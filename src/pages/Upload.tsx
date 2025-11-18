@@ -15,16 +15,25 @@ const Upload = () => {
     formData.append("image", file);
     formData.append("title", title);
 
-    const res = await fetch("http://localhost:5000/api/upload", {
-      method: "POST",
-      body: formData,
-    });
+    try {
+      const res = await fetch("http://localhost:5000/api/upload", {
+        method: "POST",
+        body: formData,
+      });
 
-    const data = await res.json();
-    console.log("업로드 완료:", data);
-    navigate("/gallery");
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`업로드 실패: ${errorText}`);
+      }
+
+      const data = await res.json();
+      console.log("업로드 완료:", data);
+      navigate("/gallery");
+    } catch (err) {
+      console.error("업로드 중 오류 발생:", err);
+      alert("업로드에 실패했습니다. 콘솔을 확인해주세요.");
+    }
   };
-
   return (
     <Container>
       <Title>📤 이미지 업로드</Title>

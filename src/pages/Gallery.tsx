@@ -1,10 +1,11 @@
 import styled from "styled-components";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 type ImageItem = {
   id: number;
-  src: string;
+  imageUrl: string;
   title: string;
 };
 export const Gallery = () => {
@@ -16,19 +17,18 @@ export const Gallery = () => {
 
   useEffect(() => {
     const fetchImages = async () => {
-      const res = await fetch("http://localhost:5000/api/images");
-      const data = await res.json();
-      console.log(data);
-      const formatted = data.map((url: any, index: number) => ({
-        id: index,
-        src: `http://localhost:5000${url}`,
-        title: `이미지 ${index + 1}`,
-      }));
-      console.log(formatted);
-      setImages(formatted);
+      try {
+        const res = await axios.get("http://localhost:5000/api/images");
+        console.log(res.data);
+        setImages(res.data);
+      } catch (err) {
+        console.error("이미지 불러오기 실패:", err);
+      }
     };
+
     fetchImages();
   }, []);
+  console.log(images);
   const handleUploadClick = () => {
     navigate("/upload");
   };
@@ -40,11 +40,13 @@ export const Gallery = () => {
       </TitleWrapper>
       <Grid>
         {images.map((img) => (
-          <ImageCard key={img.id}>
+          <ImageCard key={img.imageUrl}>
             <img
-              src={img.src}
+              src={`http://localhost:5000${img.imageUrl}`}
               alt={img.title}
-              onClick={() => setSelectedImg(img.src)}
+              onClick={() =>
+                setSelectedImg(`http://localhost:5000${img.imageUrl}`)
+              }
             />
             <p>{img.title}</p>
           </ImageCard>
