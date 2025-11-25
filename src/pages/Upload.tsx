@@ -2,6 +2,7 @@ import { useState } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { useLoading } from "../components/LoadingContext";
+import { uploadImage } from "../api/api";
 
 const Upload = () => {
   const [title, setTitle] = useState("");
@@ -35,17 +36,7 @@ const Upload = () => {
 
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(`업로드 실패: ${errorText}`);
-      }
-
-      const data = await res.json();
+      const data = await uploadImage(formData);
       console.log("업로드 완료:", data);
       navigate("/gallery");
     } catch (err) {

@@ -1,0 +1,9 @@
+.rdt_Pagination {
+  position: sticky;
+  bottom: 0;
+  background: #fff;
+  z-index: 10;
+  padding: 0.5rem;
+  border-top: 1px solid #ddd;
+  padding: 0.5rem;
+}

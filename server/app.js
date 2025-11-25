@@ -2,7 +2,8 @@ require("dotenv").config();
 
 const express = require("express");
 const mongoose = require("mongoose");
-const uploadRouter = require("./routes/upload");
+const uploadRouter = require("./routes/upload"); //갤러리
+const boardRouter = require("./routes/boardApi"); //게시판
 
 const path = require("path");
 
@@ -16,6 +17,7 @@ app.use(cors({ origin: "http://localhost:3000" }));
 app.use(express.json());
 
 app.use("/api", uploadRouter);
+app.use("/api/board", boardRouter);
 
 // MongoDB 연결
 console.log("MONGO_URI:", process.env.MONGO_URI);

@@ -1,10 +1,11 @@
 import styled from "styled-components";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { useLoading } from "../components/LoadingContext";
 import Spinner from "../components/Spinner";
 import { formatRelativeTime } from "../utils/formatRelativeTime";
+import { CloseButton } from "../components/CloseButton";
+import { deleteImage, fetchImages } from "../api/api";
 
 type ImageItem = {
   _id: string;
@@ -20,18 +21,18 @@ export const Gallery = () => {
   const { loading, setLoading } = useLoading();
 
   useEffect(() => {
-    const fetchImages = async () => {
+    const loadImages = async () => {
       setLoading(true);
       try {
-        const res = await axios.get("http://localhost:5000/api/images");
-        setImages(res.data);
+        const data = await fetchImages();
+        setImages(data);
       } catch (err) {
         console.error("이미지 불러오기 실패:", err);
       } finally {
         setLoading(false);
       }
     };
-    fetchImages();
+    loadImages();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -40,16 +41,13 @@ export const Gallery = () => {
   };
 
   const handleDelete = async (id: string) => {
-    const confirm = window.confirm("정말 삭제하시겠습니까?");
-    if (!confirm) return;
+    const confirmDelete = window.confirm("정말 삭제하시겠습니까?");
+    if (!confirmDelete) return;
 
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/image/${id}`, {
-        method: "DELETE",
-      });
-
-      if (res.ok) {
+      const success = await deleteImage(id);
+      if (success) {
         setImages((prev) => prev.filter((img) => img._id !== id));
       } else {
         alert("삭제 실패");
@@ -91,9 +89,7 @@ export const Gallery = () => {
         <Modal onClick={() => setSelectedImg(undefined)}>
           <ModalContent>
             <ModalImage src={selectedImg} alt="확대 이미지" />
-            <CloseButton onClick={() => setSelectedImg(undefined)}>
-              x
-            </CloseButton>
+            <CloseButton onClick={() => setSelectedImg(undefined)} />
           </ModalContent>
         </Modal>
       )}
@@ -204,20 +200,6 @@ const ModalImage = styled.img`
   border-radius: 8px;
 `;
 
-const CloseButton = styled.button`
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background: #fff;
-  border: none;
-  font-size: 1.5rem;
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  z-index: 1100;
-`;
 const TitleWrapper = styled.div`
   display: flex;
   align-items: center;

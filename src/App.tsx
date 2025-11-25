@@ -6,6 +6,10 @@ import Upload from "./pages/Upload";
 import Footer from "./components/Footer";
 import styled from "styled-components";
 import { LoadingProvider } from "./components/LoadingContext";
+import { Board } from "./pages/Board";
+import { BoardWrite } from "./pages/BoardWrite";
+import { BoardDetail } from "./pages/BoardDetail";
+import { ArtistProfile } from "./pages/ArtistProfile";
 
 function App() {
   return (
@@ -18,6 +22,10 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/gallery" element={<Gallery />} />
               <Route path="/upload" element={<Upload />} />
+              <Route path="/board" element={<Board />} />
+              <Route path="board/write" element={<BoardWrite />} />
+              <Route path="/board/:id" element={<BoardDetail />} />
+              <Route path="/profile" element={<ArtistProfile />} />
               {/* 다른 페이지들 추가 예정 */}
             </Routes>
           </Content>

@@ -133,7 +133,9 @@ const Home = () => {
             {SetLists[activeTab].map((song, index) => (
               <SetlistItem key={index}>
                 <span>
-                  <AlbumThumb src={song.albumImage} alt={song.title} />{" "}
+                  {song.albumImage && (
+                    <AlbumThumb src={song.albumImage} alt={song.title} />
+                  )}
                   {song.title}
                 </span>
               </SetlistItem>

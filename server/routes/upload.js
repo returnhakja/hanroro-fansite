@@ -76,8 +76,6 @@ router.get("/images", async (req, res) => {
   }
 });
 
-module.exports = router;
-
 /**
  *  이미지 삭제
  */
@@ -97,3 +95,5 @@ router.delete("/image/:id", async (req, res) => {
     res.status(500).send("서버 오류");
   }
 });
+
+module.exports = router;

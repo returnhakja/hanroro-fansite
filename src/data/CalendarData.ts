@@ -16,6 +16,13 @@ export const Events = [
     poster: require("../assets/콘서트.jpg"),
   },
   {
+    date: CreateDate(2025, 12, 20),
+    title: "2025 멜론 뮤직 어워드",
+    time: "📅 17:00",
+    place: "📍 고척스카이돔",
+    poster: require("../assets/MMA.png"),
+  },
+  {
     date: CreateDate(2025, 12, 27),
     title: "2025 Someday Christmas 부산",
     time: "📅 미정",

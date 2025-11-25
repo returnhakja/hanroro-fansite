@@ -20,6 +20,7 @@
     "multer": "^2.0.2",
     "react": "^19.2.0",
     "react-calendar": "^6.0.0",
+    "react-data-table-component": "^7.7.0",
     "react-dom": "^19.2.0",
     "react-modal": "^3.16.3",
     "react-router-dom": "^7.9.6",

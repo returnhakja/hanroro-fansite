@@ -22,6 +22,9 @@ export const SetLists = {
     { title: "금붕어", albumImage: require("../assets/이상비행.jpg") },
     { title: "뛰어!", albumImage: require("../assets/마루는강쥐.png") },
     {
+      title: "너와 나 (미발매)",
+    },
+    {
       title: "비틀비틀 짝짜꿍",
       albumImage: require("../assets/비틀비틀 짝짜꿍.jpg"),
     },
@@ -62,6 +65,9 @@ export const SetLists = {
     { title: "해초", albumImage: require("../assets/이상비행.jpg") },
     { title: "금붕어", albumImage: require("../assets/이상비행.jpg") },
     { title: "뛰어!", albumImage: require("../assets/마루는강쥐.png") },
+    {
+      title: "너와 나 (미발매 및 가재)",
+    },
     {
       title: "비틀비틀 짝짜꿍",
       albumImage: require("../assets/비틀비틀 짝짜꿍.jpg"),

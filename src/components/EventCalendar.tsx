@@ -4,8 +4,8 @@ import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import "../styles/calendar.css";
 import Modal from "react-modal";
-import styled from "styled-components";
 import { Events } from "../data/CalendarData";
+import { CloseButton } from "./CloseButton";
 
 const EventCalendar = () => {
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
@@ -32,6 +32,7 @@ const EventCalendar = () => {
         contentLabel="Event Details"
         style={{
           content: {
+            position: "relative",
             width: "500px",
             height: "900px",
             margin: "auto",
@@ -43,7 +44,7 @@ const EventCalendar = () => {
           },
         }}
       >
-        <CloseButton onClick={() => setSelectedEvent(null)}>×</CloseButton>
+        <CloseButton onClick={() => setSelectedEvent(null)} />
 
         {selectedEvent && (
           <div>
@@ -63,18 +64,3 @@ const EventCalendar = () => {
 };
 
 export default EventCalendar;
-
-const CloseButton = styled.button`
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  border: none;
-  background: transparent;
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: #333;
-
-  &:hover {
-    color: #ff0000;
-  }
-`;
