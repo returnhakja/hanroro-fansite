@@ -7,8 +7,6 @@ import Slider from "react-slick";
 import Spinner from "../components/Spinner";
 import { SetLists } from "../data/setList";
 import EventCalendar from "../components/EventCalendar";
-const API_KEY = process.env.REACT_APP_YOUTUBE_API_KEY;
-const CHANNEL_ID = process.env.REACT_APP_CHANNEL_ID;
 
 const Home = () => {
   const setListRef = useRef<HTMLDivElement>(null);
@@ -19,23 +17,28 @@ const Home = () => {
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [activeTab, setActiveTab] = useState<"day1" | "day2">("day1");
 
-  const url = `https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&channelId=${CHANNEL_ID}&part=snippet&order=date&type=video&maxResults=5`;
-
   useEffect(() => {
     if (setListRef.current) {
       setListRef.current.scrollTop = 0;
     }
   }, [activeTab]);
 
+  const BASE_URL =
+    process.env.NODE_ENV === "production"
+      ? "https://hanroro-fansite.onrender.com/api"
+      : "http://localhost:5000/api";
+
   useEffect(() => {
     const fetchVideos = async () => {
       try {
-        const res = await fetch(url);
+        const res = await fetch(`${BASE_URL}/youtube/videos`);
+        console.log(res);
         const data = await res.json();
         const videoData = data.items.map((item: any) => ({
           id: item.id.videoId,
           title: item.snippet.title,
         }));
+        console.log(videoData);
         setVideos(videoData);
         setCurrentTitle(videoData[0]?.title || "");
       } catch (err) {
