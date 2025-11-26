@@ -4,6 +4,7 @@ import "../styles/boardTable.css";
 import { useNavigate } from "react-router-dom";
 import { fetchBoard } from "../api/api";
 import { formatDateTime } from "../utils/dataFormat";
+import styled from "styled-components";
 
 interface Post {
   _id: string;
@@ -12,6 +13,7 @@ interface Post {
   createdAt: string;
   views: number;
   likes: number;
+  hide?: any;
 }
 
 export const Board = () => {
@@ -43,14 +45,14 @@ export const Board = () => {
     {
       name: "조회수",
       selector: (row) => row.views,
-      // sortable: true,
       right: true,
+      hide: 768,
     },
     {
       name: "좋아요",
       selector: (row) => row.likes,
-      // sortable: true,
       right: true,
+      hide: 768,
     },
   ];
   const navigate = useNavigate();
@@ -59,24 +61,13 @@ export const Board = () => {
     <div style={{ maxWidth: "900px", margin: "0 auto" }}>
       <h2>📋 커뮤니티 게시판</h2>
       <div style={{ textAlign: "right", marginBottom: "1rem" }}>
-        <button
-          onClick={() => navigate("/board/write")}
-          style={{
-            padding: "0.5rem 1rem",
-            backgroundColor: "#4CAF50",
-            color: "#fff",
-            border: "none",
-            borderRadius: "6px",
-            cursor: "pointer",
-          }}
-        >
+        <WriteButton onClick={() => navigate("/board/write")}>
           ✍️ 글쓰기
-        </button>
+        </WriteButton>
       </div>
 
       <DataTable
         columns={columns}
-        // data={posts}
         progressPending={pending}
         data={[...posts].sort(
           (a, b) =>
@@ -92,3 +83,20 @@ export const Board = () => {
     </div>
   );
 };
+
+const WriteButton = styled.button`
+  padding: 0.5rem 1rem;
+  background-color: #4caf50;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+
+  @media (max-width: 768px) {
+    margin-right: 1rem;
+  }
+
+  &:hover {
+    background-color: #45a049;
+  }
+`;

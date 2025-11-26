@@ -64,7 +64,6 @@ const Upload = () => {
           {previewUrl && <PreviewImage src={previewUrl} alt="미리보기" />}
           <button type="submit">업로드</button>
         </Form>
-        <Footer>© 2025 HANRORO FANSITE. All rights reserved.</Footer>
       </UploadBox>
     </PageWrapper>
   );
@@ -137,11 +136,4 @@ const PreviewImage = styled.img`
   object-fit: contain;
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-`;
-
-const Footer = styled.div`
-  margin-top: 2rem;
-  font-size: 0.85rem;
-  text-align: center;
-  color: #888;
 `;

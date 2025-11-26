@@ -189,10 +189,30 @@ const MainGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 2rem;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 const LeftColumn = styled.div``;
-const CenterColumn = styled.div``;
+const CenterColumn = styled.div`
+  margin: 2rem 0;
+  padding: 1rem;
+  background: #f8f5f2;
+  border-radius: 12px;
+
+  max-width: 100%;
+  overflow-x: auto;
+
+  .rbc-calendar {
+    min-width: 700px;
+  }
+`;
 const RightColumn = styled.div``;
 
 const SectionTitle = styled.h2`
@@ -200,15 +220,12 @@ const SectionTitle = styled.h2`
   margin-bottom: 1rem;
 `;
 
-const AlbumCard = styled.div`
-  background-color: #eae6f2;
-  height: 200px;
-  border-radius: 8px;
-`;
-
 const EventList = styled.ul`
   list-style: none;
   padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   li {
     margin-bottom: 0.5rem;
   }

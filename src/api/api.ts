@@ -1,8 +1,5 @@
 import axios from "axios";
 
-// const BASE_URL = "http://localhost:5000/api";
-// const BASE_URL = "https://hanroro-fansite.onrender.com/api";
-
 const BASE_URL =
   process.env.NODE_ENV === "production"
     ? "https://hanroro-fansite.onrender.com/api"
