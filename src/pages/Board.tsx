@@ -1,8 +1,9 @@
 import DataTable, { TableColumn } from "react-data-table-component";
 import { useEffect, useState } from "react";
 import "../styles/boardTable.css";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { fetchBoard } from "../api/api";
+import { formatDateTime } from "../utils/dataFormat";
 
 interface Post {
   _id: string;
@@ -20,8 +21,8 @@ export const Board = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/board");
-        setPosts(res.data);
+        const res = await fetchBoard();
+        setPosts(res);
       } catch (err) {
         console.error("게시글 불러오기 실패:", err);
       } finally {
@@ -33,27 +34,27 @@ export const Board = () => {
 
   const columns: TableColumn<Post>[] = [
     { name: "제목", selector: (row) => row.title, sortable: true },
-    { name: "작성자", selector: (row) => row.author, sortable: true },
+    { name: "작성자", selector: (row) => row.author },
     {
       name: "작성일",
-      selector: (row) => new Date(row.createdAt).toLocaleDateString(),
+      selector: (row) => formatDateTime(row.createdAt),
       sortable: true,
     },
     {
       name: "조회수",
       selector: (row) => row.views,
-      sortable: true,
+      // sortable: true,
       right: true,
     },
     {
       name: "좋아요",
       selector: (row) => row.likes,
-      sortable: true,
+      // sortable: true,
       right: true,
     },
   ];
   const navigate = useNavigate();
-
+  console.log(posts);
   return (
     <div style={{ maxWidth: "900px", margin: "0 auto" }}>
       <h2>📋 커뮤니티 게시판</h2>
@@ -75,12 +76,17 @@ export const Board = () => {
 
       <DataTable
         columns={columns}
-        data={posts}
+        // data={posts}
         progressPending={pending}
+        data={[...posts].sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        )}
         pagination
         highlightOnHover
         pointerOnHover
-        defaultSortFieldId={1}
+        defaultSortFieldId={3}
+        defaultSortAsc={false}
         onRowClicked={(row) => navigate(`/board/${row._id}`)}
       />
     </div>

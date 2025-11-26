@@ -1,6 +1,6 @@
 import { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { createBoard } from "../api/api";
 
 export const BoardWrite = () => {
   const [title, setTitle] = useState("");
@@ -17,12 +17,8 @@ export const BoardWrite = () => {
     }
 
     try {
-      const res = await axios.post("http://localhost:5000/api/board", {
-        title,
-        content,
-        author,
-      });
-      console.log("작성 완료:", res.data);
+      const data = await createBoard(title, content, author);
+      console.log("작성 완료:", data);
       navigate("/board");
     } catch (err) {
       console.error("작성 실패:", err);

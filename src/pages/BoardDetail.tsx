@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
 import { LoadingProvider } from "../components/LoadingContext";
+import { getBoardById, likeBoard } from "../api/api";
 
 interface Post {
   _id: string;
@@ -21,15 +21,23 @@ export const BoardDetail = () => {
 
   useEffect(() => {
     const fetchPost = async () => {
-      const res = await axios.get(`http://localhost:5000/api/board/${id}`);
-      setPost(res.data);
+      try {
+        const data = await getBoardById(id);
+        setPost(data);
+      } catch (err) {
+        console.error("게시글 불러오기 실패:", err);
+      }
     };
     fetchPost();
   }, [id]);
 
   const handleLike = async () => {
-    const res = await axios.post(`http://localhost:5000/api/board/${id}/like`);
-    setPost((prev) => (prev ? { ...prev, likes: res.data.likes } : prev));
+    try {
+      const data = await likeBoard(id);
+      setPost((prev) => (prev ? { ...prev, likes: data.likes } : prev));
+    } catch (err) {
+      console.error("좋아요 실패:", err);
+    }
   };
 
   if (!post) return <LoadingProvider children={!post} />;
