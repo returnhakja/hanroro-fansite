@@ -4,7 +4,7 @@ export const Container = styled.div`
   padding: 2rem;
 `;
 
-export const TiTle = styled.h1`
+export const Title = styled.h1`
   font-size: 1.8rem;
   margin-bottom: 1.5rem;
   color: #6a4c93;
@@ -112,3 +112,32 @@ export const UploadButton = styled.button`
     background: #8b5fbf;
   }
 `;
+
+export const EmptyText = styled.p`
+  margin-top: 2rem;
+  text-align: center;
+  color: #666;
+`;
+
+export const modalStyles = {
+  overlay: {
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  content: {
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    width: "100vw",
+    height: "100vh",
+    border: "none",
+    background: "transparent",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 0,
+  },
+} as const;

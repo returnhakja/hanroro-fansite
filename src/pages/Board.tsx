@@ -57,14 +57,14 @@ export const Board = () => {
     },
   ];
   const navigate = useNavigate();
-  console.log(posts);
+
   if (pending) return <Spinner />;
   return (
     <div style={{ maxWidth: "900px", margin: "0 auto" }}>
-      <h2>📋 커뮤니티 게시판</h2>
+      <h2>커뮤니티 게시판</h2>
       <div style={{ textAlign: "right", marginBottom: "1rem" }}>
         <WriteButton onClick={() => navigate("/board/write")}>
-          ✍️ 글쓰기
+          글쓰기
         </WriteButton>
       </div>
 
@@ -102,3 +102,4 @@ const WriteButton = styled.button`
     background-color: #45a049;
   }
 `;
+

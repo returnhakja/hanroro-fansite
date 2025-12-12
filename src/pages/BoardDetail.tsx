@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { LoadingProvider } from "../components/LoadingContext";
-import { getBoardById, likeBoard } from "../api/api";
+import { deleteBoardPost, getBoardById, likeBoard } from "../api/api";
+import { ConfirmModal } from "../components/ConfirmModal";
+import { useToast } from "../components/ToastContext";
 
 interface Post {
   _id: string;
@@ -17,7 +19,9 @@ interface Post {
 export const BoardDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [post, setPost] = useState<Post | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -37,6 +41,22 @@ export const BoardDetail = () => {
       setPost((prev) => (prev ? { ...prev, likes: data.likes } : prev));
     } catch (err) {
       console.error("좋아요 실패:", err);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!id) return;
+    try {
+      const ok = await deleteBoardPost(id);
+      if (ok) {
+        showToast("게시글이 삭제되었습니다.", "success");
+        navigate("/board");
+        return;
+      }
+      showToast("삭제에 실패했어요.", "error");
+    } catch (err) {
+      console.error("삭제 실패:", err);
+      showToast("삭제 중 오류가 발생했습니다.", "error");
     }
   };
 
@@ -74,7 +94,7 @@ export const BoardDetail = () => {
         )}
       </div>
 
-      <div style={{ marginTop: "2rem" }}>
+      <div style={{ marginTop: "2rem", display: "flex", gap: "0.5rem" }}>
         <button
           onClick={() => navigate("/board")}
           style={{
@@ -86,13 +106,41 @@ export const BoardDetail = () => {
             cursor: "pointer",
           }}
         >
-          ← 목록으로
+          목록으로
+        </button>
+
+        <button
+          onClick={() => id && navigate(`/board/${id}/edit`)}
+          style={{
+            padding: "0.5rem 1rem",
+            backgroundColor: "#6a4c93",
+            color: "#fff",
+            border: "none",
+            borderRadius: "6px",
+            cursor: "pointer",
+          }}
+        >
+          수정
+        </button>
+
+        <button
+          onClick={() => setShowDeleteConfirm(true)}
+          style={{
+            padding: "0.5rem 1rem",
+            backgroundColor: "#e03131",
+            color: "#fff",
+            border: "none",
+            borderRadius: "6px",
+            cursor: "pointer",
+          }}
+        >
+          삭제
         </button>
 
         <button
           onClick={handleLike}
           style={{
-            marginLeft: "1rem",
+            marginLeft: "auto",
             padding: "0.5rem 1rem",
             backgroundColor: "#E91E63",
             color: "#fff",
@@ -104,6 +152,19 @@ export const BoardDetail = () => {
           ❤️ 좋아요 ({post.likes})
         </button>
       </div>
+
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        title="게시글 삭제"
+        description="정말 삭제하시겠습니까?"
+        confirmLabel="삭제"
+        onCancel={() => setShowDeleteConfirm(false)}
+        onConfirm={() => {
+          setShowDeleteConfirm(false);
+          void handleDelete();
+        }}
+      />
     </div>
   );
 };
+

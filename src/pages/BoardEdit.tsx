@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { createBoard, uploadBoardImages } from "../api/api";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  getBoardById,
+  updateBoard,
+  uploadBoardImages,
+  type BoardPayload,
+} from "../api/api";
 import { ConfirmModal } from "../components/ConfirmModal";
 import { useToast } from "../components/ToastContext";
 import {
@@ -23,10 +28,17 @@ import {
   Title,
 } from "./BoardWrite.styles";
 
-export const BoardWrite = () => {
+type Post = BoardPayload & { imageUrls?: string[] };
+
+export const BoardEdit = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { showToast } = useToast();
+
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [author, setAuthor] = useState("");
+  const [existingUrls, setExistingUrls] = useState<string[]>([]);
   const [images, setImages] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const [errors, setErrors] = useState<{
@@ -38,10 +50,26 @@ export const BoardWrite = () => {
   const [dragging, setDragging] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
-  const navigate = useNavigate();
-  const { showToast } = useToast();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  useEffect(() => {
+    const load = async () => {
+      if (!id) return;
+      try {
+        const post = (await getBoardById(id)) as Post;
+        setTitle(post.title ?? "");
+        setContent(post.content ?? "");
+        setAuthor(post.author ?? "");
+        setExistingUrls(post.imageUrls ?? []);
+      } catch (err) {
+        console.error("게시글 불러오기 실패:", err);
+        showToast("게시글을 불러오지 못했어요.", "error");
+        navigate("/board");
+      }
+    };
+    void load();
+  }, [id, navigate, showToast]);
 
   useEffect(() => {
     if (!textareaRef.current) return;
@@ -83,27 +111,34 @@ export const BoardWrite = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate()) {
+    if (!validate() || !id) {
       showToast("필수 항목을 확인해 주세요.", "error");
       return;
     }
 
     setSubmitting(true);
     try {
-      let imageUrls: string[] = [];
+      let newUrls: string[] = [];
       if (images.length > 0) {
         const formData = new FormData();
         images.forEach((img) => formData.append("images", img));
         const res = await uploadBoardImages(formData);
-        imageUrls = res.imageUrls;
+        newUrls = res.imageUrls;
       }
 
-      await createBoard(title.trim(), content.trim(), author.trim(), imageUrls);
-      showToast("게시글이 등록되었습니다.", "success");
-      navigate("/board");
+      const imageUrls = [...existingUrls, ...newUrls];
+      await updateBoard(id, {
+        title: title.trim(),
+        content: content.trim(),
+        author: author.trim(),
+        imageUrls,
+      });
+
+      showToast("게시글이 수정되었습니다.", "success");
+      navigate(`/board/${id}`);
     } catch (err) {
-      console.error("게시글 생성 실패:", err);
-      showToast("게시글 작성에 실패했습니다.", "error");
+      console.error("게시글 수정 실패:", err);
+      showToast("게시글 수정에 실패했습니다.", "error");
     } finally {
       setSubmitting(false);
     }
@@ -112,6 +147,8 @@ export const BoardWrite = () => {
   const handleCancel = () => {
     if (title || content || author || images.length > 0) {
       setShowCancelConfirm(true);
+    } else if (id) {
+      navigate(`/board/${id}`);
     } else {
       navigate("/board");
     }
@@ -121,7 +158,7 @@ export const BoardWrite = () => {
     <PageWrapper>
       <FormCard>
         <HeaderRow>
-          <Title>새 게시글 작성</Title>
+          <Title>게시글 수정</Title>
           <Actions>
             <ActionButton
               type="button"
@@ -133,16 +170,16 @@ export const BoardWrite = () => {
             </ActionButton>
             <ActionButton
               type="submit"
-              form="board-write-form"
+              form="board-edit-form"
               $variant="primary"
               disabled={submitting}
             >
-              {submitting ? "등록 중..." : "등록"}
+              {submitting ? "수정 중..." : "수정"}
             </ActionButton>
           </Actions>
         </HeaderRow>
 
-        <form id="board-write-form" onSubmit={handleSubmit}>
+        <form id="board-edit-form" onSubmit={handleSubmit}>
           <Field>
             <LabelRow>
               <Label>제목</Label>
@@ -218,11 +255,26 @@ export const BoardWrite = () => {
               onChange={handleFileChange}
             />
 
-            {previews.length > 0 && (
+            {(existingUrls.length > 0 || previews.length > 0) && (
               <ThumbGrid>
+                {existingUrls.map((url, idx) => (
+                  <ThumbItem key={`existing-${url}-${idx}`}>
+                    <img src={url} alt="기존 첨부 이미지" />
+                    <RemoveThumb
+                      type="button"
+                      onClick={() =>
+                        setExistingUrls((prev) =>
+                          prev.filter((_, i) => i !== idx)
+                        )
+                      }
+                    >
+                      ×
+                    </RemoveThumb>
+                  </ThumbItem>
+                ))}
                 {previews.map((url, idx) => (
-                  <ThumbItem key={`${url}-${idx}`}>
-                    <img src={url} alt="첨부 이미지 미리보기" />
+                  <ThumbItem key={`new-${url}-${idx}`}>
+                    <img src={url} alt="새 첨부 이미지" />
                     <RemoveThumb
                       type="button"
                       onClick={() =>
@@ -242,11 +294,11 @@ export const BoardWrite = () => {
 
         <ConfirmModal
           isOpen={showCancelConfirm}
-          title="작성 취소"
-          description="작성 중인 내용이 사라집니다. 취소할까요?"
+          title="수정 취소"
+          description="수정 중인 내용이 사라집니다. 취소할까요?"
           confirmLabel="나가기"
           onCancel={() => setShowCancelConfirm(false)}
-          onConfirm={() => navigate("/board")}
+          onConfirm={() => (id ? navigate(`/board/${id}`) : navigate("/board"))}
         />
       </FormCard>
     </PageWrapper>

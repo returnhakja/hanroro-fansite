@@ -6,9 +6,11 @@ import Upload from "./pages/Upload";
 import Footer from "./components/Footer";
 import styled from "styled-components";
 import { LoadingProvider } from "./components/LoadingContext";
+import { ToastProvider } from "./components/ToastContext";
 import { Board } from "./pages/Board";
 import { BoardWrite } from "./pages/BoardWrite";
 import { BoardDetail } from "./pages/BoardDetail";
+import { BoardEdit } from "./pages/BoardEdit";
 import { ArtistProfile } from "./pages/ArtistProfile";
 import Modal from "react-modal";
 
@@ -17,23 +19,26 @@ Modal.setAppElement("#root");
 function App() {
   return (
     <LoadingProvider>
-      <PageWrapper>
-        <HashRouter>
-          <Header />
-          <Content>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/gallery" element={<Gallery />} />
-              <Route path="/upload" element={<Upload />} />
+      <ToastProvider>
+        <PageWrapper>
+          <HashRouter>
+            <Header />
+            <Content>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/gallery" element={<Gallery />} />
+                <Route path="/upload" element={<Upload />} />
               <Route path="/board" element={<Board />} />
               <Route path="/board/write" element={<BoardWrite />} />
               <Route path="/board/:id" element={<BoardDetail />} />
+              <Route path="/board/:id/edit" element={<BoardEdit />} />
               <Route path="/profile" element={<ArtistProfile />} />
             </Routes>
-          </Content>
-          <Footer />
-        </HashRouter>
-      </PageWrapper>
+            </Content>
+            <Footer />
+          </HashRouter>
+        </PageWrapper>
+      </ToastProvider>
     </LoadingProvider>
   );
 }
