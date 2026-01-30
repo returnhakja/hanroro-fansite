@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wc:*)",
+      "Bash(pnpm dev)",
+      "Bash(taskkill //F //PID 10432)"
+    ]
+  }
+}

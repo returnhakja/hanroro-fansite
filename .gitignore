@@ -15,7 +15,7 @@ dist/
 
 # production
 /build
-
+CLAUDE.md
 # misc
 .DS_Store
 .env.local

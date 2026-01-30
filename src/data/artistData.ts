@@ -1,19 +1,4 @@
-import profileImg from "../assets/한로로프로필사진.jpg";
-import oneAlbum from "../assets/입춘.jpg";
-import twoAlbum from "../assets/거울.jpg";
-import threeAlbum from "../assets/비틀비틀 짝짜꿍.jpg";
-import fourAlbum from "../assets/당밤나밤.jpg";
-import fiveAlbum from "../assets/정류장.jpg";
-import sixAlbum from "../assets/자처.jpg";
-import seveenAlbum from "../assets/이상비행.jpg";
-import ehatAlbum from "../assets/하루살이.jpg";
-import nineAlbum from "../assets/먹이사슬.jpg";
-import tenAlbum from "../assets/생존법.jpg";
-import tenOnwAlbum from "../assets/집.jpg";
-import tenTwoAlbum from "../assets/나침반.jpg";
-import tenThreeAlbum from "../assets/도망.jpg";
-import tenForeAlbum from "../assets/자몽살구클럽.jpg";
-
+// Next.js에서는 public 폴더의 파일을 직접 경로로 참조합니다
 export const artistData = {
   name: "한로로",
   differentName: "한지수, HANRORO",
@@ -21,13 +6,13 @@ export const artistData = {
   debutDate: "2022년 3월 14일",
   genre: "인디, 락",
   bio: "팬들에게 사랑받는 아티스트",
-  imageUrl: profileImg,
+  imageUrl: "/assets/한로로프로필사진.jpg",
   albums: [
     {
       id: "14",
       title: "자몽살구클럽",
       releaseDate: "2025-08-04",
-      coverUrl: tenForeAlbum,
+      coverUrl: "/assets/자몽살구클럽.jpg",
       tracks: [
         { title: "내일에서 온 티켓", duration: "3:10" },
         { title: "용의자", duration: "3:21" },
@@ -42,21 +27,21 @@ export const artistData = {
       id: "13",
       title: "도망",
       releaseDate: "2025-07-06",
-      coverUrl: tenThreeAlbum,
+      coverUrl: "/assets/도망.jpg",
       tracks: [],
     },
     {
       id: "12",
       title: "나침반",
       releaseDate: "2024-10-29",
-      coverUrl: tenTwoAlbum,
+      coverUrl: "/assets/나침반.jpg",
       tracks: [],
     },
     {
       id: "11",
       title: "집",
       releaseDate: "2024-05-28",
-      coverUrl: tenOnwAlbum,
+      coverUrl: "/assets/집.jpg",
       tracks: [
         { title: "귀가", duration: "1:50" },
         { title: "ㅈㅣㅂ", duration: "3:51" },
@@ -71,28 +56,28 @@ export const artistData = {
       id: "10",
       title: "생존밥",
       releaseDate: "2024-05-16",
-      coverUrl: tenAlbum,
+      coverUrl: "/assets/생존법.jpg",
       tracks: [],
     },
     {
       id: "9",
       title: "먹이사실",
       releaseDate: "2024-04-30",
-      coverUrl: nineAlbum,
+      coverUrl: "/assets/먹이사슬.jpg",
       tracks: [],
     },
     {
       id: "8",
       title: "하루살이",
       releaseDate: "2023-12-26",
-      coverUrl: ehatAlbum,
+      coverUrl: "/assets/하루살이.jpg",
       tracks: [],
     },
     {
       id: "7",
       title: "이상비행",
       releaseDate: "2023-08-29",
-      coverUrl: seveenAlbum,
+      coverUrl: "/assets/이상비행.jpg",
       tracks: [
         { title: "이상비행", duration: "2:35" },
         { title: "해초", duration: "3:45" },
@@ -106,42 +91,42 @@ export const artistData = {
       id: "6",
       title: "자처",
       releaseDate: "2023-04-21",
-      coverUrl: sixAlbum,
+      coverUrl: "/assets/자처.jpg",
       tracks: [],
     },
     {
       id: "5",
       title: "정류장",
       releaseDate: "2023-01-04",
-      coverUrl: fiveAlbum,
+      coverUrl: "/assets/정류장.jpg",
       tracks: [],
     },
     {
       id: "4",
       title: "당신의 밤은 나의 밤과 같습니까 (feat. 숨비)",
       releaseDate: "2022-10-25",
-      coverUrl: fourAlbum,
+      coverUrl: "/assets/당밤나밤.jpg",
       tracks: [],
     },
     {
       id: "3",
       title: "비틀비틀 짝짜꿍",
       releaseDate: "2022-09-04",
-      coverUrl: threeAlbum,
+      coverUrl: "/assets/비틀비틀 짝짜꿍.jpg",
       tracks: [],
     },
     {
       id: "2",
       title: "거울",
       releaseDate: "2022-06-18",
-      coverUrl: twoAlbum,
+      coverUrl: "/assets/거울.jpg",
       tracks: [],
     },
     {
       id: "1",
       title: "입춘",
       releaseDate: "2022-03-14",
-      coverUrl: oneAlbum,
+      coverUrl: "/assets/입춘.jpg",
       tracks: [],
     },
   ],

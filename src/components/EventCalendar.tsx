@@ -1,10 +1,11 @@
-// src/components/EventCalendar.tsx
+'use client';
+
 import { useState } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import "../styles/calendar.css";
+import "@/styles/calendar.css";
 import Modal from "react-modal";
-import { Events } from "../data/CalendarData";
+import { Events } from "@/data/CalendarData";
 import { CloseButton } from "./CloseButton";
 
 const EventCalendar = () => {
