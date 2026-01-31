@@ -463,3 +463,213 @@ export const PostContent = styled.div`
     margin: 0;
   }
 `;
+
+/* ==================== Gallery Preview Section ==================== */
+
+export const GalleryPreviewSection = styled.section`
+  padding: ${theme.spacing.sectionPadding.desktop};
+  background-color: ${theme.colors.surface};
+
+  @media (max-width: ${theme.breakpoints.tablet}) {
+    padding: ${theme.spacing.sectionPadding.tablet};
+  }
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    padding: ${theme.spacing.sectionPadding.mobile};
+  }
+`;
+
+export const SectionHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: ${theme.spacing.gap.xl};
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    flex-direction: column;
+    gap: ${theme.spacing.gap.md};
+    align-items: flex-start;
+  }
+`;
+
+export const SectionButton = styled.button`
+  padding: 0.75rem 1.5rem;
+  font-size: ${theme.typography.body.fontSize};
+  font-weight: 600;
+  color: ${theme.colors.primary};
+  background: transparent;
+  border: 2px solid ${theme.colors.primary};
+  border-radius: ${theme.borderRadius.full};
+  cursor: pointer;
+  transition: all ${theme.transitions.normal};
+
+  &:hover {
+    background: ${theme.colors.primary};
+    color: ${theme.colors.textLight};
+    transform: translateY(-2px);
+    box-shadow: ${theme.shadows.md};
+  }
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    width: 100%;
+    padding: 0.625rem 1.25rem;
+  }
+`;
+
+export const GalleryGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: ${theme.spacing.gap.lg};
+
+  @media (max-width: ${theme.breakpoints.tablet}) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: ${theme.spacing.gap.md};
+  }
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+export const GalleryItem = styled(motion.div)`
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: ${theme.borderRadius.lg};
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: ${theme.shadows.md};
+  transition: all ${theme.transitions.normal};
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: ${theme.shadows.lg};
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+`;
+
+export const GalleryItemOverlay = styled.div`
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: ${theme.spacing.gap.md};
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  color: ${theme.colors.textLight};
+  transform: translateY(100%);
+  transition: transform ${theme.transitions.normal};
+
+  ${GalleryItem}:hover & {
+    transform: translateY(0);
+  }
+
+  h4 {
+    font-size: ${theme.typography.body.fontSize};
+    font-weight: 600;
+    margin: 0;
+  }
+`;
+
+/* ==================== Board Preview Section ==================== */
+
+export const BoardPreviewSection = styled.section`
+  padding: ${theme.spacing.sectionPadding.desktop};
+  background-color: ${theme.colors.surfaceAlt};
+
+  @media (max-width: ${theme.breakpoints.tablet}) {
+    padding: ${theme.spacing.sectionPadding.tablet};
+  }
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    padding: ${theme.spacing.sectionPadding.mobile};
+  }
+`;
+
+export const BoardList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${theme.spacing.gap.md};
+`;
+
+export const BoardItem = styled(motion.div)`
+  padding: ${theme.spacing.gap.lg};
+  background: ${theme.colors.surface};
+  border-radius: ${theme.borderRadius.lg};
+  box-shadow: ${theme.shadows.sm};
+  cursor: pointer;
+  transition: all ${theme.transitions.normal};
+
+  &:hover {
+    transform: translateX(8px);
+    box-shadow: ${theme.shadows.md};
+  }
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    padding: ${theme.spacing.gap.md};
+  }
+`;
+
+export const BoardItemTitle = styled.h3`
+  font-size: ${theme.typography.h3.fontSize};
+  font-weight: ${theme.typography.h3.fontWeight};
+  color: ${theme.colors.textPrimary};
+  margin: 0 0 ${theme.spacing.gap.sm} 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    font-size: 1.125rem;
+  }
+`;
+
+export const BoardItemMeta = styled.div`
+  display: flex;
+  gap: ${theme.spacing.gap.md};
+  font-size: ${theme.typography.small.fontSize};
+  color: ${theme.colors.textSecondary};
+
+  span {
+    display: flex;
+    align-items: center;
+    gap: ${theme.spacing.gap.xs};
+  }
+`;
+
+/* ==================== Two Column Grid (Calendar + Setlist) ==================== */
+
+export const TwoColumnGrid = styled.section`
+  padding: ${theme.spacing.sectionPadding.desktop};
+  background-color: ${theme.colors.surface};
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: ${theme.spacing.gridGap.desktop};
+  max-width: 1400px;
+  margin: 0 auto;
+
+  @media (max-width: ${theme.breakpoints.tablet}) {
+    padding: ${theme.spacing.sectionPadding.tablet};
+    gap: ${theme.spacing.gridGap.tablet};
+  }
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    grid-template-columns: 1fr;
+    padding: ${theme.spacing.sectionPadding.mobile};
+    gap: ${theme.spacing.gridGap.mobile};
+  }
+`;
+
+export const TwoColumnItem = styled(motion.div)`
+  padding: ${theme.spacing.gap.lg};
+  background: ${theme.colors.surfaceAlt};
+  border-radius: ${theme.borderRadius.lg};
+  box-shadow: ${theme.shadows.md};
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    padding: ${theme.spacing.gap.md};
+  }
+`;

@@ -1,9 +1,7 @@
 import axios from "axios";
 
-export const BASE_URL =
-  process.env.NODE_ENV === "production"
-    ? "https://hanroro-fansite.onrender.com/api"
-    : "http://localhost:5000/api";
+// Next.js API Routes 사용 (Vercel 배포)
+export const BASE_URL = "/api";
 
 // 이미지 목록 불러오기
 export const fetchImages = async () => {
