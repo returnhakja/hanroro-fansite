@@ -2,6 +2,10 @@
   "name": "hanloro-fansite",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=18.17.0",
+    "pnpm": ">=8.0.0"
+  },
   "dependencies": {
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
