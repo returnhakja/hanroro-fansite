@@ -1,5 +1,7 @@
+"use client";
+
 import styled from "styled-components";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { useState } from "react";
 import LogoImg from "../assets/로고딩.svg";
 
@@ -8,9 +10,11 @@ const Header = () => {
 
   return (
     <HeaderContainer>
-      <LogoLink to="/">
-        <LogoImage src={LogoImg} alt="HANRORO Logo" />
-      </LogoLink>
+      <Link href="/" passHref legacyBehavior>
+        <LogoLink>
+          <LogoImage src={LogoImg} alt="HANRORO Logo" />
+        </LogoLink>
+      </Link>
 
       <Hamburger onClick={() => setMenuOpen(true)}>☰</Hamburger>
 
@@ -18,26 +22,26 @@ const Header = () => {
 
       <Nav open={menuOpen}>
         <CloseButton onClick={() => setMenuOpen(false)}>✕</CloseButton>
-        <NavItem to="/gallery" onClick={() => setMenuOpen(false)}>
-          Gallery
-        </NavItem>
-        <NavItem to="/board" onClick={() => setMenuOpen(false)}>
-          Board
-        </NavItem>
-        {/* <NavItem to="/support" onClick={() => setMenuOpen(false)}>
-          Support
-        </NavItem>
-        <NavItem to="/archive" onClick={() => setMenuOpen(false)}>
-          Archive
-        </NavItem> */}
-        <NavItem to="/profile" onClick={() => setMenuOpen(false)}>
-          Profile
-        </NavItem>
+        <Link href="/gallery" passHref legacyBehavior>
+          <NavItem onClick={() => setMenuOpen(false)}>Gallery</NavItem>
+        </Link>
+        <Link href="/board" passHref legacyBehavior>
+          <NavItem onClick={() => setMenuOpen(false)}>Board</NavItem>
+        </Link>
+        {/* <Link href="/support" passHref legacyBehavior>
+          <NavItem onClick={() => setMenuOpen(false)}>Support</NavItem>
+        </Link>
+        <Link href="/archive" passHref legacyBehavior>
+          <NavItem onClick={() => setMenuOpen(false)}>Archive</NavItem>
+        </Link> */}
+        <Link href="/profile" passHref legacyBehavior>
+          <NavItem onClick={() => setMenuOpen(false)}>Profile</NavItem>
+        </Link>
       </Nav>
 
       <Auth>
-        {/* <AuthButton to="/login">Login</AuthButton> */}
-        {/* <AuthButton to="/signup">Sign Up</AuthButton> */}
+        {/* <Link href="/login" passHref legacyBehavior><AuthButton>Login</AuthButton></Link> */}
+        {/* <Link href="/signup" passHref legacyBehavior><AuthButton>Sign Up</AuthButton></Link> */}
       </Auth>
     </HeaderContainer>
   );
@@ -53,9 +57,10 @@ const HeaderContainer = styled.header`
   position: relative;
 `;
 
-const LogoLink = styled(Link)`
+const LogoLink = styled.a`
   display: inline-block;
   text-decoration: none;
+  cursor: pointer;
 `;
 
 const LogoImage = styled.img`
@@ -124,11 +129,12 @@ const CloseButton = styled.div`
   }
 `;
 
-const NavItem = styled(Link)`
+const NavItem = styled.a`
   text-decoration: none;
   color: #333;
   font-weight: 500;
   margin: 0.5rem 0;
+  cursor: pointer;
 
   &:hover {
     color: #6a4c93;
@@ -144,13 +150,14 @@ const Auth = styled.div`
   }
 `;
 
-const AuthButton = styled(Link)`
+const AuthButton = styled.a`
   padding: 0.4rem 0.8rem;
   border: 1px solid #6a4c93;
   border-radius: 6px;
   text-decoration: none;
   color: #6a4c93;
   font-size: 0.9rem;
+  cursor: pointer;
 
   &:hover {
     background-color: #6a4c93;
