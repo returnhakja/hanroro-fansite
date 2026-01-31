@@ -5,11 +5,12 @@ import { deleteFromBlob, isVercelBlobUrl } from '@/lib/storage/vercel-blob';
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
-    const image = await Image.findByIdAndDelete(params.id);
+    const { id } = await params;
+    const image = await Image.findByIdAndDelete(id);
 
     if (!image) {
       return NextResponse.json(

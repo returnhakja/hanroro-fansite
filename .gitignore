@@ -20,8 +20,16 @@ dist/
 .next/
 out/
 next-env.d.ts
+tsconfig.tsbuildinfo
+
+# Legacy files (CRA & Render)
+server-legacy/
+src/pages-legacy/
+src/*.legacy
 
 CLAUDE.md
+.claude/settings.local.json
+
 # misc
 .DS_Store
 .env.local

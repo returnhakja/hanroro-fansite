@@ -3,19 +3,28 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { motion } from "framer-motion";
 import Spinner from "@/components/Spinner";
-import { SetLists } from "@/data/setList";
 import EventCalendar from "@/components/EventCalendar";
+import { fadeInScale, staggerContainer, staggerItem } from "@/utils/animations";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import {
   Container,
   HeroSection,
-  Banner,
-  Quote,
+  HeroBackground,
+  HeroOverlay,
+  HeroContent,
+  HeroTitle,
+  HeroSubtitle,
+  CTAButton,
+  ScrollIndicator,
+  VideoSection,
+  SectionTitle,
   MainGrid,
   LeftColumn,
   CenterColumn,
   RightColumn,
-  SectionTitle,
+  ColumnTitle,
   EventList,
   PostCard,
   SpinnerWrapper,
@@ -44,14 +53,18 @@ interface Image {
 
 const Home = () => {
   const setListRef = useRef<HTMLDivElement>(null);
+  const shouldReduceMotion = useReducedMotion();
 
   const [videos, setVideos] = useState<{ id: string; title: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentTitle, setCurrentTitle] = useState<string>("");
   const [activeIndex, setActiveIndex] = useState<number>(0);
-  const [activeTab, setActiveTab] = useState<"day1" | "day2">("day1");
+  const [activeTab, setActiveTab] = useState<number>(0);
 
   const [image, setImage] = useState<Image | null>(null);
+  const [concert, setConcert] = useState<any>(null);
+  const [setlists, setSetlists] = useState<any[]>([]);
+  const [setlistLoading, setSetlistLoading] = useState(true);
 
   useLayoutEffect(() => {
     if (setListRef.current) {
@@ -90,6 +103,22 @@ const Home = () => {
       }
     };
     loadRandomImage();
+  }, []);
+
+  useEffect(() => {
+    const loadSetlists = async () => {
+      try {
+        const res = await fetch('/api/setlists/active');
+        const data = await res.json();
+        setConcert(data.concert);
+        setSetlists(data.setlists);
+      } catch (err) {
+        console.error("셋리스트 불러오기 실패:", err);
+      } finally {
+        setSetlistLoading(false);
+      }
+    };
+    loadSetlists();
   }, []);
 
   const settings = useMemo(
@@ -131,68 +160,163 @@ const Home = () => {
     [videos, activeIndex]
   );
 
+  const scrollToContent = () => {
+    window.scrollTo({
+      top: window.innerHeight * 0.7,
+      behavior: 'smooth'
+    });
+  };
+
   return (
     <Container>
+      {/* Hero Section - 새로운 디자인 */}
       <HeroSection>
-        <Banner>
-          <Quote>"{currentTitle}"</Quote>
-          {loading ? (
+        <HeroBackground
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8 }}
+        />
+        <HeroOverlay />
+
+        <HeroContent
+          initial={shouldReduceMotion ? {} : { opacity: 0, y: 30 }}
+          animate={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+        >
+          <HeroTitle
+            initial={shouldReduceMotion ? {} : { opacity: 0, scale: 0.9 }}
+            animate={shouldReduceMotion ? {} : { opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.5 }}
+          >
+            HANRORO
+          </HeroTitle>
+
+          <HeroSubtitle
+            initial={shouldReduceMotion ? {} : { opacity: 0, y: 20 }}
+            animate={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.7 }}
+          >
+            {currentTitle || "한로로의 최신 소식을 만나보세요"}
+          </HeroSubtitle>
+
+          <CTAButton
+            initial={shouldReduceMotion ? {} : { opacity: 0 }}
+            animate={shouldReduceMotion ? {} : { opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.9 }}
+            whileHover={shouldReduceMotion ? {} : { scale: 1.05 }}
+            whileTap={shouldReduceMotion ? {} : { scale: 0.95 }}
+            onClick={scrollToContent}
+          >
+            최신 영상 보기
+          </CTAButton>
+        </HeroContent>
+
+        <ScrollIndicator
+          initial={shouldReduceMotion ? {} : { opacity: 0 }}
+          animate={shouldReduceMotion ? {} : { opacity: 1 }}
+          transition={{ duration: 0.6, delay: 1.2 }}
+          onClick={scrollToContent}
+        />
+      </HeroSection>
+
+      {/* Video Section */}
+      <VideoSection>
+        <SectionTitle>Latest Videos</SectionTitle>
+        {loading ? (
+          <SpinnerWrapper>
+            <Spinner />
+          </SpinnerWrapper>
+        ) : (
+          <StyledSlider {...settings}>{memoizedSlides}</StyledSlider>
+        )}
+      </VideoSection>
+
+      {/* Main Grid - Setlist + Calendar + Gallery */}
+      <MainGrid>
+        <LeftColumn
+          initial={shouldReduceMotion ? {} : { opacity: 0, y: 40 }}
+          whileInView={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6 }}
+        >
+          <ColumnTitle>
+            {concert?.title || '셋리스트'}
+          </ColumnTitle>
+
+          {setlistLoading ? (
             <SpinnerWrapper>
               <Spinner />
             </SpinnerWrapper>
+          ) : setlists.length > 0 ? (
+            <>
+              <TabWrapper>
+                {setlists.map((setlist, index) => (
+                  <TabButton
+                    key={setlist._id}
+                    $active={activeTab === index}
+                    onClick={() => setActiveTab(index)}
+                  >
+                    Day {setlist.day}
+                  </TabButton>
+                ))}
+              </TabWrapper>
+
+              <SetlistCard ref={setListRef}>
+                {setlists[activeTab]?.songs
+                  .sort((a: any, b: any) => a.order - b.order)
+                  .map((song: any, index: number) => (
+                    <SetListItem key={index}>
+                      <span>
+                        {song.albumImageUrl && (
+                          <AlbumThumb src={song.albumImageUrl} alt={song.title} />
+                        )}
+                        {song.title}
+                      </span>
+                    </SetListItem>
+                  ))}
+              </SetlistCard>
+            </>
           ) : (
-            <StyledSlider {...settings}>{memoizedSlides}</StyledSlider>
-          )}
-        </Banner>
-      </HeroSection>
-
-      <MainGrid>
-        <LeftColumn>
-          <SectionTitle>
-            4TH 단독콘서트 {`${`<자몽살구클럽>`}`} 셋리스트
-          </SectionTitle>
-          <TabWrapper>
-            <TabButton
-              $active={activeTab === "day1"}
-              onClick={() => setActiveTab("day1")}
-            >
-              Day 1
-            </TabButton>
-            <TabButton
-              $active={activeTab === "day2"}
-              onClick={() => setActiveTab("day2")}
-            >
-              Day 2
-            </TabButton>
-          </TabWrapper>
-
-          <SetlistCard ref={setListRef}>
-            {SetLists[activeTab].map((song, index) => (
-              <SetListItem key={index}>
-                <span>
-                  {song.albumImage && (
-                    <AlbumThumb src={song.albumImage} alt={song.title} />
-                  )}
-                  {song.title}
-                </span>
+            <SetlistCard>
+              <SetListItem>
+                <span>등록된 셋리스트가 없습니다</span>
               </SetListItem>
-            ))}
-          </SetlistCard>
+            </SetlistCard>
+          )}
         </LeftColumn>
 
-        <CenterColumn>
-          <SectionTitle>일정</SectionTitle>
+        <CenterColumn
+          initial={shouldReduceMotion ? {} : { opacity: 0, y: 40 }}
+          whileInView={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
+          <ColumnTitle>일정</ColumnTitle>
           <EventList>
             <EventCalendar />
           </EventList>
         </CenterColumn>
 
-        <RightColumn>
-          <PostCard>
-            <SectionTitle>갤러리 사진</SectionTitle>
+        <RightColumn
+          initial={shouldReduceMotion ? {} : { opacity: 0, y: 40 }}
+          whileInView={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+        >
+          <PostCard
+            whileHover={shouldReduceMotion ? {} : { scale: 1.02 }}
+            transition={{ duration: 0.3 }}
+          >
+            <ColumnTitle>갤러리 사진</ColumnTitle>
             {image && (
               <>
-                <PostImage src={image.imageUrl} alt={image.title} />
+                <PostImage
+                  src={image.imageUrl}
+                  alt={image.title}
+                  initial={shouldReduceMotion ? {} : { opacity: 0, scale: 1.05 }}
+                  animate={shouldReduceMotion ? {} : { opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5 }}
+                />
                 <PostContent>
                   <h3>{image.title}</h3>
                 </PostContent>

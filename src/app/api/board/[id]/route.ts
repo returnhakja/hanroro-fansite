@@ -5,11 +5,12 @@ import Board from '@/lib/db/models/Board';
 // 게시글 상세 조회 (조회수 증가)
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
-    const post = await Board.findById(params.id);
+    const { id } = await params;
+    const post = await Board.findById(id);
 
     if (!post) {
       return NextResponse.json(
@@ -35,11 +36,12 @@ export async function GET(
 // 게시글 삭제
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
-    const deleted = await Board.findByIdAndDelete(params.id);
+    const { id } = await params;
+    const deleted = await Board.findByIdAndDelete(id);
 
     if (!deleted) {
       return NextResponse.json(

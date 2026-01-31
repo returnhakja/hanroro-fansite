@@ -5,11 +5,12 @@ import Board from '@/lib/db/models/Board';
 // 좋아요 증가
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
-    const post = await Board.findById(params.id);
+    const { id } = await params;
+    const post = await Board.findById(id);
 
     if (!post) {
       return NextResponse.json(
