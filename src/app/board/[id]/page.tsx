@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import styled from 'styled-components';
 import Spinner from '@/components/ui/Spinner';
@@ -16,19 +16,32 @@ interface BoardPost {
   imageUrls?: string[];
 }
 
-export default function BoardDetailPage({ params }: { params: { id: string } }) {
+export default function BoardDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const [post, setPost] = useState<BoardPost | null>(null);
   const [loading, setLoading] = useState(true);
+  const [postId, setPostId] = useState<string>('');
+  const hasFetched = useRef(false);
 
   useEffect(() => {
-    fetchPost();
+    if (hasFetched.current) return;
+    hasFetched.current = true;
+
+    params.then(({ id }) => {
+      setPostId(id);
+      fetchPost(id);
+    });
   }, []);
 
-  const fetchPost = async () => {
+  const fetchPost = async (id: string) => {
     try {
-      const response = await fetch(`/api/board/${params.id}`);
+      const response = await fetch(`/api/board/${id}`);
       const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || '게시글을 불러올 수 없습니다');
+      }
+
       setPost(data);
     } catch (error) {
       console.error('게시글 로딩 오류:', error);
@@ -40,8 +53,10 @@ export default function BoardDetailPage({ params }: { params: { id: string } }) 
   };
 
   const handleLike = async () => {
+    if (!postId) return;
+
     try {
-      const response = await fetch(`/api/board/${params.id}/like`, {
+      const response = await fetch(`/api/board/${postId}/like`, {
         method: 'POST',
       });
       const data = await response.json();
@@ -54,10 +69,11 @@ export default function BoardDetailPage({ params }: { params: { id: string } }) 
   };
 
   const handleDelete = async () => {
+    if (!postId) return;
     if (!confirm('정말 삭제하시겠습니까?')) return;
 
     try {
-      const response = await fetch(`/api/board/${params.id}`, {
+      const response = await fetch(`/api/board/${postId}`, {
         method: 'DELETE',
       });
 
