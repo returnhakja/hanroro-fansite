@@ -103,6 +103,18 @@ export default function BoardDetailPage({ params }: { params: Promise<{ id: stri
 
       <Content>{post.content}</Content>
 
+      {post.imageUrls && post.imageUrls.length > 0 && (
+        <ImagesSection>
+          <ImagesGrid>
+            {post.imageUrls.map((url, index) => (
+              <ImageWrapper key={index}>
+                <PostImage src={url} alt={`첨부 이미지 ${index + 1}`} />
+              </ImageWrapper>
+            ))}
+          </ImagesGrid>
+        </ImagesSection>
+      )}
+
       <Actions>
         <LikeButton onClick={handleLike}>
           ❤️ 좋아요 ({post.likes})
@@ -146,6 +158,34 @@ const Content = styled.div`
   white-space: pre-wrap;
   margin-bottom: 3rem;
   min-height: 200px;
+`;
+
+const ImagesSection = styled.div`
+  margin-bottom: 2rem;
+  padding: 1rem 0;
+`;
+
+const ImagesGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+`;
+
+const ImageWrapper = styled.div`
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e0e0e0;
+  cursor: pointer;
+  transition: transform 0.2s;
+
+  &:hover {
+    transform: scale(1.05);
+  }
 `;
 
 const Actions = styled.div`
@@ -196,4 +236,10 @@ const BackButton = styled.button`
   &:hover {
     background: #ccc;
   }
+`;
+
+const PostImage = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 `;

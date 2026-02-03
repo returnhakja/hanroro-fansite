@@ -18,8 +18,17 @@ export default function GalleryPage() {
   const [loading, setLoading] = useState(true);
   const [selectedImg, setSelectedImg] = useState<ImageType | null>(null);
 
+  // 업로드 관련 상태
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploadTitle, setUploadTitle] = useState('');
+  const [preview, setPreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+
   useEffect(() => {
     fetchImages();
+    // Modal 접근성 설정
+    Modal.setAppElement('body');
   }, []);
 
   const fetchImages = async () => {
@@ -55,12 +64,67 @@ export default function GalleryPage() {
     }
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setUploadFile(file);
+      setPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!uploadFile || !uploadTitle.trim()) {
+      alert('파일과 제목을 모두 입력해주세요');
+      return;
+    }
+
+    try {
+      setUploading(true);
+      const formData = new FormData();
+      formData.append('image', uploadFile);
+      formData.append('title', uploadTitle);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        alert('업로드 성공!');
+        setUploadModalOpen(false);
+        resetUploadForm();
+        fetchImages(); // 이미지 목록 새로고침
+      } else {
+        const error = await response.json();
+        alert(error.error || '업로드 실패');
+      }
+    } catch (error) {
+      console.error('업로드 오류:', error);
+      alert('업로드에 실패했습니다');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const resetUploadForm = () => {
+    setUploadFile(null);
+    setUploadTitle('');
+    setPreview(null);
+  };
+
   if (loading) return <Spinner />;
 
   return (
     <Container>
-      <Title>Gallery</Title>
-      <Subtitle>한로로의 다양한 모습을 감상하세요</Subtitle>
+      <Header>
+        <div>
+          <Title>Gallery</Title>
+          <Subtitle>한로로의 다양한 모습을 감상하세요</Subtitle>
+        </div>
+        <UploadButton onClick={() => setUploadModalOpen(true)}>
+          이미지 업로드
+        </UploadButton>
+      </Header>
 
       {images.length === 0 ? (
         <EmptyState>아직 업로드된 이미지가 없습니다</EmptyState>
@@ -75,6 +139,7 @@ export default function GalleryPage() {
         </Grid>
       )}
 
+      {/* 이미지 상세보기 모달 */}
       <Modal
         isOpen={!!selectedImg}
         onRequestClose={() => setSelectedImg(null)}
@@ -99,6 +164,69 @@ export default function GalleryPage() {
           </ModalContent>
         )}
       </Modal>
+
+      {/* 업로드 모달 */}
+      <Modal
+        isOpen={uploadModalOpen}
+        onRequestClose={() => {
+          setUploadModalOpen(false);
+          resetUploadForm();
+        }}
+        style={{
+          overlay: { backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 1000 },
+          content: {
+            background: '#fff',
+            borderRadius: '12px',
+            padding: '2rem',
+            maxWidth: '500px',
+            margin: '50px auto',
+            maxHeight: '80vh',
+            overflow: 'auto',
+          },
+        }}
+      >
+        <UploadModalContent>
+          <CloseButton
+            onClick={() => {
+              setUploadModalOpen(false);
+              resetUploadForm();
+            }}
+          />
+          <UploadModalTitle>이미지 업로드</UploadModalTitle>
+
+          <UploadForm>
+            <Label>제목</Label>
+            <Input
+              type="text"
+              placeholder="이미지 제목을 입력하세요"
+              value={uploadTitle}
+              onChange={(e) => setUploadTitle(e.target.value)}
+              disabled={uploading}
+            />
+
+            <Label>이미지 파일</Label>
+            <FileInput
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              disabled={uploading}
+            />
+
+            {preview && (
+              <PreviewContainer>
+                <PreviewImage src={preview} alt="미리보기" />
+              </PreviewContainer>
+            )}
+
+            <UploadSubmitButton
+              onClick={handleUpload}
+              disabled={!uploadFile || !uploadTitle.trim() || uploading}
+            >
+              {uploading ? '업로드 중...' : '업로드'}
+            </UploadSubmitButton>
+          </UploadForm>
+        </UploadModalContent>
+      </Modal>
     </Container>
   );
 }
@@ -107,6 +235,19 @@ const Container = styled.div`
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
+`;
+
+const Header = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  gap: 1rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
 `;
 
 const Title = styled.h1`
@@ -118,7 +259,28 @@ const Title = styled.h1`
 const Subtitle = styled.p`
   font-size: 1.1rem;
   color: #666;
-  margin-bottom: 2rem;
+  margin-bottom: 0;
+`;
+
+const UploadButton = styled.button`
+  padding: 0.75rem 1.5rem;
+  background: #6a4c93;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #553a75;
+  }
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
 `;
 
 const Grid = styled.div`
@@ -199,5 +361,96 @@ const DeleteButton = styled.button`
 
   &:hover {
     background: #cc0000;
+  }
+`;
+
+const UploadModalContent = styled.div`
+  position: relative;
+`;
+
+const UploadModalTitle = styled.h2`
+  font-size: 1.8rem;
+  color: #6a4c93;
+  margin-bottom: 1.5rem;
+  text-align: center;
+`;
+
+const UploadForm = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`;
+
+const Label = styled.label`
+  font-size: 1rem;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 0.25rem;
+`;
+
+const Input = styled.input`
+  padding: 0.75rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: #6a4c93;
+  }
+
+  &:disabled {
+    background: #f5f5f5;
+    cursor: not-allowed;
+  }
+`;
+
+const FileInput = styled.input`
+  padding: 0.5rem;
+  border: 2px dashed #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+`;
+
+const PreviewContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  margin: 1rem 0;
+`;
+
+const PreviewImage = styled.img`
+  max-width: 100%;
+  max-height: 300px;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+`;
+
+const UploadSubmitButton = styled.button`
+  padding: 1rem;
+  background: #6a4c93;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 500;
+  transition: background 0.2s;
+  margin-top: 1rem;
+
+  &:hover:not(:disabled) {
+    background: #553a75;
+  }
+
+  &:disabled {
+    background: #ccc;
+    cursor: not-allowed;
   }
 `;

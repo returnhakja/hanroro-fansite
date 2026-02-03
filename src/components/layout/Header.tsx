@@ -10,7 +10,7 @@ const Header = () => {
   return (
     <HeaderContainer>
       <LogoLink href="/">
-        <LogoImage src="/로고딩.svg" alt="HANRORO Logo" />
+        <LogoImage src="/icon.svg" alt="HANRORO Logo" />
       </LogoLink>
 
       <Hamburger onClick={() => setMenuOpen(true)}>☰</Hamburger>
