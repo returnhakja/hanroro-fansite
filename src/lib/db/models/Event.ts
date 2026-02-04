@@ -6,7 +6,7 @@ export interface IEvent extends Document {
   time?: string;
   place?: string;
   posterUrl?: string;
-  type: 'concert' | 'award' | 'broadcast' | 'other';
+  type: 'concert' | 'award' | 'broadcast' | 'other' | 'festival';
   isPinned: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -33,7 +33,7 @@ const eventSchema = new Schema<IEvent>(
     },
     type: {
       type: String,
-      enum: ['concert', 'award', 'broadcast', 'other'],
+      enum: ['concert', 'award', 'broadcast', 'other', 'festival'],
       default: 'other',
     },
     isPinned: {

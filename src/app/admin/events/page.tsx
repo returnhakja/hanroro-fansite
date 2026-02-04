@@ -10,7 +10,7 @@ interface Event {
   time?: string;
   place?: string;
   posterUrl?: string;
-  type: 'concert' | 'award' | 'broadcast' | 'other';
+  type: 'concert' | 'award' | 'broadcast' | 'other' | 'festival';
   isPinned: boolean;
 }
 
@@ -20,7 +20,7 @@ interface EventFormData {
   time: string;
   place: string;
   posterUrl: string;
-  type: 'concert' | 'award' | 'broadcast' | 'other';
+  type: 'concert' | 'award' | 'broadcast' | 'other' | 'festival';
 }
 
 export default function AdminEventsPage() {
@@ -180,6 +180,7 @@ export default function AdminEventsPage() {
       concert: '공연',
       award: '시상식',
       broadcast: '방송',
+      festival : '페스티벌',
       other: '기타',
     };
     return types[type] || type;
@@ -311,6 +312,7 @@ export default function AdminEventsPage() {
                   }
                 >
                   <option value="concert">공연</option>
+                  <option value="festival">페스티벌</option>
                   <option value="award">시상식</option>
                   <option value="broadcast">방송</option>
                   <option value="other">기타</option>
@@ -424,6 +426,7 @@ const TypeBadge = styled.span<{ $type: string }>`
       concert: '#e3f2fd',
       award: '#fff3e0',
       broadcast: '#f3e5f5',
+      festival: '#fff9c4',
       other: '#f5f5f5',
     };
     return colors[props.$type] || colors.other;
@@ -433,6 +436,7 @@ const TypeBadge = styled.span<{ $type: string }>`
       concert: '#1976d2',
       award: '#f57c00',
       broadcast: '#7b1fa2',
+      festival: '#f57f17',
       other: '#616161',
     };
     return colors[props.$type] || colors.other;

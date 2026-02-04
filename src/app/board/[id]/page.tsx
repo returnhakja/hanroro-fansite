@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import styled from 'styled-components';
 import Spinner from '@/components/ui/Spinner';
+import CommentSection from '@/components/features/board/CommentSection';
 
 interface BoardPost {
   _id: string;
@@ -122,6 +123,8 @@ export default function BoardDetailPage({ params }: { params: Promise<{ id: stri
         <DeleteButton onClick={handleDelete}>삭제</DeleteButton>
         <BackButton onClick={() => router.push('/board')}>목록</BackButton>
       </Actions>
+
+      {postId && <CommentSection boardId={postId} />}
     </Container>
   );
 }

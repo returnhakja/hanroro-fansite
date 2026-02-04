@@ -113,6 +113,7 @@ const EventType = styled.span<{ type: string }>`
       case 'concert': return 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
       case 'fanmeeting': return 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)';
       case 'broadcast': return 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)';
+      case 'festival' : return 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)';
       default: return 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)';
     }
   }};
@@ -167,6 +168,7 @@ const EventCalendar = () => {
       case 'concert': return '콘서트';
       case 'fanmeeting': return '팬미팅';
       case 'broadcast': return '방송';
+      case 'festival' : return '페스티벌';
       default: return '기타';
     }
   };
