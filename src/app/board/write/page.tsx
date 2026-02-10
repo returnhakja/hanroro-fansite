@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styled from 'styled-components';
 import Spinner from '@/components/ui/Spinner';
+import { theme } from '@/styles/theme';
 
 export default function BoardWritePage() {
   const router = useRouter();
@@ -91,7 +92,7 @@ export default function BoardWritePage() {
   return (
     <Container>
       {loading && <Spinner />}
-      <Title>새 글 작성</Title>
+      <PageTitle>새 글 작성</PageTitle>
 
       <Form onSubmit={handleSubmit}>
         <FormGroup>
@@ -165,13 +166,18 @@ export default function BoardWritePage() {
 const Container = styled.div`
   max-width: 800px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 3rem 2rem;
+  background: ${theme.colors.background};
+  min-height: 60vh;
 `;
 
-const Title = styled.h1`
-  font-size: 2.5rem;
-  color: #6a4c93;
-  margin-bottom: 2rem;
+const PageTitle = styled.h1`
+  font-family: ${theme.typography.fontHeading};
+  font-size: ${theme.typography.h2.fontSize};
+  font-weight: ${theme.typography.h2.fontWeight};
+  line-height: ${theme.typography.h2.lineHeight};
+  color: ${theme.colors.textPrimary};
+  margin: 0 0 2.5rem 0;
 `;
 
 const Form = styled.form`
@@ -187,55 +193,75 @@ const FormGroup = styled.div`
 `;
 
 const Label = styled.label`
-  font-size: 1rem;
+  font-size: ${theme.typography.small.fontSize};
   font-weight: 500;
-  color: #333;
+  color: ${theme.colors.textSecondary};
+  letter-spacing: 0.02em;
 `;
 
 const Input = styled.input`
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 0.75rem 1rem;
+  border: 1px solid ${theme.colors.border};
+  border-radius: ${theme.borderRadius.sm};
   font-size: 1rem;
+  font-family: ${theme.typography.fontBody};
+  color: ${theme.colors.textPrimary};
+  background: ${theme.colors.surface};
+  transition: border-color ${theme.transitions.fast};
+
+  &::placeholder {
+    color: ${theme.colors.textTertiary};
+  }
 
   &:focus {
     outline: none;
-    border-color: #6a4c93;
+    border-color: ${theme.colors.accent};
   }
 `;
 
 const Textarea = styled.textarea`
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 0.75rem 1rem;
+  border: 1px solid ${theme.colors.border};
+  border-radius: ${theme.borderRadius.sm};
   font-size: 1rem;
-  font-family: inherit;
+  font-family: ${theme.typography.fontBody};
+  color: ${theme.colors.textPrimary};
+  background: ${theme.colors.surface};
   resize: vertical;
+  transition: border-color ${theme.transitions.fast};
+
+  &::placeholder {
+    color: ${theme.colors.textTertiary};
+  }
 
   &:focus {
     outline: none;
-    border-color: #6a4c93;
+    border-color: ${theme.colors.accent};
   }
 `;
 
 const FileInput = styled.input`
   padding: 0.5rem;
-  border: 2px dashed #ddd;
-  border-radius: 4px;
+  border: 2px dashed ${theme.colors.border};
+  border-radius: ${theme.borderRadius.sm};
   font-size: 0.95rem;
+  font-family: ${theme.typography.fontBody};
+  color: ${theme.colors.textSecondary};
   cursor: pointer;
 
   &::-webkit-file-upload-button {
     padding: 0.5rem 1rem;
-    background: #6a4c93;
-    color: white;
+    background: ${theme.colors.primary};
+    color: ${theme.colors.textLight};
     border: none;
-    border-radius: 4px;
+    border-radius: ${theme.borderRadius.sm};
     cursor: pointer;
     margin-right: 0.5rem;
+    font-size: 0.875rem;
+    transition: background ${theme.transitions.fast};
 
     &:hover {
-      background: #5a3c83;
+      background: ${theme.colors.primaryDark};
     }
   }
 `;
@@ -250,9 +276,9 @@ const ImagePreviewContainer = styled.div`
 const ImagePreviewWrapper = styled.div`
   position: relative;
   aspect-ratio: 1;
-  border-radius: 4px;
+  border-radius: ${theme.borderRadius.sm};
   overflow: hidden;
-  border: 2px solid #e0e0e0;
+  border: 1px solid ${theme.colors.border};
 `;
 
 const PreviewImage = styled.img`
@@ -267,8 +293,8 @@ const RemoveButton = styled.button`
   right: 4px;
   width: 24px;
   height: 24px;
-  background: rgba(0, 0, 0, 0.6);
-  color: white;
+  background: rgba(44, 36, 24, 0.6);
+  color: ${theme.colors.textLight};
   border: none;
   border-radius: 50%;
   cursor: pointer;
@@ -277,33 +303,38 @@ const RemoveButton = styled.button`
   justify-content: center;
   font-size: 14px;
   line-height: 1;
+  transition: background ${theme.transitions.fast};
 
   &:hover {
-    background: rgba(255, 0, 0, 0.8);
+    background: ${theme.colors.error};
   }
 `;
 
 const ButtonGroup = styled.div`
   display: flex;
   gap: 1rem;
+  margin-top: 0.5rem;
 `;
 
 const SubmitButton = styled.button`
   flex: 1;
   padding: 0.875rem;
-  background: #6a4c93;
-  color: white;
+  background: ${theme.colors.primary};
+  color: ${theme.colors.textLight};
   border: none;
-  border-radius: 4px;
+  border-radius: ${theme.borderRadius.sm};
   font-size: 1rem;
+  font-weight: 500;
   cursor: pointer;
+  transition: background ${theme.transitions.normal};
 
   &:hover:not(:disabled) {
-    background: #5a3c83;
+    background: ${theme.colors.primaryDark};
   }
 
   &:disabled {
-    background: #ccc;
+    background: ${theme.colors.surfaceWarm};
+    color: ${theme.colors.textTertiary};
     cursor: not-allowed;
   }
 `;
@@ -311,14 +342,16 @@ const SubmitButton = styled.button`
 const CancelButton = styled.button`
   flex: 1;
   padding: 0.875rem;
-  background: #ddd;
-  color: #333;
+  background: ${theme.colors.surfaceAlt};
+  color: ${theme.colors.textSecondary};
   border: none;
-  border-radius: 4px;
+  border-radius: ${theme.borderRadius.sm};
   font-size: 1rem;
+  font-weight: 500;
   cursor: pointer;
+  transition: background ${theme.transitions.normal};
 
   &:hover {
-    background: #ccc;
+    background: ${theme.colors.surfaceWarm};
   }
 `;

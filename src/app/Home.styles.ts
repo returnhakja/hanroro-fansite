@@ -4,8 +4,9 @@ import { motion } from "framer-motion";
 import { theme } from "@/styles/theme";
 
 export const Container = styled.div`
-  font-family: "Pretendard", "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: ${theme.typography.fontBody};
   background-color: ${theme.colors.background};
+  margin-top: -70px;
 `;
 
 /* ==================== Hero Section ==================== */
@@ -13,21 +14,20 @@ export const Container = styled.div`
 export const HeroSection = styled.section`
   position: relative;
   width: 100%;
-  height: 70vh;
-  min-height: 500px;
+  height: 100vh;
+  min-height: 600px;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
 
   @media (max-width: ${theme.breakpoints.tablet}) {
-    height: 60vh;
-    min-height: 450px;
+    min-height: 500px;
   }
 
   @media (max-width: ${theme.breakpoints.mobile}) {
-    height: 50vh;
-    min-height: 400px;
+    height: 85vh;
+    min-height: 450px;
   }
 `;
 
@@ -37,7 +37,9 @@ export const HeroBackground = styled(motion.div)`
   left: 0;
   width: 100%;
   height: 100%;
-  background: ${theme.colors.gradientHero};
+  background-image: url('/assets/대로로.jpg');
+  background-size: cover;
+  background-position: center 20%;
   z-index: 0;
 `;
 
@@ -47,7 +49,7 @@ export const HeroOverlay = styled.div`
   left: 0;
   width: 100%;
   height: 100%;
-  background: ${theme.colors.gradientOverlay};
+  background: ${theme.colors.gradientHero};
   z-index: 1;
 `;
 
@@ -62,102 +64,124 @@ export const HeroContent = styled(motion.div)`
 `;
 
 export const HeroTitle = styled(motion.h1)`
+  font-family: ${theme.typography.fontHeading};
   font-size: ${theme.typography.hero.fontSize};
   font-weight: ${theme.typography.hero.fontWeight};
   line-height: ${theme.typography.hero.lineHeight};
   letter-spacing: ${theme.typography.hero.letterSpacing};
   margin-bottom: ${theme.spacing.gap.md};
-  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
 
   @media (max-width: ${theme.breakpoints.tablet}) {
-    font-size: 3rem;
+    font-size: 3.5rem;
   }
 
   @media (max-width: ${theme.breakpoints.mobile}) {
-    font-size: 2.5rem;
+    font-size: 2.75rem;
   }
 `;
 
 export const HeroSubtitle = styled(motion.p)`
-  font-size: ${theme.typography.h3.fontSize};
-  font-weight: ${theme.typography.h3.fontWeight};
-  line-height: ${theme.typography.h3.lineHeight};
-  margin-bottom: ${theme.spacing.gap.xl};
-  opacity: 0.95;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-
-  @media (max-width: ${theme.breakpoints.tablet}) {
-    font-size: 1.25rem;
-  }
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  opacity: 0.85;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.2);
 
   @media (max-width: ${theme.breakpoints.mobile}) {
-    font-size: 1.125rem;
-    margin-bottom: ${theme.spacing.gap.lg};
-  }
-`;
-
-export const CTAButton = styled(motion.button)`
-  padding: 1rem 2.5rem;
-  font-size: ${theme.typography.body.fontSize};
-  font-weight: 600;
-  color: ${theme.colors.textLight};
-  background: rgba(255, 255, 255, 0.15);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-radius: ${theme.borderRadius.full};
-  cursor: pointer;
-  backdrop-filter: blur(10px);
-  transition: all ${theme.transitions.normal};
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.25);
-    border-color: rgba(255, 255, 255, 0.5);
-    transform: translateY(-2px);
-    box-shadow: ${theme.shadows.lg};
-  }
-
-  @media (max-width: ${theme.breakpoints.mobile}) {
-    padding: 0.875rem 2rem;
-    font-size: 0.9375rem;
+    font-size: 0.875rem;
+    letter-spacing: 0.15em;
   }
 `;
 
 export const ScrollIndicator = styled(motion.div)`
   position: absolute;
-  bottom: 2rem;
+  bottom: 3rem;
   left: 50%;
   transform: translateX(-50%);
   z-index: 2;
-  width: 30px;
-  height: 50px;
-  border: 2px solid rgba(255, 255, 255, 0.5);
-  border-radius: ${theme.borderRadius.xl};
-  display: flex;
-  justify-content: center;
-  padding-top: 8px;
+  width: 1px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.4);
   cursor: pointer;
+  overflow: hidden;
 
   &::before {
     content: '';
-    width: 6px;
-    height: 10px;
-    background: rgba(255, 255, 255, 0.8);
-    border-radius: 3px;
-    animation: scroll 2s infinite;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    animation: scrollLine 2s infinite;
   }
 
-  @keyframes scroll {
+  @keyframes scrollLine {
     0% {
-      transform: translateY(0);
+      transform: translateY(-20px);
+      opacity: 0;
+    }
+    30% {
       opacity: 1;
     }
     100% {
-      transform: translateY(15px);
+      transform: translateY(60px);
       opacity: 0;
     }
   }
 
   @media (max-width: ${theme.breakpoints.mobile}) {
-    bottom: 1rem;
+    bottom: 2rem;
+    height: 40px;
+  }
+`;
+
+/* ==================== Section Common ==================== */
+
+export const SectionOverline = styled.span`
+  display: block;
+  font-size: ${theme.typography.overline.fontSize};
+  font-weight: ${theme.typography.overline.fontWeight};
+  letter-spacing: ${theme.typography.overline.letterSpacing};
+  text-transform: uppercase;
+  color: ${theme.colors.accent};
+  margin-bottom: ${theme.spacing.gap.sm};
+`;
+
+export const SectionTitle = styled.h2`
+  font-family: ${theme.typography.fontHeading};
+  font-size: ${theme.typography.h1.fontSize};
+  font-weight: ${theme.typography.h1.fontWeight};
+  line-height: ${theme.typography.h1.lineHeight};
+  letter-spacing: ${theme.typography.h1.letterSpacing};
+  color: ${theme.colors.textPrimary};
+  margin-bottom: ${theme.spacing.gap.lg};
+
+  @media (max-width: ${theme.breakpoints.tablet}) {
+    font-size: 2.25rem;
+  }
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    font-size: 1.75rem;
+    margin-bottom: ${theme.spacing.gap.md};
+  }
+`;
+
+export const SectionLink = styled.a`
+  font-size: ${theme.typography.small.fontSize};
+  color: ${theme.colors.textSecondary};
+  text-decoration: none;
+  cursor: pointer;
+  transition: color ${theme.transitions.fast};
+
+  &:hover {
+    color: ${theme.colors.accent};
+  }
+
+  &::after {
+    content: ' \\2192';
   }
 `;
 
@@ -165,7 +189,7 @@ export const ScrollIndicator = styled(motion.div)`
 
 export const VideoSection = styled.section`
   padding: ${theme.spacing.sectionPadding.desktop};
-  background-color: ${theme.colors.surface};
+  background-color: ${theme.colors.background};
 
   @media (max-width: ${theme.breakpoints.tablet}) {
     padding: ${theme.spacing.sectionPadding.tablet};
@@ -173,24 +197,6 @@ export const VideoSection = styled.section`
 
   @media (max-width: ${theme.breakpoints.mobile}) {
     padding: ${theme.spacing.sectionPadding.mobile};
-  }
-`;
-
-export const SectionTitle = styled.h2`
-  font-size: ${theme.typography.h1.fontSize};
-  font-weight: ${theme.typography.h1.fontWeight};
-  line-height: ${theme.typography.h1.lineHeight};
-  color: ${theme.colors.textPrimary};
-  text-align: center;
-  margin-bottom: ${theme.spacing.gap.xl};
-
-  @media (max-width: ${theme.breakpoints.tablet}) {
-    font-size: 2rem;
-  }
-
-  @media (max-width: ${theme.breakpoints.mobile}) {
-    font-size: 1.75rem;
-    margin-bottom: ${theme.spacing.gap.lg};
   }
 `;
 
@@ -224,7 +230,7 @@ export const StyledSlider = styled(Slider)`
   }
 
   .slick-dots li button:before {
-    color: ${theme.colors.primary};
+    color: ${theme.colors.primaryLight};
   }
 
   .slick-dots li.slick-active button:before {
@@ -245,7 +251,7 @@ export const VideoWrapper = styled(motion.div)`
   width: 100%;
   max-width: 900px;
   aspect-ratio: 16 / 9;
-  border-radius: ${theme.borderRadius.lg};
+  border-radius: ${theme.borderRadius.md};
   overflow: hidden;
   margin: 0 auto;
   box-shadow: ${theme.shadows.lg};
@@ -257,7 +263,7 @@ export const VideoWrapper = styled(motion.div)`
   @media (max-width: ${theme.breakpoints.mobile}) {
     max-width: 100%;
     min-width: 320px;
-    border-radius: ${theme.borderRadius.md};
+    border-radius: ${theme.borderRadius.sm};
   }
 `;
 
@@ -290,7 +296,365 @@ export const StyledIframe = styled.iframe.withConfig({
   transition: opacity 0.5s ease;
 `;
 
-/* ==================== Main Grid (Setlist + Calendar + Gallery) ==================== */
+/* ==================== Gallery Preview Section ==================== */
+
+export const GalleryPreviewSection = styled.section`
+  padding: ${theme.spacing.sectionPadding.desktop};
+  background-color: ${theme.colors.surface};
+
+  @media (max-width: ${theme.breakpoints.tablet}) {
+    padding: ${theme.spacing.sectionPadding.tablet};
+  }
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    padding: ${theme.spacing.sectionPadding.mobile};
+  }
+`;
+
+export const SectionHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: ${theme.spacing.gap.xl};
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    flex-direction: column;
+    gap: ${theme.spacing.gap.sm};
+    align-items: flex-start;
+  }
+`;
+
+export const SectionHeaderLeft = styled.div``;
+
+export const GalleryGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: ${theme.spacing.gap.md};
+
+  @media (max-width: ${theme.breakpoints.tablet}) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+export const GalleryItem = styled(motion.div)`
+  position: relative;
+  aspect-ratio: 3 / 4;
+  border-radius: ${theme.borderRadius.md};
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: ${theme.shadows.sm};
+  transition: all ${theme.transitions.normal};
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: ${theme.shadows.md};
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+`;
+
+export const GalleryItemOverlay = styled.div`
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: ${theme.spacing.gap.md};
+  background: linear-gradient(to top, rgba(44, 36, 24, 0.7), transparent);
+  color: ${theme.colors.textLight};
+  transform: translateY(100%);
+  transition: transform ${theme.transitions.normal};
+
+  ${GalleryItem}:hover & {
+    transform: translateY(0);
+  }
+
+  h4 {
+    font-size: ${theme.typography.small.fontSize};
+    font-weight: 500;
+    margin: 0;
+  }
+`;
+
+/* ==================== Board Preview Section ==================== */
+
+export const BoardPreviewSection = styled.section`
+  padding: ${theme.spacing.sectionPadding.desktop};
+  background-color: ${theme.colors.background};
+
+  @media (max-width: ${theme.breakpoints.tablet}) {
+    padding: ${theme.spacing.sectionPadding.tablet};
+  }
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    padding: ${theme.spacing.sectionPadding.mobile};
+  }
+`;
+
+export const BoardList = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+export const BoardItem = styled(motion.div)`
+  padding: ${theme.spacing.gap.md} 0;
+  border-bottom: 1px solid ${theme.colors.border};
+  cursor: pointer;
+  transition: all ${theme.transitions.normal};
+  position: relative;
+  padding-left: 0;
+
+  &:hover {
+    padding-left: ${theme.spacing.gap.md};
+    border-left: 3px solid ${theme.colors.accent};
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    padding: ${theme.spacing.gap.sm} 0;
+  }
+`;
+
+export const BoardItemTitle = styled.h3`
+  font-family: ${theme.typography.fontBody};
+  font-size: ${theme.typography.h3.fontSize};
+  font-weight: ${theme.typography.h3.fontWeight};
+  color: ${theme.colors.textPrimary};
+  margin: 0 0 ${theme.spacing.gap.xs} 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    font-size: 1rem;
+  }
+`;
+
+export const BoardItemMeta = styled.div`
+  display: flex;
+  gap: ${theme.spacing.gap.sm};
+  font-size: ${theme.typography.small.fontSize};
+  color: ${theme.colors.textTertiary};
+
+  span {
+    display: flex;
+    align-items: center;
+    gap: ${theme.spacing.gap.xs};
+  }
+
+  span + span::before {
+    content: '/';
+    margin-right: ${theme.spacing.gap.xs};
+    color: ${theme.colors.borderLight};
+  }
+`;
+
+/* ==================== Two Column Grid (Calendar + Setlist) ==================== */
+
+export const TwoColumnGrid = styled.section`
+  padding: ${theme.spacing.sectionPadding.desktop};
+  background-color: ${theme.colors.surfaceAlt};
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: ${theme.spacing.gridGap.desktop};
+  max-width: 1400px;
+  margin: 0 auto;
+
+  @media (max-width: ${theme.breakpoints.tablet}) {
+    padding: ${theme.spacing.sectionPadding.tablet};
+    gap: ${theme.spacing.gridGap.tablet};
+  }
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    grid-template-columns: 1fr;
+    padding: ${theme.spacing.sectionPadding.mobile};
+    gap: ${theme.spacing.gridGap.mobile};
+  }
+`;
+
+export const TwoColumnItem = styled(motion.div)`
+  padding: ${theme.spacing.gap.lg};
+  background: ${theme.colors.surface};
+  border-radius: ${theme.borderRadius.lg};
+  box-shadow: ${theme.shadows.sm};
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    padding: ${theme.spacing.gap.md};
+  }
+`;
+
+export const ColumnTitle = styled.h2`
+  font-family: ${theme.typography.fontHeading};
+  font-size: ${theme.typography.h2.fontSize};
+  font-weight: ${theme.typography.h2.fontWeight};
+  color: ${theme.colors.textPrimary};
+  margin-bottom: ${theme.spacing.gap.lg};
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    font-size: 1.5rem;
+    margin-bottom: ${theme.spacing.gap.md};
+  }
+`;
+
+/* ==================== Setlist ==================== */
+
+export const TabWrapper = styled.div`
+  display: flex;
+  gap: ${theme.spacing.gap.xs};
+  margin-bottom: ${theme.spacing.gap.lg};
+`;
+
+export const TabButton = styled.button<{ $active: boolean }>`
+  padding: 0.5rem 1.25rem;
+  border: 1.5px solid ${(props) => (props.$active ? theme.colors.accent : theme.colors.border)};
+  border-radius: ${theme.borderRadius.full};
+  background: ${(props) => (props.$active ? theme.colors.accent : 'transparent')};
+  font-weight: ${(props) => (props.$active ? 600 : 400)};
+  font-size: ${theme.typography.small.fontSize};
+  color: ${(props) => (props.$active ? theme.colors.textLight : theme.colors.textSecondary)};
+  cursor: pointer;
+  transition: all ${theme.transitions.normal};
+
+  &:hover {
+    border-color: ${theme.colors.accent};
+    color: ${(props) => (props.$active ? theme.colors.textLight : theme.colors.accent)};
+  }
+`;
+
+export const SetlistCard = styled.div`
+  max-height: 400px;
+  overflow-y: auto;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: ${theme.colors.secondaryLight};
+    border-radius: 2px;
+  }
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+`;
+
+export const SetListItem = styled(motion.li)`
+  display: flex;
+  align-items: center;
+  padding: ${theme.spacing.gap.sm};
+  margin-bottom: 2px;
+  font-size: ${theme.typography.body.fontSize};
+  line-height: ${theme.typography.body.lineHeight};
+  border-radius: ${theme.borderRadius.sm};
+  transition: all ${theme.transitions.fast};
+
+  &:hover {
+    background-color: ${theme.colors.surfaceAlt};
+    transform: translateX(4px);
+  }
+`;
+
+export const SongOrder = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: ${theme.colors.accent};
+  margin-right: ${theme.spacing.gap.sm};
+  flex-shrink: 0;
+`;
+
+export const AlbumThumb = styled.img`
+  width: 36px;
+  height: 36px;
+  border-radius: ${theme.borderRadius.sm};
+  margin-right: ${theme.spacing.gap.sm};
+  object-fit: cover;
+`;
+
+/* ==================== Calendar ==================== */
+
+export const EventList = styled.ul`
+  list-style: none;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  li {
+    margin-bottom: ${theme.spacing.gap.xs};
+  }
+`;
+
+/* ==================== Unused but kept for compatibility ==================== */
+
+export const PostCard = styled(motion.div)`
+  background-color: ${theme.colors.surface};
+  padding: ${theme.spacing.gap.lg};
+  border-radius: ${theme.borderRadius.md};
+  box-shadow: ${theme.shadows.sm};
+  transition: all ${theme.transitions.normal};
+
+  &:hover {
+    box-shadow: ${theme.shadows.md};
+    transform: translateY(-4px);
+  }
+`;
+
+export const PostImage = styled(motion.img)`
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: ${theme.borderRadius.md};
+  margin-bottom: ${theme.spacing.gap.md};
+`;
+
+export const PostContent = styled.div`
+  padding: ${theme.spacing.gap.sm} 0;
+
+  h3 {
+    font-size: ${theme.typography.h3.fontSize};
+    font-weight: ${theme.typography.h3.fontWeight};
+    color: ${theme.colors.textPrimary};
+    margin: 0;
+  }
+`;
+
+/* ==================== Removed components (no longer used) ==================== */
+
+export const SectionButton = styled.button`
+  padding: 0.625rem 1.5rem;
+  font-size: ${theme.typography.small.fontSize};
+  font-weight: 500;
+  color: ${theme.colors.primary};
+  background: transparent;
+  border: 1.5px solid ${theme.colors.border};
+  border-radius: ${theme.borderRadius.full};
+  cursor: pointer;
+  transition: all ${theme.transitions.normal};
+
+  &:hover {
+    border-color: ${theme.colors.accent};
+    color: ${theme.colors.accent};
+  }
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    width: 100%;
+    text-align: center;
+  }
+`;
 
 export const MainGrid = styled.section`
   padding: ${theme.spacing.sectionPadding.desktop};
@@ -326,350 +690,3 @@ export const CenterColumn = styled(motion.div)`
   }
 `;
 export const RightColumn = styled(motion.div)``;
-
-export const ColumnTitle = styled.h2`
-  font-size: ${theme.typography.h2.fontSize};
-  font-weight: ${theme.typography.h2.fontWeight};
-  color: ${theme.colors.textPrimary};
-  margin-bottom: ${theme.spacing.gap.lg};
-
-  @media (max-width: ${theme.breakpoints.mobile}) {
-    font-size: 1.5rem;
-    margin-bottom: ${theme.spacing.gap.md};
-  }
-`;
-
-/* ==================== Setlist ==================== */
-
-export const TabWrapper = styled.div`
-  display: flex;
-  gap: ${theme.spacing.gap.sm};
-  margin-bottom: ${theme.spacing.gap.lg};
-  border-bottom: 2px solid ${theme.colors.surfaceAlt};
-`;
-
-export const TabButton = styled.button<{ $active: boolean }>`
-  padding: ${theme.spacing.gap.sm} ${theme.spacing.gap.md};
-  border: none;
-  border-bottom: 3px solid ${(props) => (props.$active ? theme.colors.primary : "transparent")};
-  background: none;
-  font-weight: ${(props) => (props.$active ? 700 : 400)};
-  font-size: ${theme.typography.body.fontSize};
-  color: ${(props) => (props.$active ? theme.colors.primary : theme.colors.textSecondary)};
-  cursor: pointer;
-  transition: all ${theme.transitions.normal};
-  position: relative;
-  margin-bottom: -2px;
-
-  &:hover {
-    color: ${theme.colors.primary};
-    transform: translateY(-2px);
-  }
-`;
-
-export const SetlistCard = styled.div`
-  max-height: 400px;
-  overflow-y: auto;
-  padding: ${theme.spacing.gap.md};
-  background-color: ${theme.colors.surface};
-  border-radius: ${theme.borderRadius.md};
-  box-shadow: ${theme.shadows.sm};
-
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-  &::-webkit-scrollbar-thumb {
-    background-color: ${theme.colors.primaryLight};
-    border-radius: 3px;
-  }
-  &::-webkit-scrollbar-track {
-    background-color: ${theme.colors.surfaceAlt};
-  }
-`;
-
-export const SetListItem = styled(motion.li)`
-  display: flex;
-  align-items: center;
-  padding: ${theme.spacing.gap.sm};
-  margin-bottom: ${theme.spacing.gap.xs};
-  font-size: ${theme.typography.body.fontSize};
-  line-height: ${theme.typography.body.lineHeight};
-  border-radius: ${theme.borderRadius.sm};
-  transition: all ${theme.transitions.fast};
-
-  &:hover {
-    background-color: ${theme.colors.surfaceAlt};
-    transform: translateX(4px);
-  }
-`;
-
-export const AlbumThumb = styled.img`
-  width: 40px;
-  height: 40px;
-  border-radius: ${theme.borderRadius.sm};
-  margin-right: ${theme.spacing.gap.sm};
-  object-fit: cover;
-  box-shadow: ${theme.shadows.sm};
-`;
-
-/* ==================== Calendar ==================== */
-
-export const EventList = styled.ul`
-  list-style: none;
-  padding: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  li {
-    margin-bottom: ${theme.spacing.gap.xs};
-  }
-`;
-
-/* ==================== Gallery ==================== */
-
-export const PostCard = styled(motion.div)`
-  background-color: ${theme.colors.surface};
-  padding: ${theme.spacing.gap.lg};
-  border-radius: ${theme.borderRadius.lg};
-  box-shadow: ${theme.shadows.md};
-  transition: all ${theme.transitions.normal};
-
-  &:hover {
-    box-shadow: ${theme.shadows.lg};
-    transform: translateY(-4px);
-  }
-
-  @media (max-width: ${theme.breakpoints.mobile}) {
-    padding: ${theme.spacing.gap.md};
-  }
-`;
-
-export const PostImage = styled(motion.img)`
-  width: 100%;
-  height: auto;
-  display: block;
-  border-radius: ${theme.borderRadius.md};
-  margin-bottom: ${theme.spacing.gap.md};
-`;
-
-export const PostContent = styled.div`
-  padding: ${theme.spacing.gap.sm} 0;
-
-  h3 {
-    font-size: ${theme.typography.h3.fontSize};
-    font-weight: ${theme.typography.h3.fontWeight};
-    color: ${theme.colors.textPrimary};
-    margin: 0;
-  }
-`;
-
-/* ==================== Gallery Preview Section ==================== */
-
-export const GalleryPreviewSection = styled.section`
-  padding: ${theme.spacing.sectionPadding.desktop};
-  background-color: ${theme.colors.surface};
-
-  @media (max-width: ${theme.breakpoints.tablet}) {
-    padding: ${theme.spacing.sectionPadding.tablet};
-  }
-
-  @media (max-width: ${theme.breakpoints.mobile}) {
-    padding: ${theme.spacing.sectionPadding.mobile};
-  }
-`;
-
-export const SectionHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: ${theme.spacing.gap.xl};
-
-  @media (max-width: ${theme.breakpoints.mobile}) {
-    flex-direction: column;
-    gap: ${theme.spacing.gap.md};
-    align-items: flex-start;
-  }
-`;
-
-export const SectionButton = styled.button`
-  padding: 0.75rem 1.5rem;
-  font-size: ${theme.typography.body.fontSize};
-  font-weight: 600;
-  color: ${theme.colors.primary};
-  background: transparent;
-  border: 2px solid ${theme.colors.primary};
-  border-radius: ${theme.borderRadius.full};
-  cursor: pointer;
-  transition: all ${theme.transitions.normal};
-
-  &:hover {
-    background: ${theme.colors.primary};
-    color: ${theme.colors.textLight};
-    transform: translateY(-2px);
-    box-shadow: ${theme.shadows.md};
-  }
-
-  @media (max-width: ${theme.breakpoints.mobile}) {
-    width: 100%;
-    padding: 0.625rem 1.25rem;
-  }
-`;
-
-export const GalleryGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: ${theme.spacing.gap.lg};
-
-  @media (max-width: ${theme.breakpoints.tablet}) {
-    grid-template-columns: repeat(2, 1fr);
-    gap: ${theme.spacing.gap.md};
-  }
-
-  @media (max-width: ${theme.breakpoints.mobile}) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-export const GalleryItem = styled(motion.div)`
-  position: relative;
-  aspect-ratio: 1;
-  border-radius: ${theme.borderRadius.lg};
-  overflow: hidden;
-  cursor: pointer;
-  box-shadow: ${theme.shadows.md};
-  transition: all ${theme.transitions.normal};
-
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: ${theme.shadows.lg};
-  }
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-`;
-
-export const GalleryItemOverlay = styled.div`
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: ${theme.spacing.gap.md};
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
-  color: ${theme.colors.textLight};
-  transform: translateY(100%);
-  transition: transform ${theme.transitions.normal};
-
-  ${GalleryItem}:hover & {
-    transform: translateY(0);
-  }
-
-  h4 {
-    font-size: ${theme.typography.body.fontSize};
-    font-weight: 600;
-    margin: 0;
-  }
-`;
-
-/* ==================== Board Preview Section ==================== */
-
-export const BoardPreviewSection = styled.section`
-  padding: ${theme.spacing.sectionPadding.desktop};
-  background-color: ${theme.colors.surfaceAlt};
-
-  @media (max-width: ${theme.breakpoints.tablet}) {
-    padding: ${theme.spacing.sectionPadding.tablet};
-  }
-
-  @media (max-width: ${theme.breakpoints.mobile}) {
-    padding: ${theme.spacing.sectionPadding.mobile};
-  }
-`;
-
-export const BoardList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${theme.spacing.gap.md};
-`;
-
-export const BoardItem = styled(motion.div)`
-  padding: ${theme.spacing.gap.lg};
-  background: ${theme.colors.surface};
-  border-radius: ${theme.borderRadius.lg};
-  box-shadow: ${theme.shadows.sm};
-  cursor: pointer;
-  transition: all ${theme.transitions.normal};
-
-  &:hover {
-    transform: translateX(8px);
-    box-shadow: ${theme.shadows.md};
-  }
-
-  @media (max-width: ${theme.breakpoints.mobile}) {
-    padding: ${theme.spacing.gap.md};
-  }
-`;
-
-export const BoardItemTitle = styled.h3`
-  font-size: ${theme.typography.h3.fontSize};
-  font-weight: ${theme.typography.h3.fontWeight};
-  color: ${theme.colors.textPrimary};
-  margin: 0 0 ${theme.spacing.gap.sm} 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-
-  @media (max-width: ${theme.breakpoints.mobile}) {
-    font-size: 1.125rem;
-  }
-`;
-
-export const BoardItemMeta = styled.div`
-  display: flex;
-  gap: ${theme.spacing.gap.md};
-  font-size: ${theme.typography.small.fontSize};
-  color: ${theme.colors.textSecondary};
-
-  span {
-    display: flex;
-    align-items: center;
-    gap: ${theme.spacing.gap.xs};
-  }
-`;
-
-/* ==================== Two Column Grid (Calendar + Setlist) ==================== */
-
-export const TwoColumnGrid = styled.section`
-  padding: ${theme.spacing.sectionPadding.desktop};
-  background-color: ${theme.colors.surface};
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: ${theme.spacing.gridGap.desktop};
-  max-width: 1400px;
-  margin: 0 auto;
-
-  @media (max-width: ${theme.breakpoints.tablet}) {
-    padding: ${theme.spacing.sectionPadding.tablet};
-    gap: ${theme.spacing.gridGap.tablet};
-  }
-
-  @media (max-width: ${theme.breakpoints.mobile}) {
-    grid-template-columns: 1fr;
-    padding: ${theme.spacing.sectionPadding.mobile};
-    gap: ${theme.spacing.gridGap.mobile};
-  }
-`;
-
-export const TwoColumnItem = styled(motion.div)`
-  padding: ${theme.spacing.gap.lg};
-  background: ${theme.colors.surfaceAlt};
-  border-radius: ${theme.borderRadius.lg};
-  box-shadow: ${theme.shadows.md};
-
-  @media (max-width: ${theme.breakpoints.mobile}) {
-    padding: ${theme.spacing.gap.md};
-  }
-`;

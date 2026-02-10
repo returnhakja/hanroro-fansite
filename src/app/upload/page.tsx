@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styled from 'styled-components';
+import { theme } from '@/styles/theme';
 import Spinner from '@/components/ui/Spinner';
 
 export default function UploadPage() {
@@ -116,13 +117,14 @@ const Container = styled.div`
 
 const Title = styled.h1`
   font-size: 2.5rem;
-  color: #6a4c93;
+  color: ${theme.colors.primary};
   margin-bottom: 0.5rem;
+  font-family: ${theme.typography.fontHeading};
 `;
 
 const Subtitle = styled.p`
   font-size: 1.1rem;
-  color: #666;
+  color: ${theme.colors.textSecondary};
   margin-bottom: 2rem;
 `;
 
@@ -141,30 +143,30 @@ const FormGroup = styled.div`
 const Label = styled.label`
   font-size: 1rem;
   font-weight: 500;
-  color: #333;
+  color: ${theme.colors.textPrimary};
 `;
 
 const Input = styled.input`
   padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid ${theme.colors.border};
+  border-radius: ${theme.borderRadius.sm};
   font-size: 1rem;
 
   &:focus {
     outline: none;
-    border-color: #6a4c93;
+    border-color: ${theme.colors.accent};
   }
 `;
 
 const FileInput = styled.input`
   padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid ${theme.colors.border};
+  border-radius: ${theme.borderRadius.sm};
   font-size: 1rem;
 
   &:focus {
     outline: none;
-    border-color: #6a4c93;
+    border-color: ${theme.colors.accent};
   }
 `;
 
@@ -173,14 +175,14 @@ const PreviewSection = styled.div`
   flex-direction: column;
   gap: 1rem;
   padding: 1rem;
-  background: #f8f5f2;
-  border-radius: 8px;
+  background: ${theme.colors.surfaceAlt};
+  border-radius: ${theme.borderRadius.md};
 `;
 
 const PreviewLabel = styled.span`
   font-size: 1rem;
   font-weight: 500;
-  color: #333;
+  color: ${theme.colors.textPrimary};
 `;
 
 const PreviewImage = styled.img`
@@ -199,20 +201,20 @@ const ButtonGroup = styled.div`
 const SubmitButton = styled.button`
   flex: 1;
   padding: 0.875rem;
-  background: #6a4c93;
-  color: white;
+  background: ${theme.colors.primary};
+  color: ${theme.colors.textLight};
   border: none;
-  border-radius: 4px;
+  border-radius: ${theme.borderRadius.sm};
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
 
   &:hover {
-    background: #5a3c83;
+    background: ${theme.colors.primaryDark};
   }
 
   &:disabled {
-    background: #ccc;
+    opacity: 0.5;
     cursor: not-allowed;
   }
 `;
@@ -220,15 +222,15 @@ const SubmitButton = styled.button`
 const CancelButton = styled.button`
   flex: 1;
   padding: 0.875rem;
-  background: #ddd;
-  color: #333;
+  background: ${theme.colors.surfaceWarm};
+  color: ${theme.colors.textSecondary};
   border: none;
-  border-radius: 4px;
+  border-radius: ${theme.borderRadius.sm};
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
 
   &:hover {
-    background: #ccc;
+    background: ${theme.colors.border};
   }
 `;

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import { theme } from '@/styles/theme';
 import CommentForm from './CommentForm';
 import CommentList from './CommentList';
 
@@ -82,7 +83,7 @@ export default function CommentSection({ boardId }: CommentSectionProps) {
 const Container = styled.div`
   margin-top: 3rem;
   padding-top: 2rem;
-  border-top: 2px solid #eee;
+  border-top: 2px solid ${theme.colors.borderLight};
 `;
 
 const Header = styled.div`
@@ -90,29 +91,30 @@ const Header = styled.div`
 `;
 
 const Title = styled.h2`
+  font-family: ${theme.typography.fontHeading};
   font-size: 1.5rem;
-  color: #333;
-  font-weight: 600;
+  color: ${theme.colors.textPrimary};
+  font-weight: 400;
   margin: 0;
 `;
 
 const LoadingText = styled.p`
   text-align: center;
-  color: #999;
+  color: ${theme.colors.textTertiary};
   padding: 2rem;
   margin: 0;
 `;
 
 const ErrorText = styled.p`
   text-align: center;
-  color: #ff4444;
+  color: ${theme.colors.error};
   padding: 2rem;
   margin: 0;
 `;
 
 const EmptyText = styled.p`
   text-align: center;
-  color: #999;
+  color: ${theme.colors.textTertiary};
   padding: 2rem;
   font-size: 1rem;
   margin: 0;

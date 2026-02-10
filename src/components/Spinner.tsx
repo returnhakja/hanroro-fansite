@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { theme } from "@/styles/theme";
 
 const SpinnerOverlay = styled.div`
   position: fixed;
@@ -6,7 +7,7 @@ const SpinnerOverlay = styled.div`
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(250, 247, 242, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -14,8 +15,8 @@ const SpinnerOverlay = styled.div`
 `;
 
 const SpinnerCircle = styled.div`
-  border: 4px solid #eee;
-  border-top: 4px solid #6a4c93;
+  border: 3px solid ${theme.colors.borderLight};
+  border-top: 3px solid ${theme.colors.accent};
   border-radius: 50%;
   width: 40px;
   height: 40px;

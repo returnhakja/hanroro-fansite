@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import styled from 'styled-components';
+import { theme } from '@/styles/theme';
 import { formatRelativeTime } from '@/lib/utils/time';
 import CommentForm from './CommentForm';
 
@@ -74,7 +75,7 @@ export default function CommentItem({
           ) : (
             <>
               <AuthorName>{comment.author}</AuthorName>
-              <Separator>•</Separator>
+              <Separator>&middot;</Separator>
               <TimeStamp>{formatRelativeTime(comment.createdAt)}</TimeStamp>
             </>
           )}
@@ -133,14 +134,14 @@ export default function CommentItem({
 
 const CommentContainer = styled.div<{ $isReply: boolean; $isDeleted: boolean }>`
   padding: 1rem;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid ${theme.colors.borderLight};
   background: ${(props) => {
-    if (props.$isDeleted) return '#f9f9f9';
-    return props.$isReply ? '#fafafa' : 'white';
+    if (props.$isDeleted) return theme.colors.surfaceAlt;
+    return props.$isReply ? theme.colors.background : theme.colors.surface;
   }};
   margin-left: ${(props) => (props.$isReply ? '3rem' : '0')};
 
-  @media (max-width: 768px) {
+  @media (max-width: ${theme.breakpoints.mobile}) {
     margin-left: ${(props) => (props.$isReply ? '1.5rem' : '0')};
     padding: 0.75rem;
   }
@@ -151,31 +152,31 @@ const CommentHeader = styled.div`
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 0.5rem;
-  font-size: 0.875rem;
+  font-size: ${theme.typography.small.fontSize};
 `;
 
 const AuthorName = styled.span`
   font-weight: 600;
-  color: #333;
+  color: ${theme.colors.textPrimary};
 `;
 
 const Separator = styled.span`
-  color: #ccc;
+  color: ${theme.colors.border};
 `;
 
 const TimeStamp = styled.span`
-  color: #999;
+  color: ${theme.colors.textTertiary};
 `;
 
 const DeletedInfo = styled.span`
-  color: #999;
+  color: ${theme.colors.textTertiary};
   font-style: italic;
 `;
 
 const CommentContent = styled.p<{ $isDeleted: boolean }>`
   margin: 0 0 0.75rem 0;
   line-height: 1.6;
-  color: ${(props) => (props.$isDeleted ? '#999' : '#333')};
+  color: ${(props) => (props.$isDeleted ? theme.colors.textTertiary : theme.colors.textPrimary)};
   white-space: pre-wrap;
   word-break: break-word;
   ${(props) => props.$isDeleted && 'font-style: italic;'}
@@ -190,17 +191,17 @@ const ActionButton = styled.button<{ $active?: boolean; $delete?: boolean }>`
   background: none;
   border: none;
   color: ${(props) => {
-    if (props.$delete) return '#ff4444';
-    if (props.$active) return '#6a4c93';
-    return '#666';
+    if (props.$delete) return theme.colors.error;
+    if (props.$active) return theme.colors.accent;
+    return theme.colors.textSecondary;
   }};
-  font-size: 0.875rem;
+  font-size: ${theme.typography.small.fontSize};
   cursor: pointer;
   padding: 0;
-  transition: color 0.2s;
+  transition: color ${theme.transitions.fast};
 
   &:hover:not(:disabled) {
-    color: ${(props) => (props.$delete ? '#cc0000' : '#6a4c93')};
+    color: ${(props) => (props.$delete ? '#a04040' : theme.colors.accent)};
   }
 
   &:disabled {
@@ -213,6 +214,4 @@ const ReplyFormContainer = styled.div`
   margin-top: 1rem;
 `;
 
-const RepliesContainer = styled.div`
-  /* Replies are rendered with margin-left in CommentContainer */
-`;
+const RepliesContainer = styled.div``;

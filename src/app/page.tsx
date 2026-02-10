@@ -15,12 +15,13 @@ import {
   HeroContent,
   HeroTitle,
   HeroSubtitle,
-  CTAButton,
   ScrollIndicator,
   GalleryPreviewSection,
+  SectionOverline,
   SectionTitle,
   SectionHeader,
-  SectionButton,
+  SectionHeaderLeft,
+  SectionLink,
   GalleryGrid,
   GalleryItem,
   GalleryItemOverlay,
@@ -36,6 +37,7 @@ import {
   TabButton,
   SetlistCard,
   SetListItem,
+  SongOrder,
   AlbumThumb,
   EventList,
   VideoSection,
@@ -88,7 +90,6 @@ const Home = () => {
     }
   }, [activeTab]);
 
-  // YouTube 영상 로드
   useEffect(() => {
     const fetchVideos = async () => {
       try {
@@ -108,13 +109,12 @@ const Home = () => {
     fetchVideos();
   }, []);
 
-  // 갤러리 이미지 로드 (최근 4개)
   useEffect(() => {
     const loadImages = async () => {
       try {
         const res = await fetch('/api/images');
         const data = await res.json();
-        setImages(data.slice(0, 4));
+        setImages(data.slice(0, 6));
       } catch (err) {
         console.error("이미지 불러오기 실패:", err);
       }
@@ -122,7 +122,6 @@ const Home = () => {
     loadImages();
   }, []);
 
-  // 게시글 로드 (최근 5개)
   useEffect(() => {
     const loadPosts = async () => {
       try {
@@ -136,7 +135,6 @@ const Home = () => {
     loadPosts();
   }, []);
 
-  // 셋리스트 로드
   useEffect(() => {
     const loadSetlists = async () => {
       try {
@@ -191,9 +189,9 @@ const Home = () => {
     [videos, activeIndex]
   );
 
-  const scrollToGallery = () => {
+  const scrollToContent = () => {
     window.scrollTo({
-      top: window.innerHeight * 0.7,
+      top: window.innerHeight,
       behavior: 'smooth'
     });
   };
@@ -212,60 +210,84 @@ const Home = () => {
       {/* Hero Section */}
       <HeroSection>
         <HeroBackground
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8 }}
+          initial={{ scale: 1.1 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 1.5, ease: 'easeOut' }}
         />
         <HeroOverlay />
 
         <HeroContent
-          initial={shouldReduceMotion ? {} : { opacity: 0, y: 30 }}
+          initial={shouldReduceMotion ? {} : { opacity: 0, y: 20 }}
           animate={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
+          transition={{ duration: 1, delay: 0.3 }}
         >
           <HeroTitle
-            initial={shouldReduceMotion ? {} : { opacity: 0, scale: 0.9 }}
-            animate={shouldReduceMotion ? {} : { opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
+            initial={shouldReduceMotion ? {} : { opacity: 0 }}
+            animate={shouldReduceMotion ? {} : { opacity: 1 }}
+            transition={{ duration: 1, delay: 0.5 }}
           >
             HANRORO
           </HeroTitle>
 
           <HeroSubtitle
-            initial={shouldReduceMotion ? {} : { opacity: 0, y: 20 }}
-            animate={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.7 }}
-          >
-            한로로 팬들의 따뜻한 커뮤니티
-          </HeroSubtitle>
-
-          <CTAButton
             initial={shouldReduceMotion ? {} : { opacity: 0 }}
             animate={shouldReduceMotion ? {} : { opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.9 }}
-            whileHover={shouldReduceMotion ? {} : { scale: 1.05 }}
-            whileTap={shouldReduceMotion ? {} : { scale: 0.95 }}
-            onClick={scrollToGallery}
+            transition={{ duration: 0.8, delay: 0.8 }}
           >
-            둘러보기
-          </CTAButton>
+            Singer-Songwriter
+          </HeroSubtitle>
         </HeroContent>
 
         <ScrollIndicator
           initial={shouldReduceMotion ? {} : { opacity: 0 }}
           animate={shouldReduceMotion ? {} : { opacity: 1 }}
           transition={{ duration: 0.6, delay: 1.2 }}
-          onClick={scrollToGallery}
+          onClick={scrollToContent}
         />
       </HeroSection>
+
+      {/* Board Preview Section - 최신 소식 */}
+      <BoardPreviewSection>
+        <SectionHeader>
+          <SectionHeaderLeft>
+            <SectionOverline>LATEST</SectionOverline>
+            <SectionTitle>최신 소식</SectionTitle>
+          </SectionHeaderLeft>
+          <SectionLink onClick={() => router.push('/board')}>
+            더 보기
+          </SectionLink>
+        </SectionHeader>
+        <BoardList>
+          {posts.map((post, index) => (
+            <BoardItem
+              key={post._id}
+              initial={shouldReduceMotion ? {} : { opacity: 0, y: 10 }}
+              whileInView={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: index * 0.08 }}
+              onClick={() => router.push(`/board/${post._id}`)}
+            >
+              <BoardItemTitle>{post.title}</BoardItemTitle>
+              <BoardItemMeta>
+                <span>{post.author}</span>
+                <span>{formatDate(post.createdAt)}</span>
+                <span>조회 {post.views}</span>
+              </BoardItemMeta>
+            </BoardItem>
+          ))}
+        </BoardList>
+      </BoardPreviewSection>
 
       {/* Gallery Preview Section */}
       <GalleryPreviewSection>
         <SectionHeader>
-          <SectionTitle>갤러리</SectionTitle>
-          <SectionButton onClick={() => router.push('/gallery')}>
+          <SectionHeaderLeft>
+            <SectionOverline>GALLERY</SectionOverline>
+            <SectionTitle>갤러리</SectionTitle>
+          </SectionHeaderLeft>
+          <SectionLink onClick={() => router.push('/gallery')}>
             전체 보기
-          </SectionButton>
+          </SectionLink>
         </SectionHeader>
         <GalleryGrid>
           {images.map((image, index) => (
@@ -275,7 +297,6 @@ const Home = () => {
               whileInView={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              whileHover={shouldReduceMotion ? {} : { scale: 1.02 }}
               onClick={() => router.push('/gallery')}
             >
               <img src={image.imageUrl} alt={image.title} />
@@ -287,36 +308,6 @@ const Home = () => {
         </GalleryGrid>
       </GalleryPreviewSection>
 
-      {/* Board Preview Section */}
-      <BoardPreviewSection>
-        <SectionHeader>
-          <SectionTitle>최신 게시글</SectionTitle>
-          <SectionButton onClick={() => router.push('/board')}>
-            게시판 가기
-          </SectionButton>
-        </SectionHeader>
-        <BoardList>
-          {posts.map((post, index) => (
-            <BoardItem
-              key={post._id}
-              initial={shouldReduceMotion ? {} : { opacity: 0, x: -20 }}
-              whileInView={shouldReduceMotion ? {} : { opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              onClick={() => router.push(`/board/${post._id}`)}
-            >
-              <BoardItemTitle>{post.title}</BoardItemTitle>
-              <BoardItemMeta>
-                <span>👤 {post.author}</span>
-                <span>👁️ {post.views}</span>
-                <span>❤️ {post.likes}</span>
-                <span>📅 {formatDate(post.createdAt)}</span>
-              </BoardItemMeta>
-            </BoardItem>
-          ))}
-        </BoardList>
-      </BoardPreviewSection>
-
       {/* Two Column Grid - Calendar + Setlist */}
       <TwoColumnGrid>
         <TwoColumnItem
@@ -325,6 +316,7 @@ const Home = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
+          <SectionOverline>SCHEDULE</SectionOverline>
           <ColumnTitle>일정</ColumnTitle>
           <EventList>
             <EventCalendar />
@@ -337,6 +329,7 @@ const Home = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
+          <SectionOverline>SETLIST</SectionOverline>
           <ColumnTitle>
             {concert?.title || '셋리스트'}
           </ColumnTitle>
@@ -364,12 +357,11 @@ const Home = () => {
                   .sort((a: any, b: any) => a.order - b.order)
                   .map((song: any, index: number) => (
                     <SetListItem key={index}>
-                      <span>
-                        {song.albumImageUrl && (
-                          <AlbumThumb src={song.albumImageUrl} alt={song.title} />
-                        )}
-                        {song.title}
-                      </span>
+                      <SongOrder>{String(song.order).padStart(2, '0')}</SongOrder>
+                      {song.albumImageUrl && (
+                        <AlbumThumb src={song.albumImageUrl} alt={song.title} />
+                      )}
+                      <span>{song.title}</span>
                     </SetListItem>
                   ))}
               </SetlistCard>
@@ -386,7 +378,8 @@ const Home = () => {
 
       {/* Video Section */}
       <VideoSection>
-        <SectionTitle>Latest Videos</SectionTitle>
+        <SectionOverline style={{ textAlign: 'center' }}>VIDEOS</SectionOverline>
+        <SectionTitle style={{ textAlign: 'center' }}>Latest Videos</SectionTitle>
         {loading ? (
           <SpinnerWrapper>
             <Spinner />

@@ -101,7 +101,7 @@ const StatIcon = styled.div`
 const StatNumber = styled.div`
   font-size: 3rem;
   font-weight: bold;
-  color: #667eea;
+  color: #8B7355;
   margin-bottom: 0.5rem;
 `;
 
@@ -136,7 +136,7 @@ const InfoBox = styled.div`
   background: #f8f9fa;
   padding: 1.5rem;
   border-radius: 8px;
-  border-left: 4px solid #667eea;
+  border-left: 4px solid #8B7355;
 `;
 
 const InfoTitle = styled.h3`
@@ -161,7 +161,7 @@ const InfoList = styled.ul`
       content: '•';
       position: absolute;
       left: 0;
-      color: #667eea;
+      color: #8B7355;
       font-weight: bold;
     }
   }

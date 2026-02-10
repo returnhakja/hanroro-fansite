@@ -63,6 +63,7 @@ const CloseButton = styled.button`
 `;
 
 const EventTitle = styled.h2`
+  font-family: ${theme.typography.fontHeading};
   font-size: ${theme.typography.h2.fontSize};
   font-weight: ${theme.typography.h2.fontWeight};
   color: ${theme.colors.textPrimary};
@@ -110,11 +111,11 @@ const EventType = styled.span<{ type: string }>`
   font-weight: 600;
   background: ${props => {
     switch (props.type) {
-      case 'concert': return 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-      case 'fanmeeting': return 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)';
-      case 'broadcast': return 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)';
-      case 'festival' : return 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)';
-      default: return 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)';
+      case 'concert': return `linear-gradient(135deg, ${theme.colors.primary} 0%, ${theme.colors.primaryDark} 100%)`;
+      case 'fanmeeting': return `linear-gradient(135deg, ${theme.colors.accent} 0%, ${theme.colors.accentDark} 100%)`;
+      case 'broadcast': return `linear-gradient(135deg, ${theme.colors.info} 0%, #5D7186 100%)`;
+      case 'festival' : return `linear-gradient(135deg, ${theme.colors.success} 0%, #4E6E4E 100%)`;
+      default: return `linear-gradient(135deg, ${theme.colors.secondaryLight} 0%, ${theme.colors.secondary} 100%)`;
     }
   }};
   color: white;
@@ -123,7 +124,7 @@ const EventType = styled.span<{ type: string }>`
 
 const modalStyles = {
   overlay: {
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    backgroundColor: "rgba(44, 36, 24, 0.5)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -148,7 +149,6 @@ const EventCalendar = () => {
   const [events, setEvents] = useState<Event[]>([]);
 
   useEffect(() => {
-    // react-modal 접근성 설정
     Modal.setAppElement('body');
 
     const loadEvents = async () => {
@@ -215,18 +215,18 @@ const EventCalendar = () => {
               <EventDetails>
                 {selectedEvent.time && (
                   <EventDetail>
-                    <strong>🕐 시간</strong>
+                    <strong>시간</strong>
                     <span>{selectedEvent.time}</span>
                   </EventDetail>
                 )}
                 {selectedEvent.place && (
                   <EventDetail>
-                    <strong>📍 장소</strong>
+                    <strong>장소</strong>
                     <span>{selectedEvent.place}</span>
                   </EventDetail>
                 )}
                 <EventDetail>
-                  <strong>📅 날짜</strong>
+                  <strong>날짜</strong>
                   <span>{new Date(selectedEvent.date).toLocaleDateString('ko-KR', {
                     year: 'numeric',
                     month: 'long',

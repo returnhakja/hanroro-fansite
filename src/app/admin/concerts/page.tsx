@@ -610,7 +610,7 @@ const Title = styled.h1`
 
 const AddButton = styled.button`
   padding: 0.75rem 1.5rem;
-  background: #667eea;
+  background: #8B7355;
   color: white;
   border: none;
   border-radius: 8px;
@@ -619,7 +619,7 @@ const AddButton = styled.button`
   transition: background 0.2s;
 
   &:hover {
-    background: #5568d3;
+    background: #6B5740;
   }
 `;
 
@@ -647,7 +647,7 @@ const SidebarTitle = styled.h2`
 
 const ConcertCard = styled.div<{ $active: boolean }>`
   padding: 1rem;
-  border: 2px solid ${(props) => (props.$active ? '#667eea' : '#e9ecef')};
+  border: 2px solid ${(props) => (props.$active ? '#8B7355' : '#e9ecef')};
   border-radius: 8px;
   margin-bottom: 1rem;
   cursor: pointer;
@@ -655,7 +655,7 @@ const ConcertCard = styled.div<{ $active: boolean }>`
   background: ${(props) => (props.$active ? '#f8f9ff' : 'white')};
 
   &:hover {
-    border-color: #667eea;
+    border-color: #8B7355;
   }
 `;
 
@@ -674,7 +674,7 @@ const ConcertInfo = styled.div`
 const ActiveBadge = styled.span`
   display: inline-block;
   padding: 0.25rem 0.5rem;
-  background: #667eea;
+  background: #8B7355;
   color: white;
   border-radius: 4px;
   font-size: 0.75rem;
@@ -690,7 +690,7 @@ const ConcertActions = styled.div`
 
 const SmallButton = styled.button<{ $danger?: boolean }>`
   padding: 0.4rem 0.8rem;
-  background: ${(props) => (props.$danger ? '#e74c3c' : '#95a5a6')};
+  background: ${(props) => (props.$danger ? '#C75B5B' : '#95a5a6')};
   color: white;
   border: none;
   border-radius: 4px;
@@ -699,7 +699,7 @@ const SmallButton = styled.button<{ $danger?: boolean }>`
   transition: background 0.2s;
 
   &:hover {
-    background: ${(props) => (props.$danger ? '#c0392b' : '#7f8c8d')};
+    background: ${(props) => (props.$danger ? '#A84848' : '#7f8c8d')};
   }
 `;
 
@@ -748,7 +748,7 @@ const SetlistHeader = styled.div`
 const SetlistDay = styled.div`
   font-size: 1.25rem;
   font-weight: 700;
-  color: #667eea;
+  color: #8B7355;
 `;
 
 const SetlistDate = styled.div`
@@ -780,7 +780,7 @@ const SongItem = styled.div`
 const SongOrder = styled.div`
   width: 24px;
   height: 24px;
-  background: #667eea;
+  background: #8B7355;
   color: white;
   border-radius: 50%;
   display: flex;
@@ -888,7 +888,7 @@ const Input = styled.input`
 
   &:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: #8B7355;
   }
 `;
 
@@ -903,7 +903,7 @@ const SongInputRow = styled.div`
 const SongInputNumber = styled.div`
   width: 32px;
   height: 32px;
-  background: #667eea;
+  background: #8B7355;
   color: white;
   border-radius: 50%;
   display: flex;
@@ -915,7 +915,7 @@ const SongInputNumber = styled.div`
 
 const RemoveSongButton = styled.button`
   padding: 0.5rem;
-  background: #e74c3c;
+  background: #C75B5B;
   color: white;
   border: none;
   border-radius: 4px;
@@ -924,15 +924,15 @@ const RemoveSongButton = styled.button`
   transition: background 0.2s;
 
   &:hover {
-    background: #c0392b;
+    background: #A84848;
   }
 `;
 
 const AddSongButton = styled.button`
   padding: 0.75rem;
   background: #f8f9fa;
-  color: #667eea;
-  border: 2px dashed #667eea;
+  color: #8B7355;
+  border: 2px dashed #8B7355;
   border-radius: 6px;
   font-weight: 600;
   cursor: pointer;
@@ -968,7 +968,7 @@ const CancelButton = styled.button`
 
 const SubmitButton = styled.button`
   padding: 0.75rem 1.5rem;
-  background: #667eea;
+  background: #8B7355;
   color: white;
   border: none;
   border-radius: 6px;
@@ -977,6 +977,6 @@ const SubmitButton = styled.button`
   transition: background 0.2s;
 
   &:hover {
-    background: #5568d3;
+    background: #6B5740;
   }
 `;

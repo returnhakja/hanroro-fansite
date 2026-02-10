@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import styled from 'styled-components';
+import { theme } from '@/styles/theme';
 
 interface CommentFormProps {
   boardId: string;
@@ -114,11 +115,11 @@ export default function CommentForm({
 }
 
 const FormContainer = styled.div<{ $isReply: boolean }>`
-  background: ${(props) => (props.$isReply ? '#fff' : '#f8f5f2')};
+  background: ${(props) => (props.$isReply ? theme.colors.surface : theme.colors.surfaceAlt)};
   padding: ${(props) => (props.$isReply ? '1rem' : '1.5rem')};
-  border-radius: 8px;
+  border-radius: ${theme.borderRadius.md};
   margin-bottom: ${(props) => (props.$isReply ? '1rem' : '2rem')};
-  ${(props) => props.$isReply && 'border: 1px solid #ddd;'}
+  ${(props) => props.$isReply && `border: 1px solid ${theme.colors.border};`}
 `;
 
 const Form = styled.form`
@@ -130,22 +131,23 @@ const Form = styled.form`
 const AuthorInput = styled.input`
   width: 200px;
   padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid ${theme.colors.border};
+  border-radius: ${theme.borderRadius.sm};
   font-size: 1rem;
   font-family: inherit;
+  background: ${theme.colors.surface};
 
   &:focus {
     outline: none;
-    border-color: #6a4c93;
+    border-color: ${theme.colors.accent};
   }
 
   &:disabled {
-    background: #f5f5f5;
+    background: ${theme.colors.surfaceAlt};
     cursor: not-allowed;
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: ${theme.breakpoints.mobile}) {
     width: 100%;
   }
 `;
@@ -153,20 +155,21 @@ const AuthorInput = styled.input`
 const TextArea = styled.textarea`
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid ${theme.colors.border};
+  border-radius: ${theme.borderRadius.sm};
   font-size: 1rem;
   resize: vertical;
   font-family: inherit;
   line-height: 1.6;
+  background: ${theme.colors.surface};
 
   &:focus {
     outline: none;
-    border-color: #6a4c93;
+    border-color: ${theme.colors.accent};
   }
 
   &:disabled {
-    background: #f5f5f5;
+    background: ${theme.colors.surfaceAlt};
     cursor: not-allowed;
   }
 `;
@@ -178,8 +181,8 @@ const Footer = styled.div`
 `;
 
 const CharCount = styled.span<{ $isOver: boolean }>`
-  font-size: 0.875rem;
-  color: ${(props) => (props.$isOver ? '#ff4444' : '#999')};
+  font-size: ${theme.typography.small.fontSize};
+  color: ${(props) => (props.$isOver ? theme.colors.error : theme.colors.textTertiary)};
 `;
 
 const ButtonGroup = styled.div`
@@ -190,10 +193,10 @@ const ButtonGroup = styled.div`
 const Button = styled.button`
   padding: 0.625rem 1.25rem;
   border: none;
-  border-radius: 4px;
+  border-radius: ${theme.borderRadius.sm};
   font-size: 1rem;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all ${theme.transitions.fast};
   font-weight: 500;
 
   &:disabled {
@@ -203,19 +206,19 @@ const Button = styled.button`
 `;
 
 const CancelButton = styled(Button)`
-  background: #f0f0f0;
-  color: #666;
+  background: ${theme.colors.surfaceWarm};
+  color: ${theme.colors.textSecondary};
 
   &:hover:not(:disabled) {
-    background: #e0e0e0;
+    background: ${theme.colors.border};
   }
 `;
 
 const SubmitButton = styled(Button)`
-  background: #6a4c93;
-  color: white;
+  background: ${theme.colors.primary};
+  color: ${theme.colors.textLight};
 
   &:hover:not(:disabled) {
-    background: #5a3c83;
+    background: ${theme.colors.primaryDark};
   }
 `;

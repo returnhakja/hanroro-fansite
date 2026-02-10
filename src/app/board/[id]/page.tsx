@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import styled from 'styled-components';
 import Spinner from '@/components/ui/Spinner';
 import CommentSection from '@/components/features/board/CommentSection';
+import { theme } from '@/styles/theme';
 
 interface BoardPost {
   _id: string;
@@ -96,9 +97,11 @@ export default function BoardDetailPage({ params }: { params: Promise<{ id: stri
       <Header>
         <Title>{post.title}</Title>
         <Meta>
-          <span>작성자: {post.author}</span>
-          <span>조회수: {post.views}</span>
-          <span>좋아요: {post.likes}</span>
+          <span>{post.author}</span>
+          <Separator>/</Separator>
+          <span>조회 {post.views}</span>
+          <Separator>/</Separator>
+          <span>좋아요 {post.likes}</span>
         </Meta>
       </Header>
 
@@ -118,7 +121,7 @@ export default function BoardDetailPage({ params }: { params: Promise<{ id: stri
 
       <Actions>
         <LikeButton onClick={handleLike}>
-          ❤️ 좋아요 ({post.likes})
+          좋아요 ({post.likes})
         </LikeButton>
         <DeleteButton onClick={handleDelete}>삭제</DeleteButton>
         <BackButton onClick={() => router.push('/board')}>목록</BackButton>
@@ -132,32 +135,44 @@ export default function BoardDetailPage({ params }: { params: Promise<{ id: stri
 const Container = styled.div`
   max-width: 800px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 3rem 2rem;
+  background: ${theme.colors.background};
+  min-height: 60vh;
 `;
 
 const Header = styled.div`
-  border-bottom: 2px solid #6a4c93;
-  padding-bottom: 1rem;
-  margin-bottom: 2rem;
+  border-bottom: 1px solid ${theme.colors.border};
+  padding-bottom: 1.25rem;
+  margin-bottom: 2.5rem;
 `;
 
 const Title = styled.h1`
-  font-size: 2rem;
-  color: #333;
-  margin-bottom: 1rem;
+  font-family: ${theme.typography.fontHeading};
+  font-size: 2.25rem;
+  font-weight: ${theme.typography.h2.fontWeight};
+  line-height: ${theme.typography.h2.lineHeight};
+  color: ${theme.colors.textPrimary};
+  margin: 0 0 1rem 0;
 `;
 
 const Meta = styled.div`
   display: flex;
-  gap: 1.5rem;
-  color: #666;
-  font-size: 0.9rem;
+  align-items: center;
+  gap: 0.625rem;
+  color: ${theme.colors.textTertiary};
+  font-size: ${theme.typography.small.fontSize};
+`;
+
+const Separator = styled.span`
+  color: ${theme.colors.borderLight};
+  font-size: 0.75rem;
 `;
 
 const Content = styled.div`
-  line-height: 1.8;
-  color: #333;
-  font-size: 1.1rem;
+  line-height: ${theme.typography.bodyLarge.lineHeight};
+  color: ${theme.colors.textPrimary};
+  font-size: ${theme.typography.bodyLarge.fontSize};
+  font-family: ${theme.typography.fontBody};
   white-space: pre-wrap;
   margin-bottom: 3rem;
   min-height: 200px;
@@ -173,71 +188,21 @@ const ImagesGrid = styled.div`
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 1rem;
 
-  @media (max-width: 768px) {
+  @media (max-width: ${theme.breakpoints.mobile}) {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   }
 `;
 
 const ImageWrapper = styled.div`
   aspect-ratio: 1;
-  border-radius: 8px;
+  border-radius: ${theme.borderRadius.md};
   overflow: hidden;
-  border: 1px solid #e0e0e0;
+  border: 1px solid ${theme.colors.border};
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: transform ${theme.transitions.normal};
 
   &:hover {
     transform: scale(1.05);
-  }
-`;
-
-const Actions = styled.div`
-  display: flex;
-  gap: 1rem;
-  padding-top: 2rem;
-  border-top: 1px solid #eee;
-`;
-
-const LikeButton = styled.button`
-  padding: 0.75rem 1.5rem;
-  background: #ff6b9d;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  cursor: pointer;
-
-  &:hover {
-    background: #ff4081;
-  }
-`;
-
-const DeleteButton = styled.button`
-  padding: 0.75rem 1.5rem;
-  background: #ff4444;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  cursor: pointer;
-
-  &:hover {
-    background: #cc0000;
-  }
-`;
-
-const BackButton = styled.button`
-  padding: 0.75rem 1.5rem;
-  background: #ddd;
-  color: #333;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  cursor: pointer;
-  margin-left: auto;
-
-  &:hover {
-    background: #ccc;
   }
 `;
 
@@ -245,4 +210,61 @@ const PostImage = styled.img`
   width: 100%;
   height: 100%;
   object-fit: cover;
+`;
+
+const Actions = styled.div`
+  display: flex;
+  gap: 0.75rem;
+  padding-top: 2rem;
+  border-top: 1px solid ${theme.colors.border};
+`;
+
+const LikeButton = styled.button`
+  padding: 0.625rem 1.5rem;
+  background: ${theme.colors.accent};
+  color: ${theme.colors.textLight};
+  border: none;
+  border-radius: ${theme.borderRadius.sm};
+  font-size: ${theme.typography.small.fontSize};
+  font-weight: 500;
+  cursor: pointer;
+  transition: all ${theme.transitions.normal};
+
+  &:hover {
+    background: ${theme.colors.accentDark};
+  }
+`;
+
+const DeleteButton = styled.button`
+  padding: 0.625rem 1.5rem;
+  background: transparent;
+  color: ${theme.colors.error};
+  border: 1px solid ${theme.colors.error};
+  border-radius: ${theme.borderRadius.sm};
+  font-size: ${theme.typography.small.fontSize};
+  font-weight: 500;
+  cursor: pointer;
+  transition: all ${theme.transitions.normal};
+
+  &:hover {
+    background: ${theme.colors.error};
+    color: ${theme.colors.textLight};
+  }
+`;
+
+const BackButton = styled.button`
+  padding: 0.625rem 1.5rem;
+  background: transparent;
+  color: ${theme.colors.primary};
+  border: 1px solid ${theme.colors.primary};
+  border-radius: ${theme.borderRadius.sm};
+  font-size: ${theme.typography.small.fontSize};
+  font-weight: 500;
+  cursor: pointer;
+  margin-left: auto;
+  transition: all ${theme.transitions.normal};
+
+  &:hover {
+    background: ${theme.colors.surfaceAlt};
+  }
 `;

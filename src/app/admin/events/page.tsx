@@ -366,7 +366,7 @@ const Title = styled.h1`
 
 const AddButton = styled.button`
   padding: 0.75rem 1.5rem;
-  background: #667eea;
+  background: #8B7355;
   color: white;
   border: none;
   border-radius: 8px;
@@ -375,7 +375,7 @@ const AddButton = styled.button`
   transition: background 0.2s;
 
   &:hover {
-    background: #5568d3;
+    background: #6B5740;
   }
 `;
 
@@ -450,7 +450,7 @@ const ActionButtons = styled.div`
 
 const EditButton = styled.button`
   padding: 0.5rem 1rem;
-  background: #667eea;
+  background: #8B7355;
   color: white;
   border: none;
   border-radius: 6px;
@@ -459,13 +459,13 @@ const EditButton = styled.button`
   transition: background 0.2s;
 
   &:hover {
-    background: #5568d3;
+    background: #6B5740;
   }
 `;
 
 const DeleteButton = styled.button`
   padding: 0.5rem 1rem;
-  background: #e74c3c;
+  background: #C75B5B;
   color: white;
   border: none;
   border-radius: 6px;
@@ -474,7 +474,7 @@ const DeleteButton = styled.button`
   transition: background 0.2s;
 
   &:hover {
-    background: #c0392b;
+    background: #A84848;
   }
 `;
 
@@ -566,7 +566,7 @@ const Input = styled.input`
 
   &:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: #8B7355;
   }
 `;
 
@@ -579,7 +579,7 @@ const Select = styled.select`
 
   &:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: #8B7355;
   }
 `;
 
@@ -607,7 +607,7 @@ const CancelButton = styled.button`
 
 const SubmitButton = styled.button`
   padding: 0.75rem 1.5rem;
-  background: #667eea;
+  background: #8B7355;
   color: white;
   border: none;
   border-radius: 6px;
@@ -616,6 +616,6 @@ const SubmitButton = styled.button`
   transition: background 0.2s;
 
   &:hover {
-    background: #5568d3;
+    background: #6B5740;
   }
 `;

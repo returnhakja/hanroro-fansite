@@ -82,7 +82,7 @@ const Container = styled.div`
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #8B7355 0%, #6B5740 100%);
 `;
 
 const LoginBox = styled.div`
@@ -123,13 +123,13 @@ const Input = styled.input`
 
   &:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: #8B7355;
   }
 `;
 
 const Button = styled.button`
   padding: 1rem;
-  background: #667eea;
+  background: #8B7355;
   color: white;
   border: none;
   border-radius: 6px;
@@ -140,7 +140,7 @@ const Button = styled.button`
   transition: background 0.2s;
 
   &:hover:not(:disabled) {
-    background: #5568d3;
+    background: #6B5740;
   }
 
   &:disabled {
@@ -150,7 +150,7 @@ const Button = styled.button`
 `;
 
 const Error = styled.div`
-  color: #e74c3c;
+  color: #C75B5B;
   font-size: 0.9rem;
   text-align: center;
   padding: 0.75rem;

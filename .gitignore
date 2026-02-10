@@ -4,7 +4,7 @@
 /node_modules
 /.pnp
 .pnp.js
-.md
+nul
 
 node_modules/
 .env
@@ -28,6 +28,7 @@ src/pages-legacy/
 src/*.legacy
 
 CLAUDE.md
+AGENTS.md
 .claude/settings.local.json
 
 # misc
