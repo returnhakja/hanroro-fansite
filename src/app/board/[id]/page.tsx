@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import styled from 'styled-components';
 import Spinner from '@/components/ui/Spinner';
 import CommentSection from '@/components/features/board/CommentSection';
@@ -12,18 +13,27 @@ interface BoardPost {
   title: string;
   content: string;
   author: string;
+  userId?: string;
   createdAt: string;
   views: number;
   likes: number;
+  likedBy?: string[];
   imageUrls?: string[];
 }
 
 export default function BoardDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
+  const { data: session } = useSession();
   const [post, setPost] = useState<BoardPost | null>(null);
   const [loading, setLoading] = useState(true);
   const [postId, setPostId] = useState<string>('');
   const hasFetched = useRef(false);
+
+  // 수정 모드 상태
+  const [editing, setEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState('');
+  const [editContent, setEditContent] = useState('');
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (hasFetched.current) return;
@@ -54,16 +64,36 @@ export default function BoardDetailPage({ params }: { params: Promise<{ id: stri
     }
   };
 
+  const isAuthor = post?.userId && session?.user?.id && post.userId === session.user.id;
+  const isLiked = post?.likedBy?.includes(session?.user?.id || '');
+
   const handleLike = async () => {
     if (!postId) return;
+
+    if (!session?.user?.id) {
+      alert('로그인이 필요합니다');
+      return;
+    }
 
     try {
       const response = await fetch(`/api/board/${postId}/like`, {
         method: 'POST',
       });
       const data = await response.json();
+
+      if (!response.ok) {
+        alert(data.error || '좋아요에 실패했습니다');
+        return;
+      }
+
       if (post) {
-        setPost({ ...post, likes: data.likes });
+        setPost({
+          ...post,
+          likes: data.likes,
+          likedBy: data.liked
+            ? [...(post.likedBy || []), session.user.id]
+            : (post.likedBy || []).filter((id) => id !== session.user.id),
+        });
       }
     } catch (error) {
       console.error('좋아요 오류:', error);
@@ -82,10 +112,60 @@ export default function BoardDetailPage({ params }: { params: Promise<{ id: stri
       if (response.ok) {
         alert('삭제되었습니다');
         router.push('/board');
+      } else {
+        const data = await response.json();
+        alert(data.error || '삭제에 실패했습니다');
       }
     } catch (error) {
       console.error('삭제 오류:', error);
       alert('삭제에 실패했습니다');
+    }
+  };
+
+  const startEdit = () => {
+    if (!post) return;
+    setEditTitle(post.title);
+    setEditContent(post.content);
+    setEditing(true);
+  };
+
+  const cancelEdit = () => {
+    setEditing(false);
+    setEditTitle('');
+    setEditContent('');
+  };
+
+  const handleSave = async () => {
+    if (!postId || !editTitle.trim() || !editContent.trim()) {
+      alert('제목과 내용을 입력해주세요');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const response = await fetch(`/api/board/${postId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: editTitle,
+          content: editContent,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(data.error || '수정에 실패했습니다');
+        return;
+      }
+
+      setPost(data);
+      setEditing(false);
+    } catch (error) {
+      console.error('수정 오류:', error);
+      alert('수정에 실패했습니다');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -95,7 +175,15 @@ export default function BoardDetailPage({ params }: { params: Promise<{ id: stri
   return (
     <Container>
       <Header>
-        <Title>{post.title}</Title>
+        {editing ? (
+          <EditTitleInput
+            value={editTitle}
+            onChange={(e) => setEditTitle(e.target.value)}
+            placeholder="제목을 입력하세요"
+          />
+        ) : (
+          <Title>{post.title}</Title>
+        )}
         <Meta>
           <span>{post.author}</span>
           <Separator>/</Separator>
@@ -105,9 +193,17 @@ export default function BoardDetailPage({ params }: { params: Promise<{ id: stri
         </Meta>
       </Header>
 
-      <Content>{post.content}</Content>
+      {editing ? (
+        <EditContentArea
+          value={editContent}
+          onChange={(e) => setEditContent(e.target.value)}
+          placeholder="내용을 입력하세요"
+        />
+      ) : (
+        <Content>{post.content}</Content>
+      )}
 
-      {post.imageUrls && post.imageUrls.length > 0 && (
+      {!editing && post.imageUrls && post.imageUrls.length > 0 && (
         <ImagesSection>
           <ImagesGrid>
             {post.imageUrls.map((url, index) => (
@@ -120,11 +216,29 @@ export default function BoardDetailPage({ params }: { params: Promise<{ id: stri
       )}
 
       <Actions>
-        <LikeButton onClick={handleLike}>
-          좋아요 ({post.likes})
-        </LikeButton>
-        <DeleteButton onClick={handleDelete}>삭제</DeleteButton>
-        <BackButton onClick={() => router.push('/board')}>목록</BackButton>
+        {editing ? (
+          <>
+            <SaveButton onClick={handleSave} disabled={saving}>
+              {saving ? '저장 중...' : '저장'}
+            </SaveButton>
+            <CancelButton onClick={cancelEdit} disabled={saving}>
+              취소
+            </CancelButton>
+          </>
+        ) : (
+          <>
+            <LikeButton onClick={handleLike} $liked={!!isLiked}>
+              {isLiked ? '좋아요 취소' : '좋아요'} ({post.likes})
+            </LikeButton>
+            {isAuthor && (
+              <>
+                <EditButton onClick={startEdit}>수정</EditButton>
+                <DeleteButton onClick={handleDelete}>삭제</DeleteButton>
+              </>
+            )}
+            <BackButton onClick={() => router.push('/board')}>목록</BackButton>
+          </>
+        )}
       </Actions>
 
       {postId && <CommentSection boardId={postId} />}
@@ -155,6 +269,24 @@ const Title = styled.h1`
   margin: 0 0 1rem 0;
 `;
 
+const EditTitleInput = styled.input`
+  width: 100%;
+  font-family: ${theme.typography.fontHeading};
+  font-size: 2.25rem;
+  font-weight: ${theme.typography.h2.fontWeight};
+  color: ${theme.colors.textPrimary};
+  border: 1px solid ${theme.colors.border};
+  border-radius: ${theme.borderRadius.sm};
+  padding: 0.5rem;
+  margin: 0 0 1rem 0;
+  background: ${theme.colors.surface};
+
+  &:focus {
+    outline: none;
+    border-color: ${theme.colors.accent};
+  }
+`;
+
 const Meta = styled.div`
   display: flex;
   align-items: center;
@@ -176,6 +308,26 @@ const Content = styled.div`
   white-space: pre-wrap;
   margin-bottom: 3rem;
   min-height: 200px;
+`;
+
+const EditContentArea = styled.textarea`
+  width: 100%;
+  min-height: 300px;
+  line-height: ${theme.typography.bodyLarge.lineHeight};
+  color: ${theme.colors.textPrimary};
+  font-size: ${theme.typography.bodyLarge.fontSize};
+  font-family: ${theme.typography.fontBody};
+  border: 1px solid ${theme.colors.border};
+  border-radius: ${theme.borderRadius.sm};
+  padding: 1rem;
+  margin-bottom: 3rem;
+  background: ${theme.colors.surface};
+  resize: vertical;
+
+  &:focus {
+    outline: none;
+    border-color: ${theme.colors.accent};
+  }
 `;
 
 const ImagesSection = styled.div`
@@ -219,9 +371,9 @@ const Actions = styled.div`
   border-top: 1px solid ${theme.colors.border};
 `;
 
-const LikeButton = styled.button`
+const LikeButton = styled.button<{ $liked: boolean }>`
   padding: 0.625rem 1.5rem;
-  background: ${theme.colors.accent};
+  background: ${(props) => (props.$liked ? theme.colors.accentDark : theme.colors.accent)};
   color: ${theme.colors.textLight};
   border: none;
   border-radius: ${theme.borderRadius.sm};
@@ -231,7 +383,24 @@ const LikeButton = styled.button`
   transition: all ${theme.transitions.normal};
 
   &:hover {
-    background: ${theme.colors.accentDark};
+    background: ${(props) => (props.$liked ? theme.colors.accent : theme.colors.accentDark)};
+  }
+`;
+
+const EditButton = styled.button`
+  padding: 0.625rem 1.5rem;
+  background: transparent;
+  color: ${theme.colors.primary};
+  border: 1px solid ${theme.colors.primary};
+  border-radius: ${theme.borderRadius.sm};
+  font-size: ${theme.typography.small.fontSize};
+  font-weight: 500;
+  cursor: pointer;
+  transition: all ${theme.transitions.normal};
+
+  &:hover {
+    background: ${theme.colors.primary};
+    color: ${theme.colors.textLight};
   }
 `;
 
@@ -249,6 +418,48 @@ const DeleteButton = styled.button`
   &:hover {
     background: ${theme.colors.error};
     color: ${theme.colors.textLight};
+  }
+`;
+
+const SaveButton = styled.button`
+  padding: 0.625rem 1.5rem;
+  background: ${theme.colors.accent};
+  color: ${theme.colors.textLight};
+  border: none;
+  border-radius: ${theme.borderRadius.sm};
+  font-size: ${theme.typography.small.fontSize};
+  font-weight: 500;
+  cursor: pointer;
+  transition: all ${theme.transitions.normal};
+
+  &:hover:not(:disabled) {
+    background: ${theme.colors.accentDark};
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+const CancelButton = styled.button`
+  padding: 0.625rem 1.5rem;
+  background: transparent;
+  color: ${theme.colors.textSecondary};
+  border: 1px solid ${theme.colors.border};
+  border-radius: ${theme.borderRadius.sm};
+  font-size: ${theme.typography.small.fontSize};
+  font-weight: 500;
+  cursor: pointer;
+  transition: all ${theme.transitions.normal};
+
+  &:hover:not(:disabled) {
+    background: ${theme.colors.surfaceAlt};
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 `;
 

@@ -1,10 +1,17 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import Link from 'next/link';
 import { theme } from '@/styles/theme';
 
 const Footer = () => {
+  const [year, setYear] = useState<number | null>(null);
+
+  useEffect(() => {
+    setYear(new Date().getFullYear());
+  }, []);
+
   return (
     <FooterContainer>
       <FooterInner>
@@ -59,7 +66,7 @@ const Footer = () => {
 
         <FooterDivider />
         <FooterCopyright>
-          &copy; {new Date().getFullYear()} HANRORO FANSITE. All rights reserved.
+          &copy; {year ?? ''} HANRORO FANSITE. All rights reserved.
         </FooterCopyright>
       </FooterInner>
     </FooterContainer>

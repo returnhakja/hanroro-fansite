@@ -1,17 +1,33 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import styled from 'styled-components';
 import Spinner from '@/components/ui/Spinner';
 import { theme } from '@/styles/theme';
 
 export default function BoardWritePage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [author, setAuthor] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (status === 'loading') return;
+    if (!session) {
+      alert('로그인이 필요합니다');
+      router.push('/board');
+    }
+  }, [session, status, router]);
+
+  useEffect(() => {
+    if (session?.user) {
+      setAuthor(session.user.nickname || session.user.name || '');
+    }
+  }, [session]);
 
   // 이미지 첨부 관련 상태
   const [imageFiles, setImageFiles] = useState<File[]>([]);
@@ -112,6 +128,8 @@ export default function BoardWritePage() {
             value={author}
             onChange={(e) => setAuthor(e.target.value)}
             placeholder="작성자명을 입력하세요"
+            readOnly={!!(session?.user?.nickname || session?.user?.name)}
+            style={(session?.user?.nickname || session?.user?.name) ? { backgroundColor: theme.colors.surfaceAlt } : undefined}
           />
         </FormGroup>
 

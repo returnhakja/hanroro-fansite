@@ -3,11 +3,13 @@
 import styled from 'styled-components';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { useSession, signIn, signOut } from 'next-auth/react';
 import { theme } from '@/styles/theme';
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { data: session, status } = useSession();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -40,7 +42,43 @@ const Header = () => {
         <NavLink href="/board" onClick={() => setMenuOpen(false)}>
           Board
         </NavLink>
+
+        <MobileAuthSection>
+          {status === 'loading' ? null : session ? (
+            <>
+              <MobileUserLink href="/mypage" onClick={() => setMenuOpen(false)}>
+                {session.user?.image && (
+                  <UserImage src={session.user.image} alt="프로필" />
+                )}
+                <span>{session.user?.nickname || session.user?.name}</span>
+              </MobileUserLink>
+              <AuthButton onClick={() => { signOut(); setMenuOpen(false); }}>
+                로그아웃
+              </AuthButton>
+            </>
+          ) : (
+            <AuthButton onClick={() => { signIn('google'); setMenuOpen(false); }}>
+              Google 로그인
+            </AuthButton>
+          )}
+        </MobileAuthSection>
       </Nav>
+
+      <DesktopAuthSection>
+        {status === 'loading' ? null : session ? (
+          <>
+            <DesktopUserLink href="/mypage">
+              {session.user?.image && (
+                <UserImage src={session.user.image} alt="프로필" />
+              )}
+              <UserName>{session.user?.nickname || session.user?.name}</UserName>
+            </DesktopUserLink>
+            <AuthButton onClick={() => signOut()}>로그아웃</AuthButton>
+          </>
+        ) : (
+          <AuthButton onClick={() => signIn('google')}>로그인</AuthButton>
+        )}
+      </DesktopAuthSection>
     </HeaderContainer>
   );
 };
@@ -197,6 +235,83 @@ const NavLink = styled(Link)`
     &::after {
       display: none;
     }
+  }
+`;
+
+const DesktopAuthSection = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    display: none;
+  }
+`;
+
+const MobileAuthSection = styled.div`
+  display: none;
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: auto;
+    padding-top: 1.5rem;
+    border-top: 1px solid ${theme.colors.borderLight};
+    width: 100%;
+  }
+`;
+
+const MobileUserLink = styled(Link)`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: ${theme.colors.textPrimary};
+  text-decoration: none;
+
+  &:hover {
+    color: ${theme.colors.accent};
+  }
+`;
+
+const DesktopUserLink = styled(Link)`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+
+  &:hover span {
+    color: ${theme.colors.accent};
+  }
+`;
+
+const UserImage = styled.img`
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+`;
+
+const UserName = styled.span`
+  font-size: ${theme.typography.small.fontSize};
+  color: ${theme.colors.textSecondary};
+`;
+
+const AuthButton = styled.button`
+  padding: 0.4rem 1rem;
+  background: ${theme.colors.primary};
+  color: ${theme.colors.textLight};
+  border: none;
+  border-radius: ${theme.borderRadius.full};
+  font-size: ${theme.typography.small.fontSize};
+  font-family: ${theme.typography.fontBody};
+  cursor: pointer;
+  transition: background ${theme.transitions.normal};
+  white-space: nowrap;
+
+  &:hover {
+    background: ${theme.colors.primaryDark};
   }
 `;
 

@@ -4,6 +4,7 @@ export interface IComment extends Document {
   boardId: Types.ObjectId;
   content: string;
   author: string;
+  userId?: string;
   parentId: Types.ObjectId | null;
   depth: number;
   createdAt: Date;
@@ -28,6 +29,7 @@ const commentSchema = new Schema<IComment>({
     required: [true, '작성자명을 입력해주세요'],
     maxlength: [50, '작성자명은 50자를 초과할 수 없습니다'],
   },
+  userId: { type: String, default: null },
   parentId: {
     type: Schema.Types.ObjectId,
     ref: 'Comment',

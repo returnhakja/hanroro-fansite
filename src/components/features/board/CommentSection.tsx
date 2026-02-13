@@ -11,6 +11,7 @@ interface Comment {
   boardId: string;
   content: string;
   author: string;
+  userId?: string;
   parentId: string | null;
   depth: number;
   createdAt: string;

@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSession, signIn } from 'next-auth/react';
 import styled from 'styled-components';
 import { theme } from '@/styles/theme';
 
@@ -21,11 +22,18 @@ export default function CommentForm({
   buttonText = '댓글 작성',
   onCancel,
 }: CommentFormProps) {
+  const { data: session } = useSession();
   const [content, setContent] = useState('');
   const [author, setAuthor] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   const isReply = !!parentId;
+
+  useEffect(() => {
+    if (session?.user) {
+      setAuthor(session.user.nickname || session.user.name || '');
+    }
+  }, [session]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,6 +81,18 @@ export default function CommentForm({
     }
   };
 
+  if (!session) {
+    return (
+      <FormContainer $isReply={isReply}>
+        <LoginPrompt>
+          댓글을 작성하려면{' '}
+          <LoginLink onClick={() => signIn('google')}>로그인</LoginLink>
+          해주세요.
+        </LoginPrompt>
+      </FormContainer>
+    );
+  }
+
   return (
     <FormContainer $isReply={isReply}>
       <Form onSubmit={handleSubmit}>
@@ -84,6 +104,8 @@ export default function CommentForm({
             placeholder="작성자명"
             maxLength={50}
             disabled={submitting}
+            readOnly={!!(session.user?.nickname || session.user?.name)}
+            style={(session.user?.nickname || session.user?.name) ? { backgroundColor: theme.colors.surfaceAlt } : undefined}
           />
         )}
         <TextArea
@@ -221,4 +243,23 @@ const SubmitButton = styled(Button)`
   &:hover:not(:disabled) {
     background: ${theme.colors.primaryDark};
   }
+`;
+
+const LoginPrompt = styled.p`
+  color: ${theme.colors.textSecondary};
+  font-size: 0.95rem;
+  text-align: center;
+  padding: 1rem;
+  margin: 0;
+`;
+
+const LoginLink = styled.button`
+  background: none;
+  border: none;
+  color: ${theme.colors.accent};
+  cursor: pointer;
+  font-size: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  padding: 0;
 `;

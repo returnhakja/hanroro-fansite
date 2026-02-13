@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/lib/auth/auth';
 import connectDB from '@/lib/db/mongoose';
 import Comment from '@/lib/db/models/Comment';
 import Board from '@/lib/db/models/Board';
@@ -55,6 +56,14 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: '로그인이 필요합니다' },
+        { status: 401 }
+      );
+    }
+
     const { id } = await params;
     const body = await request.json();
     const { content, author, parentId } = body;
@@ -136,6 +145,7 @@ export async function POST(
       boardId: id,
       content: content.trim(),
       author: author.trim(),
+      userId: session.user.id || null,
       parentId: parentId || null,
       depth,
     });

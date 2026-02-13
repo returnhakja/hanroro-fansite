@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import styled from 'styled-components';
 import { theme } from '@/styles/theme';
 import { formatRelativeTime } from '@/lib/utils/time';
@@ -11,6 +12,7 @@ interface Comment {
   boardId: string;
   content: string;
   author: string;
+  userId?: string;
   parentId: string | null;
   depth: number;
   createdAt: string;
@@ -32,8 +34,21 @@ export default function CommentItem({
   onDelete,
   isReply = false,
 }: CommentItemProps) {
+  const { data: session } = useSession();
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [timeText, setTimeText] = useState('');
+
+  // 수정 모드 상태
+  const [editing, setEditing] = useState(false);
+  const [editContent, setEditContent] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const isAuthor = comment.userId && session?.user?.id && comment.userId === session.user.id;
+
+  useEffect(() => {
+    setTimeText(formatRelativeTime(comment.createdAt));
+  }, [comment.createdAt]);
 
   const handleDelete = async () => {
     if (!confirm('댓글을 삭제하시겠습니까?')) {
@@ -61,6 +76,45 @@ export default function CommentItem({
     }
   };
 
+  const startEdit = () => {
+    setEditContent(comment.content);
+    setEditing(true);
+  };
+
+  const cancelEdit = () => {
+    setEditing(false);
+    setEditContent('');
+  };
+
+  const handleSave = async () => {
+    if (!editContent.trim()) {
+      alert('댓글 내용을 입력해주세요');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const response = await fetch(`/api/board/comments/${comment._id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: editContent }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || '댓글 수정에 실패했습니다');
+      }
+
+      setEditing(false);
+      onReplySubmit(); // 댓글 목록 새로고침
+    } catch (error) {
+      console.error('댓글 수정 오류:', error);
+      alert(error instanceof Error ? error.message : '댓글 수정에 실패했습니다');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleReplySuccess = () => {
     setShowReplyForm(false);
     onReplySubmit();
@@ -76,16 +130,35 @@ export default function CommentItem({
             <>
               <AuthorName>{comment.author}</AuthorName>
               <Separator>&middot;</Separator>
-              <TimeStamp>{formatRelativeTime(comment.createdAt)}</TimeStamp>
+              <TimeStamp>{timeText}</TimeStamp>
             </>
           )}
         </CommentHeader>
 
-        <CommentContent $isDeleted={comment.deleted}>
-          {comment.content}
-        </CommentContent>
+        {editing ? (
+          <EditArea>
+            <EditTextarea
+              value={editContent}
+              onChange={(e) => setEditContent(e.target.value)}
+              placeholder="댓글 내용을 입력하세요"
+              maxLength={500}
+            />
+            <EditActions>
+              <SaveButton onClick={handleSave} disabled={saving}>
+                {saving ? '저장 중...' : '저장'}
+              </SaveButton>
+              <CancelButton onClick={cancelEdit} disabled={saving}>
+                취소
+              </CancelButton>
+            </EditActions>
+          </EditArea>
+        ) : (
+          <CommentContent $isDeleted={comment.deleted}>
+            {comment.content}
+          </CommentContent>
+        )}
 
-        {!comment.deleted && (
+        {!comment.deleted && !editing && (
           <CommentActions>
             {!isReply && (
               <ActionButton
@@ -95,9 +168,14 @@ export default function CommentItem({
                 답글
               </ActionButton>
             )}
-            <ActionButton onClick={handleDelete} disabled={deleting} $delete>
-              {deleting ? '삭제 중...' : '삭제'}
-            </ActionButton>
+            {isAuthor && (
+              <>
+                <ActionButton onClick={startEdit}>수정</ActionButton>
+                <ActionButton onClick={handleDelete} disabled={deleting} $delete>
+                  {deleting ? '삭제 중...' : '삭제'}
+                </ActionButton>
+              </>
+            )}
           </CommentActions>
         )}
 
@@ -180,6 +258,75 @@ const CommentContent = styled.p<{ $isDeleted: boolean }>`
   white-space: pre-wrap;
   word-break: break-word;
   ${(props) => props.$isDeleted && 'font-style: italic;'}
+`;
+
+const EditArea = styled.div`
+  margin-bottom: 0.75rem;
+`;
+
+const EditTextarea = styled.textarea`
+  width: 100%;
+  min-height: 80px;
+  padding: 0.75rem;
+  border: 1px solid ${theme.colors.border};
+  border-radius: ${theme.borderRadius.sm};
+  font-size: ${theme.typography.small.fontSize};
+  font-family: ${theme.typography.fontBody};
+  color: ${theme.colors.textPrimary};
+  background: ${theme.colors.surface};
+  resize: vertical;
+  line-height: 1.6;
+
+  &:focus {
+    outline: none;
+    border-color: ${theme.colors.accent};
+  }
+`;
+
+const EditActions = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+`;
+
+const SaveButton = styled.button`
+  padding: 0.375rem 1rem;
+  background: ${theme.colors.accent};
+  color: ${theme.colors.textLight};
+  border: none;
+  border-radius: ${theme.borderRadius.sm};
+  font-size: ${theme.typography.small.fontSize};
+  cursor: pointer;
+  transition: all ${theme.transitions.fast};
+
+  &:hover:not(:disabled) {
+    background: ${theme.colors.accentDark};
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+const CancelButton = styled.button`
+  padding: 0.375rem 1rem;
+  background: transparent;
+  color: ${theme.colors.textSecondary};
+  border: 1px solid ${theme.colors.border};
+  border-radius: ${theme.borderRadius.sm};
+  font-size: ${theme.typography.small.fontSize};
+  cursor: pointer;
+  transition: all ${theme.transitions.fast};
+
+  &:hover:not(:disabled) {
+    background: ${theme.colors.surfaceAlt};
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 `;
 
 const CommentActions = styled.div`

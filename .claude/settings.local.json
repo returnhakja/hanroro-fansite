@@ -1,9 +1,13 @@
 {
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
   "permissions": {
     "allow": [
       "Bash(wc:*)",
       "Bash(pnpm dev)",
-      "Bash(taskkill //F //PID 10432)"
+      "Bash(taskkill //F //PID 10432)",
+      "Bash(pnpm add:*)"
     ]
   }
 }

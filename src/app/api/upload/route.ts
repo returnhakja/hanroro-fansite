@@ -1,10 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/lib/auth/auth';
 import connectDB from '@/lib/db/mongoose';
 import Image from '@/lib/db/models/Image';
 import { uploadToBlob } from '@/lib/storage/vercel-blob';
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: '로그인이 필요합니다' },
+        { status: 401 }
+      );
+    }
+
     const formData = await request.formData();
     const file = formData.get('image') as File;
     const title = formData.get('title') as string;
@@ -25,6 +34,7 @@ export async function POST(request: NextRequest) {
       title,
       filename: file.name,
       imageUrl,
+      userId: session.user.id,
     });
 
     return NextResponse.json({

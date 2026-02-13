@@ -12,6 +12,7 @@ export async function GET() {
       title: img.title,
       createdAt: img.createdAt,
       imageUrl: img.imageUrl,
+      userId: img.userId || null,
     }));
 
     return NextResponse.json(imageUrls);

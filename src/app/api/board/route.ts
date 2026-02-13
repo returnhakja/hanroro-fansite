@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/lib/auth/auth';
 import connectDB from '@/lib/db/mongoose';
 import Board from '@/lib/db/models/Board';
 
@@ -21,6 +22,14 @@ export async function GET() {
 // 게시글 작성
 export async function POST(request: NextRequest) {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: '로그인이 필요합니다' },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const { title, content, author, imageUrls } = body;
 
@@ -36,6 +45,7 @@ export async function POST(request: NextRequest) {
       title,
       content,
       author,
+      userId: session.user.id || null,
       imageUrls: imageUrls || [],
     });
 

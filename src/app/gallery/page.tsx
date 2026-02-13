@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import styled from 'styled-components';
 import Modal from 'react-modal';
 import { CloseButton } from '@/components/ui/CloseButton';
@@ -11,10 +12,12 @@ interface ImageType {
   _id: string;
   title: string;
   imageUrl: string;
+  userId?: string | null;
   createdAt: string;
 }
 
 export default function GalleryPage() {
+  const { data: session } = useSession();
   const [images, setImages] = useState<ImageType[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedImg, setSelectedImg] = useState<ImageType | null>(null);
@@ -123,9 +126,11 @@ export default function GalleryPage() {
           <Title>갤러리</Title>
           <Subtitle>한로로의 다양한 모습을 감상하세요</Subtitle>
         </div>
-        <UploadButton onClick={() => setUploadModalOpen(true)}>
-          이미지 업로드
-        </UploadButton>
+        {session && (
+          <UploadButton onClick={() => setUploadModalOpen(true)}>
+            이미지 업로드
+          </UploadButton>
+        )}
       </Header>
 
       {images.length === 0 ? (
@@ -167,9 +172,11 @@ export default function GalleryPage() {
             <CloseButton onClick={() => setSelectedImg(null)} />
             <ModalImage src={selectedImg.imageUrl} alt={selectedImg.title} />
             <ModalTitle>{selectedImg.title}</ModalTitle>
-            <DeleteButton onClick={() => handleDelete(selectedImg._id)}>
-              삭제
-            </DeleteButton>
+            {session && selectedImg.userId === session.user?.id && (
+              <DeleteButton onClick={() => handleDelete(selectedImg._id)}>
+                삭제
+              </DeleteButton>
+            )}
           </ModalContent>
         )}
       </Modal>

@@ -4,20 +4,24 @@ export interface IBoard extends Document {
   title: string;
   content: string;
   author: string;
+  userId?: string;
   imageUrls: string[];
   createdAt: Date;
   views: number;
   likes: number;
+  likedBy: string[];
 }
 
 const boardSchema = new Schema<IBoard>({
   title: { type: String, required: true },
   content: { type: String, required: true },
   author: { type: String, required: true },
+  userId: { type: String, default: null },
   imageUrls: [{ type: String }],
   createdAt: { type: Date, default: Date.now },
   views: { type: Number, default: 0 },
   likes: { type: Number, default: 0 },
+  likedBy: [{ type: String }],
 });
 
 const Board: Model<IBoard> =
