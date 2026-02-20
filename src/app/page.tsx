@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Spinner from "@/components/Spinner";
-import EventCalendar from "@/components/EventCalendar";
 
 import {
   Container,
@@ -29,24 +28,18 @@ import {
   BoardList,
   BoardItem,
   BoardItemTitle,
-  BoardItemMeta,
-  TwoColumnGrid,
-  TwoColumnItem,
-  ColumnTitle,
-  TabWrapper,
+  BoardItemMeta, TwoColumnItem, TabWrapper,
   TabButton,
   SetlistCard,
   SetListItem,
   SongOrder,
-  AlbumThumb,
-  EventList,
-  VideoSection,
+  AlbumThumb, VideoSection,
   SpinnerWrapper,
   StyledSlider,
   VideoSlide,
   VideoWrapper,
   Thumbnail,
-  StyledIframe,
+  StyledIframe
 } from "./Home.styles";
 import { useReducedMotion } from "framer-motion";
 
@@ -83,6 +76,7 @@ const Home = () => {
   const [concert, setConcert] = useState<any>(null);
   const [setlists, setSetlists] = useState<any[]>([]);
   const [setlistLoading, setSetlistLoading] = useState(true);
+  const [upcomingEvents, setUpcomingEvents] = useState<any[]>([]);
 
   useLayoutEffect(() => {
     if (setListRef.current) {
@@ -149,6 +143,22 @@ const Home = () => {
       }
     };
     loadSetlists();
+  }, []);
+
+  useEffect(() => {
+    const loadUpcomingEvents = async () => {
+      try {
+        const res = await fetch('/api/events/upcoming');
+        const data = await res.json();
+        const futureEvents = (data.events || [])
+          .filter((event: any) => new Date(event.date) >= new Date())
+          .slice(0, 2);
+        setUpcomingEvents(futureEvents);
+      } catch (err) {
+        console.error("일정 불러오기 실패:", err);
+      }
+    };
+    loadUpcomingEvents();
   }, []);
 
   const settings = useMemo(
@@ -308,38 +318,73 @@ const Home = () => {
         </GalleryGrid>
       </GalleryPreviewSection>
 
-      {/* Two Column Grid - Calendar + Setlist */}
-      <TwoColumnGrid>
-        <TwoColumnItem
-          initial={shouldReduceMotion ? {} : { opacity: 0, y: 40 }}
-          whileInView={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
-          <SectionOverline>SCHEDULE</SectionOverline>
-          <ColumnTitle>일정</ColumnTitle>
-          <EventList>
-            <EventCalendar />
-          </EventList>
-        </TwoColumnItem>
+      {/* Schedule Preview Section */}
+      <BoardPreviewSection>
+        <SectionHeader>
+          <SectionHeaderLeft>
+            <SectionOverline>SCHEDULE</SectionOverline>
+            <SectionTitle>다가오는 일정</SectionTitle>
+          </SectionHeaderLeft>
+          <SectionLink onClick={() => router.push('/schedule')}>
+            전체 보기
+          </SectionLink>
+        </SectionHeader>
+        {upcomingEvents.length > 0 ? (
+          <BoardList>
+            {upcomingEvents.map((event, index) => (
+              <BoardItem
+                key={event._id}
+                initial={shouldReduceMotion ? {} : { opacity: 0, y: 10 }}
+                whileInView={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: index * 0.08 }}
+                onClick={() => router.push('/schedule')}
+              >
+                <BoardItemTitle>{event.title}</BoardItemTitle>
+                <BoardItemMeta>
+                  <span>{formatDate(event.date)}</span>
+                  {event.place && <span>{event.place}</span>}
+                  {event.time && <span>{event.time}</span>}
+                </BoardItemMeta>
+              </BoardItem>
+            ))}
+          </BoardList>
+        ) : (
+          <BoardList>
+            <BoardItem
+              initial={shouldReduceMotion ? {} : { opacity: 0, y: 10 }}
+              whileInView={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+            >
+              <BoardItemTitle>등록된 일정이 없습니다</BoardItemTitle>
+            </BoardItem>
+          </BoardList>
+        )}
+      </BoardPreviewSection>
 
-        <TwoColumnItem
-          initial={shouldReduceMotion ? {} : { opacity: 0, y: 40 }}
-          whileInView={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-        >
-          <SectionOverline>SETLIST</SectionOverline>
-          <ColumnTitle>
-            {concert?.title || '셋리스트'}
-          </ColumnTitle>
-
-          {setlistLoading ? (
-            <SpinnerWrapper>
-              <Spinner />
-            </SpinnerWrapper>
-          ) : setlists.length > 0 ? (
-            <>
+      {/* Setlist Preview Section */}
+      <GalleryPreviewSection>
+        <SectionHeader>
+          <SectionHeaderLeft>
+            <SectionOverline>SETLIST</SectionOverline>
+            <SectionTitle>{concert?.title || '최근 공연 셋리스트'}</SectionTitle>
+          </SectionHeaderLeft>
+          <SectionLink onClick={() => router.push('/setlist')}>
+            전체 보기
+          </SectionLink>
+        </SectionHeader>
+        {setlistLoading ? (
+          <SpinnerWrapper>
+            <Spinner />
+          </SpinnerWrapper>
+        ) : setlists.length > 0 ? (
+          <TwoColumnItem
+            initial={shouldReduceMotion ? {} : { opacity: 0, y: 20 }}
+            whileInView={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            {setlists.length > 1 && (
               <TabWrapper>
                 {setlists.map((setlist, index) => (
                   <TabButton
@@ -351,30 +396,34 @@ const Home = () => {
                   </TabButton>
                 ))}
               </TabWrapper>
-
-              <SetlistCard ref={setListRef}>
-                {setlists[activeTab]?.songs
-                  .sort((a: any, b: any) => a.order - b.order)
-                  .map((song: any, index: number) => (
-                    <SetListItem key={index}>
-                      <SongOrder>{String(song.order).padStart(2, '0')}</SongOrder>
-                      {song.albumImageUrl && (
-                        <AlbumThumb src={song.albumImageUrl} alt={song.title} />
-                      )}
-                      <span>{song.title}</span>
-                    </SetListItem>
-                  ))}
-              </SetlistCard>
-            </>
-          ) : (
-            <SetlistCard>
-              <SetListItem>
-                <span>등록된 셋리스트가 없습니다</span>
-              </SetListItem>
+            )}
+            <SetlistCard ref={setListRef}>
+              {setlists[activeTab]?.songs
+                .sort((a: any, b: any) => a.order - b.order)
+                .slice(0, 10)
+                .map((song: any, index: number) => (
+                  <SetListItem key={index}>
+                    <SongOrder>{String(song.order).padStart(2, '0')}</SongOrder>
+                    {song.albumImageUrl && (
+                      <AlbumThumb src={song.albumImageUrl} alt={song.title} />
+                    )}
+                    <span>{song.title}</span>
+                  </SetListItem>
+                ))}
             </SetlistCard>
-          )}
-        </TwoColumnItem>
-      </TwoColumnGrid>
+          </TwoColumnItem>
+        ) : (
+          <BoardList>
+            <BoardItem
+              initial={shouldReduceMotion ? {} : { opacity: 0, y: 10 }}
+              whileInView={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+            >
+              <BoardItemTitle>등록된 셋리스트가 없습니다</BoardItemTitle>
+            </BoardItem>
+          </BoardList>
+        )}
+      </GalleryPreviewSection>
 
       {/* Video Section */}
       <VideoSection>

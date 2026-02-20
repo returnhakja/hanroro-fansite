@@ -36,6 +36,12 @@ const Header = () => {
         <NavLink href="/gallery" onClick={() => setMenuOpen(false)}>
           Gallery
         </NavLink>
+        <NavLink href="/schedule" onClick={() => setMenuOpen(false)}>
+          Schedule
+        </NavLink>
+        <NavLink href="/setlist" onClick={() => setMenuOpen(false)}>
+          Setlist
+        </NavLink>
         <NavLink href="/profile" onClick={() => setMenuOpen(false)}>
           About
         </NavLink>
