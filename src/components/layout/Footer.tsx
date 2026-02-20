@@ -59,6 +59,12 @@ const Footer = () => {
           </FooterColumn>
 
           <FooterColumn>
+            <FooterColumnTitle>Legal</FooterColumnTitle>
+            <FooterLink href="/privacy-policy">개인정보처리방침</FooterLink>
+            <FooterLink href="/terms-of-service">서비스 이용약관</FooterLink>
+          </FooterColumn>
+
+          <FooterColumn>
             <FooterColumnTitle>Contact</FooterColumnTitle>
             <FooterLink href="/contact">문의하기</FooterLink>
           </FooterColumn>
@@ -107,9 +113,13 @@ const FooterDesc = styled.p`
 
 const FooterGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 2rem;
   margin-bottom: 3rem;
+
+  @media (max-width: ${theme.breakpoints.tablet}) {
+    grid-template-columns: repeat(2, 1fr);
+  }
 
   @media (max-width: ${theme.breakpoints.mobile}) {
     grid-template-columns: 1fr;

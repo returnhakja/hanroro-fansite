@@ -7,11 +7,12 @@
 
 ## 📸 주요 기능
 
-- **갤러리 보기**: 팬들이 업로드한 한로로 이미지들을 모아볼 수 있어요
-- **이미지 업로드**: 제목과 함께 이미지를 업로드하여 팬들과 공유할 수 있어요
-- **확대 보기**: 갤러리 이미지를 클릭하면 크게 볼 수 있어요
-- **게시판**: 팬들끼리 자유롭게 소통할 수 있는 게시판
-- **아티스트 프로필**: 한로로의 YouTube 영상 및 일정 확인
+- **갤러리**: 팬들이 업로드한 한로로 이미지들을 모아볼 수 있어요 (모달 확대 보기)
+- **일정 페이지**: 다가오는 공연 D-day 카드 + 전체 캘린더로 일정 확인
+- **셋리스트 페이지**: 모든 공연의 셋리스트를 Day별 탭으로 확인 (단독콘서트: Day1/Day2, 페스티벌: Day1)
+- **게시판**: 팬들끼리 자유롭게 소통할 수 있는 게시판 (댓글/대댓글 지원)
+- **YouTube 영상**: 최신 YouTube 영상 목록 (YouTube Data API 연동)
+- **관리자 대시보드**: 공연/일정/이미지 관리 기능 (JWT 인증)
 
 ---
 
@@ -85,38 +86,63 @@ pnpm seed:admin
 src/
 ├── app/
 │   ├── layout.tsx              # 루트 레이아웃
-│   ├── page.tsx                # 홈 페이지
+│   ├── page.tsx                # 홈 페이지 (프리뷰 섹션)
+│   ├── gallery/                # 갤러리 페이지
+│   ├── schedule/               # 일정 페이지 (D-day + 캘린더)
+│   ├── setlist/                # 셋리스트 페이지
+│   ├── profile/                # 프로필 페이지
+│   ├── board/                  # 게시판 페이지
+│   ├── admin/                  # 관리자 대시보드
 │   └── api/                    # API Routes
+│       ├── concerts/           # 공연 목록 (공개)
+│       ├── events/             # 일정 목록 (공개)
 │       ├── upload/             # 이미지 업로드
 │       ├── images/             # 이미지 목록/랜덤
-│       ├── image/[id]/         # 이미지 삭제
 │       ├── board/              # 게시판 CRUD
-│       └── youtube/videos/     # YouTube API
+│       ├── youtube/            # YouTube API
+│       └── admin/              # 관리자 API
 ├── components/
 │   ├── providers/              # SSR, 로딩 Provider
 │   ├── layout/                 # Header, Footer
-│   └── features/               # 기능별 컴포넌트
+│   ├── features/board/         # 게시판 컴포넌트
+│   ├── seo/                    # StructuredData
+│   ├── ui/                     # 공통 UI
+│   ├── EventCalendar.tsx       # 이벤트 캘린더
+│   └── ImageUploader.tsx       # 이미지 업로더
 ├── lib/
 │   ├── db/                     # MongoDB 연결, 모델
-│   ├── storage/                # Vercel Blob 유틸
+│   ├── auth/                   # JWT 인증
+│   ├── storage/                # 파일 스토리지
 │   └── utils/                  # 유틸리티 함수
-└── data/                       # 정적 데이터
+├── styles/                     # 글로벌 스타일
+└── hooks/                      # 커스텀 훅
 ```
 
 ---
 
 ## 🔗 API 엔드포인트
 
+### 공개 API
 | 엔드포인트 | 메서드 | 설명 |
 |----------|--------|------|
-| `/api/upload` | POST | 이미지 업로드 (Vercel Blob) |
-| `/api/images` | GET | 이미지 목록 |
+| `/api/concerts` | GET | 모든 공연 + 셋리스트 목록 |
+| `/api/events/upcoming` | GET | 다가오는 일정 (isPinned 포함) |
+| `/api/youtube/videos` | GET | YouTube 영상 목록 |
+| `/api/images` | GET | 갤러리 이미지 목록 |
 | `/api/images/random` | GET | 랜덤 이미지 |
-| `/api/image/[id]` | DELETE | 이미지 삭제 |
+| `/api/upload` | POST | 이미지 업로드 (Vercel Blob) |
 | `/api/board` | GET/POST | 게시글 목록/작성 |
 | `/api/board/[id]` | GET/DELETE | 게시글 조회/삭제 |
 | `/api/board/[id]/like` | POST | 좋아요 |
-| `/api/youtube/videos` | GET | YouTube 영상 목록 |
+| `/api/board/[id]/comments` | GET/POST | 댓글 목록/작성 |
+
+### 관리자 전용 API (JWT 필수)
+| 엔드포인트 | 메서드 | 설명 |
+|----------|--------|------|
+| `/api/admin/concerts` | GET/POST/PUT/DELETE | 공연 관리 |
+| `/api/admin/setlists` | GET/POST/PUT/DELETE | 셋리스트 관리 |
+| `/api/admin/events` | GET/POST/PUT/DELETE | 일정 관리 |
+| `/api/admin/login` | POST | 관리자 로그인 (JWT 발급) |
 
 ---
 
@@ -128,10 +154,10 @@ src/
 - MongoDB + Mongoose TypeScript 모델
 - Vercel Blob 통합
 - 모든 API Routes 마이그레이션
-
-### 🚧 진행 필요
-- CRA 페이지 → Next.js App Router 페이지 마이그레이션
-- react-router-dom → Next.js Link/Router 변환
+- 모든 페이지 App Router로 마이그레이션 완료
+- 일정(/schedule) 및 셋리스트(/setlist) 전용 페이지 분리
+- framer-motion 애니메이션 적용
+- 게시판 댓글/대댓글 기능 추가
 
 ---
 
