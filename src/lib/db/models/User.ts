@@ -15,7 +15,7 @@ const userSchema = new Schema<IUser>({
   email: { type: String, required: true, unique: true, lowercase: true },
   image: { type: String, default: '' },
   googleId: { type: String, required: true, unique: true },
-  nickname: { type: String, default: '', maxlength: [20, '닉네임은 20자를 초과할 수 없습니다'], unique: true, sparse: true },
+  nickname: { type: String, default: null, maxlength: [20, '닉네임은 20자를 초과할 수 없습니다'], unique: true, sparse: true },
   createdAt: { type: Date, default: Date.now },
   lastLogin: { type: Date, default: Date.now },
 });

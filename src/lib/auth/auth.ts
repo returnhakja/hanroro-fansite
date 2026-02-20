@@ -15,6 +15,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     strategy: 'jwt',
     maxAge: 24 * 60 * 60, // 24시간
   },
+  useSecureCookies: process.env.NODE_ENV === 'production',
+  trustHost: true,
+  debug: process.env.NODE_ENV === 'development',
   callbacks: {
     async signIn({ account, profile }) {
       if (account?.provider === 'google' && profile) {
@@ -31,7 +34,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 lastLogin: new Date(),
               },
               $setOnInsert: {
-                nickname: '',
+                nickname: null,
               },
             },
             { upsert: true, new: true }
