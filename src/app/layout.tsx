@@ -14,6 +14,7 @@ export const metadata: Metadata = {
     template: '%s | 한로로 팬사이트',
   },
   description: '싱어송라이터 한로로의 팬사이트 - 갤러리, 공연 일정, 커뮤니티',
+  applicationName: '한로로 팬사이트',
   keywords: ['한로로', 'HANRORO', '싱어송라이터', 'K-POP', '팬사이트', '공연', '갤러리', '커뮤니티', '한로로 팬사이트'],
   authors: [{ name: 'HANRORO Fansite Team' }],
   creator: 'HANRORO Fansite',
