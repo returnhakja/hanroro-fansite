@@ -1,11 +1,17 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo, memo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import styled from 'styled-components';
+import dynamic from 'next/dynamic';
 import Spinner from '@/components/ui/Spinner';
 import CommentSection from '@/components/features/board/CommentSection';
+
+const RichTextEditor = dynamic(
+  () => import('@/components/features/board/RichTextEditor'),
+  { ssr: false, loading: () => <div style={{ minHeight: '300px', border: '1px solid #eee', borderRadius: '4px' }} /> }
+);
 import { theme } from '@/styles/theme';
 
 interface BoardPost {
@@ -21,6 +27,19 @@ interface BoardPost {
   imageUrls?: string[];
 }
 
+function isHtmlContent(content: string): boolean {
+  return /<[a-z][\s\S]*>/i.test(content);
+}
+
+// 이미지 아이템 컴포넌트 (메모이제이션으로 불필요한 리렌더링 방지)
+const PostImageItem = memo(({ url, index }: { url: string; index: number }) => (
+  <ImageWrapper>
+    <PostImage src={url} alt={`첨부 이미지 ${index + 1}`} />
+  </ImageWrapper>
+));
+
+PostImageItem.displayName = 'PostImageItem';
+
 export default function BoardDetailClient({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const { data: session } = useSession();
@@ -35,17 +54,7 @@ export default function BoardDetailClient({ params }: { params: Promise<{ id: st
   const [editContent, setEditContent] = useState('');
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    if (hasFetched.current) return;
-    hasFetched.current = true;
-
-    params.then(({ id }) => {
-      setPostId(id);
-      fetchPost(id);
-    });
-  }, []);
-
-  const fetchPost = async (id: string) => {
+  const fetchPost = useCallback(async (id: string) => {
     try {
       const response = await fetch(`/api/board/${id}`);
       const data = await response.json();
@@ -62,12 +71,29 @@ export default function BoardDetailClient({ params }: { params: Promise<{ id: st
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
 
-  const isAuthor = post?.userId && session?.user?.id && post.userId === session.user.id;
-  const isLiked = post?.likedBy?.includes(session?.user?.id || '');
+  useEffect(() => {
+    if (hasFetched.current) return;
+    hasFetched.current = true;
 
-  const handleLike = async () => {
+    params.then(({ id }) => {
+      setPostId(id);
+      fetchPost(id);
+    });
+  }, [fetchPost]);
+
+  const isAuthor = useMemo(
+    () => post?.userId && session?.user?.id && post.userId === session.user.id,
+    [post?.userId, session?.user?.id]
+  );
+
+  const isLiked = useMemo(
+    () => post?.likedBy?.includes(session?.user?.id || ''),
+    [post?.likedBy, session?.user?.id]
+  );
+
+  const handleLike = useCallback(async () => {
     if (!postId) return;
 
     if (!session?.user?.id) {
@@ -98,9 +124,9 @@ export default function BoardDetailClient({ params }: { params: Promise<{ id: st
     } catch (error) {
       console.error('좋아요 오류:', error);
     }
-  };
+  }, [postId, session?.user?.id, post]);
 
-  const handleDelete = async () => {
+  const handleDelete = useCallback(async () => {
     if (!postId) return;
     if (!confirm('정말 삭제하시겠습니까?')) return;
 
@@ -120,22 +146,22 @@ export default function BoardDetailClient({ params }: { params: Promise<{ id: st
       console.error('삭제 오류:', error);
       alert('삭제에 실패했습니다');
     }
-  };
+  }, [postId, router]);
 
-  const startEdit = () => {
+  const startEdit = useCallback(() => {
     if (!post) return;
     setEditTitle(post.title);
     setEditContent(post.content);
     setEditing(true);
-  };
+  }, [post]);
 
-  const cancelEdit = () => {
+  const cancelEdit = useCallback(() => {
     setEditing(false);
     setEditTitle('');
     setEditContent('');
-  };
+  }, []);
 
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     if (!postId || !editTitle.trim() || !editContent.trim()) {
       alert('제목과 내용을 입력해주세요');
       return;
@@ -167,7 +193,7 @@ export default function BoardDetailClient({ params }: { params: Promise<{ id: st
     } finally {
       setSaving(false);
     }
-  };
+  }, [postId, editTitle, editContent]);
 
   if (loading) return <Spinner />;
   if (!post) return <div>게시글을 찾을 수 없습니다</div>;
@@ -194,22 +220,27 @@ export default function BoardDetailClient({ params }: { params: Promise<{ id: st
       </Header>
 
       {editing ? (
-        <EditContentArea
+        <RichTextEditor
           value={editContent}
-          onChange={(e) => setEditContent(e.target.value)}
-          placeholder="내용을 입력하세요"
+          onChange={setEditContent}
+          minHeight="300px"
         />
       ) : (
-        <Content>{post.content}</Content>
+        <Content
+          dangerouslySetInnerHTML={{
+            __html: isHtmlContent(post.content)
+              ? post.content
+              : post.content.replace(/\n/g, '<br>'),
+          }}
+        />
       )}
 
+      {/* 구형 게시글의 별도 첨부 이미지 하위 호환 */}
       {!editing && post.imageUrls && post.imageUrls.length > 0 && (
         <ImagesSection>
           <ImagesGrid>
             {post.imageUrls.map((url, index) => (
-              <ImageWrapper key={index}>
-                <PostImage src={url} alt={`첨부 이미지 ${index + 1}`} />
-              </ImageWrapper>
+              <PostImageItem key={index} url={url} index={index} />
             ))}
           </ImagesGrid>
         </ImagesSection>
@@ -305,28 +336,45 @@ const Content = styled.div`
   color: ${theme.colors.textPrimary};
   font-size: ${theme.typography.bodyLarge.fontSize};
   font-family: ${theme.typography.fontBody};
-  white-space: pre-wrap;
   margin-bottom: 3rem;
   min-height: 200px;
-`;
 
-const EditContentArea = styled.textarea`
-  width: 100%;
-  min-height: 300px;
-  line-height: ${theme.typography.bodyLarge.lineHeight};
-  color: ${theme.colors.textPrimary};
-  font-size: ${theme.typography.bodyLarge.fontSize};
-  font-family: ${theme.typography.fontBody};
-  border: 1px solid ${theme.colors.border};
-  border-radius: ${theme.borderRadius.sm};
-  padding: 1rem;
-  margin-bottom: 3rem;
-  background: ${theme.colors.surface};
-  resize: vertical;
-
-  &:focus {
-    outline: none;
-    border-color: ${theme.colors.accent};
+  p { margin: 0.5rem 0; }
+  h2 {
+    font-family: ${theme.typography.fontHeading};
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin: 1.5rem 0 0.5rem;
+    line-height: 1.3;
+  }
+  h3 {
+    font-family: ${theme.typography.fontHeading};
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin: 1.25rem 0 0.5rem;
+    line-height: 1.3;
+  }
+  strong { font-weight: 600; }
+  em { font-style: italic; }
+  s { text-decoration: line-through; color: ${theme.colors.textTertiary}; }
+  blockquote {
+    border-left: 3px solid ${theme.colors.accent};
+    padding-left: 1rem;
+    margin: 1rem 0;
+    color: ${theme.colors.textSecondary};
+    font-style: italic;
+  }
+  ul {
+    padding-left: 1.5rem;
+    margin: 0.5rem 0;
+    li { margin: 0.25rem 0; }
+  }
+  img {
+    max-width: 100%;
+    height: auto;
+    border-radius: ${theme.borderRadius.sm};
+    margin: 0.5rem 0;
+    display: block;
   }
 `;
 
@@ -369,6 +417,11 @@ const Actions = styled.div`
   gap: 0.75rem;
   padding-top: 2rem;
   border-top: 1px solid ${theme.colors.border};
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    flex-direction: column;
+    gap: 0.625rem;
+  }
 `;
 
 const LikeButton = styled.button<{ $liked: boolean }>`
@@ -384,6 +437,10 @@ const LikeButton = styled.button<{ $liked: boolean }>`
 
   &:hover {
     background: ${(props) => (props.$liked ? theme.colors.accent : theme.colors.accentDark)};
+  }
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    width: 100%;
   }
 `;
 
@@ -402,6 +459,10 @@ const EditButton = styled.button`
     background: ${theme.colors.primary};
     color: ${theme.colors.textLight};
   }
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    width: 100%;
+  }
 `;
 
 const DeleteButton = styled.button`
@@ -418,6 +479,10 @@ const DeleteButton = styled.button`
   &:hover {
     background: ${theme.colors.error};
     color: ${theme.colors.textLight};
+  }
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    width: 100%;
   }
 `;
 
@@ -440,6 +505,10 @@ const SaveButton = styled.button`
     opacity: 0.5;
     cursor: not-allowed;
   }
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    width: 100%;
+  }
 `;
 
 const CancelButton = styled.button`
@@ -461,6 +530,10 @@ const CancelButton = styled.button`
     opacity: 0.5;
     cursor: not-allowed;
   }
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    width: 100%;
+  }
 `;
 
 const BackButton = styled.button`
@@ -477,5 +550,10 @@ const BackButton = styled.button`
 
   &:hover {
     background: ${theme.colors.surfaceAlt};
+  }
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    width: 100%;
+    margin-left: 0;
   }
 `;

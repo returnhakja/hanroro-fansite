@@ -1,105 +1,66 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
-import styled from 'styled-components';
-import Spinner from '@/components/ui/Spinner';
-import { theme } from '@/styles/theme';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import styled from "styled-components";
+import dynamic from "next/dynamic";
+import Spinner from "@/components/ui/Spinner";
+
+const RichTextEditor = dynamic(
+  () => import("@/components/features/board/RichTextEditor"),
+  { ssr: false, loading: () => <div style={{ minHeight: "400px", border: "1px solid #eee", borderRadius: "4px" }} /> }
+);
+import { theme } from "@/styles/theme";
 
 export default function BoardWritePage() {
   const router = useRouter();
   const { data: session, status } = useSession();
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [author, setAuthor] = useState('');
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [author, setAuthor] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (status === 'loading') return;
+    if (status === "loading") return;
     if (!session) {
-      alert('로그인이 필요합니다');
-      router.push('/board');
+      alert("로그인이 필요합니다");
+      router.push("/board");
     }
   }, [session, status, router]);
 
   useEffect(() => {
     if (session?.user) {
-      setAuthor(session.user.nickname || session.user.name || '');
+      setAuthor(session.user.nickname || session.user.name || "");
     }
   }, [session]);
-
-  // 이미지 첨부 관련 상태
-  const [imageFiles, setImageFiles] = useState<File[]>([]);
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
-
-    const fileArray = Array.from(files);
-    setImageFiles((prev) => [...prev, ...fileArray]);
-
-    // 미리보기 생성
-    fileArray.forEach((file) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreviews((prev) => [...prev, reader.result as string]);
-      };
-      reader.readAsDataURL(file);
-    });
-  };
-
-  const removeImage = (index: number) => {
-    setImageFiles((prev) => prev.filter((_, i) => i !== index));
-    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!title || !content || !author) {
-      alert('모든 필드를 입력해주세요');
+      alert("모든 필드를 입력해주세요");
       return;
     }
 
     setLoading(true);
 
     try {
-      // 1. 이미지 업로드 (있는 경우)
-      const imageUrls: string[] = [];
-      for (const file of imageFiles) {
-        const formData = new FormData();
-        formData.append('image', file);
-        formData.append('title', `${title}_image`);
-
-        const uploadResponse = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (uploadResponse.ok) {
-          const data = await uploadResponse.json();
-          imageUrls.push(data.imageUrl);
-        }
-      }
-
-      // 2. 게시글 작성
-      const response = await fetch('/api/board', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, content, author, imageUrls }),
+      const response = await fetch("/api/board", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, content, author, imageUrls: [] }),
       });
 
       if (response.ok) {
-        alert('작성 완료!');
-        router.push('/board');
+        alert("작성 완료!");
+        router.push("/board");
       } else {
-        throw new Error('Failed to create post');
+        throw new Error("Failed to create post");
       }
     } catch (error) {
-      console.error('작성 오류:', error);
-      alert('작성에 실패했습니다');
+      console.error("작성 오류:", error);
+      alert("작성에 실패했습니다");
     } finally {
       setLoading(false);
     }
@@ -129,50 +90,29 @@ export default function BoardWritePage() {
             onChange={(e) => setAuthor(e.target.value)}
             placeholder="작성자명을 입력하세요"
             readOnly={!!(session?.user?.nickname || session?.user?.name)}
-            style={(session?.user?.nickname || session?.user?.name) ? { backgroundColor: theme.colors.surfaceAlt } : undefined}
+            style={
+              session?.user?.nickname || session?.user?.name
+                ? { backgroundColor: theme.colors.surfaceAlt }
+                : undefined
+            }
           />
         </FormGroup>
 
         <FormGroup>
           <Label>내용</Label>
-          <Textarea
+          <RichTextEditor
             value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder="내용을 입력하세요"
-            rows={10}
+            onChange={setContent}
+            placeholder="내용을 입력하세요."
+            minHeight="400px"
           />
-        </FormGroup>
-
-        <FormGroup>
-          <Label>이미지 첨부 (선택사항)</Label>
-          <FileInput
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={handleImageChange}
-          />
-          {imagePreviews.length > 0 && (
-            <ImagePreviewContainer>
-              {imagePreviews.map((preview, index) => (
-                <ImagePreviewWrapper key={index}>
-                  <PreviewImage src={preview} alt={`미리보기 ${index + 1}`} />
-                  <RemoveButton
-                    type="button"
-                    onClick={() => removeImage(index)}
-                  >
-                    ✕
-                  </RemoveButton>
-                </ImagePreviewWrapper>
-              ))}
-            </ImagePreviewContainer>
-          )}
         </FormGroup>
 
         <ButtonGroup>
           <SubmitButton type="submit" disabled={loading}>
-            {loading ? '작성 중...' : '작성하기'}
+            {loading ? "작성 중..." : "작성하기"}
           </SubmitButton>
-          <CancelButton type="button" onClick={() => router.push('/board')}>
+          <CancelButton type="button" onClick={() => router.push("/board")}>
             취소
           </CancelButton>
         </ButtonGroup>
@@ -234,97 +174,6 @@ const Input = styled.input`
   &:focus {
     outline: none;
     border-color: ${theme.colors.accent};
-  }
-`;
-
-const Textarea = styled.textarea`
-  padding: 0.75rem 1rem;
-  border: 1px solid ${theme.colors.border};
-  border-radius: ${theme.borderRadius.sm};
-  font-size: 1rem;
-  font-family: ${theme.typography.fontBody};
-  color: ${theme.colors.textPrimary};
-  background: ${theme.colors.surface};
-  resize: vertical;
-  transition: border-color ${theme.transitions.fast};
-
-  &::placeholder {
-    color: ${theme.colors.textTertiary};
-  }
-
-  &:focus {
-    outline: none;
-    border-color: ${theme.colors.accent};
-  }
-`;
-
-const FileInput = styled.input`
-  padding: 0.5rem;
-  border: 2px dashed ${theme.colors.border};
-  border-radius: ${theme.borderRadius.sm};
-  font-size: 0.95rem;
-  font-family: ${theme.typography.fontBody};
-  color: ${theme.colors.textSecondary};
-  cursor: pointer;
-
-  &::-webkit-file-upload-button {
-    padding: 0.5rem 1rem;
-    background: ${theme.colors.primary};
-    color: ${theme.colors.textLight};
-    border: none;
-    border-radius: ${theme.borderRadius.sm};
-    cursor: pointer;
-    margin-right: 0.5rem;
-    font-size: 0.875rem;
-    transition: background ${theme.transitions.fast};
-
-    &:hover {
-      background: ${theme.colors.primaryDark};
-    }
-  }
-`;
-
-const ImagePreviewContainer = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 1rem;
-  margin-top: 1rem;
-`;
-
-const ImagePreviewWrapper = styled.div`
-  position: relative;
-  aspect-ratio: 1;
-  border-radius: ${theme.borderRadius.sm};
-  overflow: hidden;
-  border: 1px solid ${theme.colors.border};
-`;
-
-const PreviewImage = styled.img`
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-`;
-
-const RemoveButton = styled.button`
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 24px;
-  height: 24px;
-  background: rgba(44, 36, 24, 0.6);
-  color: ${theme.colors.textLight};
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  line-height: 1;
-  transition: background ${theme.transitions.fast};
-
-  &:hover {
-    background: ${theme.colors.error};
   }
 `;
 

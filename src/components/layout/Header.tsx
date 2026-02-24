@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import styled from 'styled-components';
-import Link from 'next/link';
-import { useState, useEffect } from 'react';
-import { useSession, signIn, signOut } from 'next-auth/react';
-import { theme } from '@/styles/theme';
+import styled from "styled-components";
+import Link from "next/link";
+import { useState, useEffect } from "react";
+import { useSession, signIn, signOut } from "next-auth/react";
+import { theme } from "@/styles/theme";
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -15,8 +15,8 @@ const Header = () => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 60);
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
@@ -33,8 +33,42 @@ const Header = () => {
 
       <Nav $open={menuOpen}>
         <CloseButton onClick={() => setMenuOpen(false)}>&times;</CloseButton>
+
+        <MobileAuthSection>
+          {status === "loading" ? null : session ? (
+            <>
+              <MobileUserLink href="/mypage" onClick={() => setMenuOpen(false)}>
+                {session.user?.image && (
+                  <UserImage src={session.user.image} alt="프로필" />
+                )}
+                <span>{session.user?.nickname || session.user?.name}</span>
+              </MobileUserLink>
+              <AuthButton
+                onClick={() => {
+                  signOut();
+                  setMenuOpen(false);
+                }}
+              >
+                로그아웃
+              </AuthButton>
+            </>
+          ) : (
+            <AuthButton
+              onClick={() => {
+                signIn("google");
+                setMenuOpen(false);
+              }}
+            >
+              Google 로그인
+            </AuthButton>
+          )}
+        </MobileAuthSection>
+
         <NavLink href="/gallery" onClick={() => setMenuOpen(false)}>
           Gallery
+        </NavLink>
+        <NavLink href="/board" onClick={() => setMenuOpen(false)}>
+          Board
         </NavLink>
         <NavLink href="/schedule" onClick={() => setMenuOpen(false)}>
           Schedule
@@ -45,44 +79,23 @@ const Header = () => {
         <NavLink href="/profile" onClick={() => setMenuOpen(false)}>
           About
         </NavLink>
-        <NavLink href="/board" onClick={() => setMenuOpen(false)}>
-          Board
-        </NavLink>
-
-        <MobileAuthSection>
-          {status === 'loading' ? null : session ? (
-            <>
-              <MobileUserLink href="/mypage" onClick={() => setMenuOpen(false)}>
-                {session.user?.image && (
-                  <UserImage src={session.user.image} alt="프로필" />
-                )}
-                <span>{session.user?.nickname || session.user?.name}</span>
-              </MobileUserLink>
-              <AuthButton onClick={() => { signOut(); setMenuOpen(false); }}>
-                로그아웃
-              </AuthButton>
-            </>
-          ) : (
-            <AuthButton onClick={() => { signIn('google'); setMenuOpen(false); }}>
-              Google 로그인
-            </AuthButton>
-          )}
-        </MobileAuthSection>
       </Nav>
 
       <DesktopAuthSection>
-        {status === 'loading' ? null : session ? (
+        {status === "loading" ? null : session ? (
           <>
             <DesktopUserLink href="/mypage">
               {session.user?.image && (
                 <UserImage src={session.user.image} alt="프로필" />
               )}
-              <UserName>{session.user?.nickname || session.user?.name}</UserName>
+              <UserName>
+                {session.user?.nickname || session.user?.name}
+              </UserName>
             </DesktopUserLink>
             <AuthButton onClick={() => signOut()}>로그아웃</AuthButton>
           </>
         ) : (
-          <AuthButton onClick={() => signIn('google')}>로그인</AuthButton>
+          <AuthButton onClick={() => signIn("google")}>로그인</AuthButton>
         )}
       </DesktopAuthSection>
     </HeaderContainer>
@@ -100,11 +113,14 @@ const HeaderContainer = styled.header<{ $scrolled: boolean }>`
   right: 0;
   z-index: 100;
   background-color: ${({ $scrolled }) =>
-    $scrolled ? 'rgba(250, 247, 242, 0.95)' : 'transparent'};
+    $scrolled ? "rgba(250, 247, 242, 0.95)" : "transparent"};
   border-bottom: ${({ $scrolled }) =>
-    $scrolled ? `1px solid ${theme.colors.border}` : '1px solid transparent'};
-  backdrop-filter: ${({ $scrolled }) => ($scrolled ? 'blur(12px)' : 'none')};
-  transition: background-color 0.4s ease, border-bottom 0.4s ease, backdrop-filter 0.4s ease;
+    $scrolled ? `1px solid ${theme.colors.border}` : "1px solid transparent"};
+  backdrop-filter: ${({ $scrolled }) => ($scrolled ? "blur(12px)" : "none")};
+  transition:
+    background-color 0.4s ease,
+    border-bottom 0.4s ease,
+    backdrop-filter 0.4s ease;
 
   @media (max-width: ${theme.breakpoints.mobile}) {
     padding: 1rem 1.5rem;
@@ -183,7 +199,7 @@ const Nav = styled.nav<{ $open: boolean }>`
     border-left: 1px solid ${theme.colors.border};
     z-index: 999;
     gap: 0;
-    transform: ${({ $open }) => ($open ? 'translateX(0)' : 'translateX(100%)')};
+    transform: ${({ $open }) => ($open ? "translateX(0)" : "translateX(100%)")};
     transition: transform 0.3s ease-in-out;
   }
 `;
@@ -213,14 +229,16 @@ const NavLink = styled(Link)`
   padding: 0.5rem 0;
 
   &::after {
-    content: '';
+    content: "";
     position: absolute;
     bottom: 0;
     left: 50%;
     width: 0;
     height: 1.5px;
     background-color: ${theme.colors.accent};
-    transition: width 0.3s ease, left 0.3s ease;
+    transition:
+      width 0.3s ease,
+      left 0.3s ease;
   }
 
   &:hover::after {
@@ -261,9 +279,9 @@ const MobileAuthSection = styled.div`
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-    margin-top: auto;
-    padding-top: 1.5rem;
-    border-top: 1px solid ${theme.colors.borderLight};
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid ${theme.colors.borderLight};
     width: 100%;
   }
 `;
