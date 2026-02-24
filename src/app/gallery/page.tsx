@@ -116,6 +116,24 @@ export default function GalleryPage() {
     setPreview(null);
   };
 
+  const handleDownload = async (imageUrl: string, title: string) => {
+    try {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${title}.jpg`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('다운로드 오류:', error);
+      alert('다운로드에 실패했습니다');
+    }
+  };
+
   if (loading) return <Spinner />;
 
   return (
@@ -172,11 +190,18 @@ export default function GalleryPage() {
             <CloseButton onClick={() => setSelectedImg(null)} />
             <ModalImage src={selectedImg.imageUrl} alt={selectedImg.title} />
             <ModalTitle>{selectedImg.title}</ModalTitle>
-            {session && selectedImg.userId === session.user?.id && (
-              <DeleteButton onClick={() => handleDelete(selectedImg._id)}>
-                삭제
-              </DeleteButton>
-            )}
+            <ButtonGroup>
+              <DownloadButton
+                onClick={() => handleDownload(selectedImg.imageUrl, selectedImg.title)}
+              >
+                ⬇️ 다운로드
+              </DownloadButton>
+              {session && selectedImg.userId === session.user?.id && (
+                <DeleteButton onClick={() => handleDelete(selectedImg._id)}>
+                  삭제
+                </DeleteButton>
+              )}
+            </ButtonGroup>
           </ModalContent>
         )}
       </Modal>
@@ -411,8 +436,30 @@ const ModalTitle = styled.h3`
   font-weight: 400;
 `;
 
-const DeleteButton = styled.button`
+const ButtonGroup = styled.div`
+  display: flex;
+  gap: 0.75rem;
   margin-top: 1rem;
+`;
+
+const DownloadButton = styled.button`
+  padding: 0.5rem 1.5rem;
+  background: ${theme.colors.accent};
+  color: ${theme.colors.textLight};
+  border: none;
+  border-radius: ${theme.borderRadius.sm};
+  cursor: pointer;
+  font-size: 1rem;
+  font-family: ${theme.typography.fontBody};
+  transition: all ${theme.transitions.fast};
+
+  &:hover {
+    background: #B89B6A;
+    box-shadow: ${theme.shadows.sm};
+  }
+`;
+
+const DeleteButton = styled.button`
   padding: 0.5rem 1.5rem;
   background: ${theme.colors.error};
   color: ${theme.colors.textLight};
