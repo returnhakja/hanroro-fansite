@@ -1,8 +1,50 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
+interface Stats {
+  concerts: number;
+  events: number;
+  posts: number;
+  images: number;
+}
+
 export default function AdminDashboard() {
+  const [stats, setStats] = useState<Stats>({
+    concerts: 0,
+    events: 0,
+    posts: 0,
+    images: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const token = localStorage.getItem('adminToken');
+        const response = await fetch('/api/admin/stats', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('통계를 불러올 수 없습니다');
+        }
+
+        const data = await response.json();
+        setStats(data);
+      } catch (error) {
+        console.error('통계 조회 오류:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
   return (
     <Container>
       <Title>대시보드</Title>
@@ -11,25 +53,25 @@ export default function AdminDashboard() {
       <Grid>
         <StatCard>
           <StatIcon>🎤</StatIcon>
-          <StatNumber>-</StatNumber>
+          <StatNumber>{loading ? '-' : stats.concerts}</StatNumber>
           <StatLabel>공연</StatLabel>
         </StatCard>
 
         <StatCard>
           <StatIcon>📅</StatIcon>
-          <StatNumber>-</StatNumber>
+          <StatNumber>{loading ? '-' : stats.events}</StatNumber>
           <StatLabel>일정</StatLabel>
         </StatCard>
 
         <StatCard>
           <StatIcon>📝</StatIcon>
-          <StatNumber>-</StatNumber>
+          <StatNumber>{loading ? '-' : stats.posts}</StatNumber>
           <StatLabel>게시글</StatLabel>
         </StatCard>
 
         <StatCard>
           <StatIcon>🖼️</StatIcon>
-          <StatNumber>-</StatNumber>
+          <StatNumber>{loading ? '-' : stats.images}</StatNumber>
           <StatLabel>이미지</StatLabel>
         </StatCard>
       </Grid>

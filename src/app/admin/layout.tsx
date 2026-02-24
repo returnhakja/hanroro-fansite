@@ -98,9 +98,9 @@ const Sidebar = styled.aside`
   background: #2c3e50;
   color: white;
   padding: 2rem 0;
-  position: fixed;
-  height: 100vh;
-  overflow-y: auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 `;
 
 const Logo = styled.h1`
@@ -149,7 +149,6 @@ const LogoutButton = styled.button`
 `;
 
 const Main = styled.main`
-  margin-left: 260px;
   flex: 1;
   padding: 2rem;
   background: #ecf0f1;
