@@ -7,6 +7,7 @@ import "@/styles/calendar.css";
 import Modal from "react-modal";
 import styled from "styled-components";
 import { theme } from "@/styles/theme";
+import { useUpcomingEvents } from "@/hooks/queries/useEvents";
 
 interface Event {
   _id: string;
@@ -146,22 +147,14 @@ const modalStyles = {
 
 const EventCalendar = () => {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [events, setEvents] = useState<Event[]>([]);
+  const { data } = useUpcomingEvents();
 
+  // Modal 접근성 설정
   useEffect(() => {
     Modal.setAppElement('body');
-
-    const loadEvents = async () => {
-      try {
-        const res = await fetch('/api/events/upcoming');
-        const data = await res.json();
-        setEvents(data.events || []);
-      } catch (err) {
-        console.error("일정 불러오기 실패:", err);
-      }
-    };
-    loadEvents();
   }, []);
+
+  const events = data ?? [];
 
   const getEventTypeLabel = (type: string) => {
     switch (type) {

@@ -1,31 +1,19 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import styled from 'styled-components';
-
-interface Event {
-  _id: string;
-  title: string;
-  date: string;
-  time?: string;
-  place?: string;
-  posterUrl?: string;
-  type: 'concert' | 'award' | 'broadcast' | 'other' | 'festival';
-  isPinned: boolean;
-}
-
-interface EventFormData {
-  title: string;
-  date: string;
-  time: string;
-  place: string;
-  posterUrl: string;
-  type: 'concert' | 'award' | 'broadcast' | 'other' | 'festival';
-}
+import {
+  useAdminEvents,
+  useCreateEvent,
+  useUpdateEvent,
+  useDeleteEvent,
+  useTogglePin,
+  type Event,
+  type EventFormData,
+} from '@/hooks/queries/useEvents';
 
 export default function AdminEventsPage() {
-  const [events, setEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: events = [], isLoading } = useAdminEvents();
   const [showModal, setShowModal] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [formData, setFormData] = useState<EventFormData>({
@@ -37,103 +25,39 @@ export default function AdminEventsPage() {
     type: 'other',
   });
 
-  useEffect(() => {
-    fetchEvents();
-  }, []);
-
-  const fetchEvents = async () => {
-    try {
-      const token = localStorage.getItem('adminToken');
-      const res = await fetch('/api/admin/events', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setEvents(data.events);
-      }
-    } catch (error) {
-      console.error('일정 목록 조회 실패:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const createEvent = useCreateEvent();
+  const updateEvent = useUpdateEvent();
+  const deleteEvent = useDeleteEvent();
+  const togglePin = useTogglePin();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
-      const token = localStorage.getItem('adminToken');
-      const url = editingEvent
-        ? `/api/admin/events/${editingEvent._id}`
-        : '/api/admin/events';
-      const method = editingEvent ? 'PUT' : 'POST';
-
-      const res = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (res.ok) {
-        await fetchEvents();
-        handleCloseModal();
+      if (editingEvent) {
+        await updateEvent.mutateAsync({ id: editingEvent._id, formData });
       } else {
-        const data = await res.json();
-        alert(data.error || '저장 실패');
+        await createEvent.mutateAsync(formData);
       }
-    } catch (error) {
-      console.error('일정 저장 실패:', error);
-      alert('저장 중 오류가 발생했습니다');
+      handleCloseModal();
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : '저장 실패');
     }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm('정말 삭제하시겠습니까?')) return;
-
     try {
-      const token = localStorage.getItem('adminToken');
-      const res = await fetch(`/api/admin/events/${id}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (res.ok) {
-        await fetchEvents();
-      } else {
-        const data = await res.json();
-        alert(data.error || '삭제 실패');
-      }
-    } catch (error) {
-      console.error('일정 삭제 실패:', error);
-      alert('삭제 중 오류가 발생했습니다');
+      await deleteEvent.mutateAsync(id);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : '삭제 중 오류가 발생했습니다');
     }
   };
 
   const handleTogglePin = async (event: Event) => {
     try {
-      const token = localStorage.getItem('adminToken');
-      const res = await fetch(`/api/admin/events/${event._id}/pin`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ isPinned: !event.isPinned }),
-      });
-
-      if (res.ok) {
-        await fetchEvents();
-      }
-    } catch (error) {
-      console.error('일정 고정/해제 실패:', error);
+      await togglePin.mutateAsync({ id: event._id, isPinned: !event.isPinned });
+    } catch (err: unknown) {
+      console.error('일정 고정/해제 실패:', err);
     }
   };
 
@@ -186,7 +110,7 @@ export default function AdminEventsPage() {
     return types[type] || type;
   };
 
-  if (loading) {
+  if (isLoading) {
     return <Container>로딩 중...</Container>;
   }
 

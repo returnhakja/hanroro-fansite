@@ -1,97 +1,29 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import styled from 'styled-components';
 import Link from 'next/link';
-
-interface Post {
-  _id: string;
-  title: string;
-  content: string;
-  author: string;
-  views: number;
-  likes: number;
-  createdAt: string;
-  imageUrls: string[];
-}
-
-interface Stats {
-  totalPosts: number;
-  totalViews: number;
-  totalLikes: number;
-}
+import { useAdminBoard, useAdminDeletePost } from '@/hooks/queries/useAdminBoard';
 
 export default function BoardManagePage() {
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [stats, setStats] = useState<Stats>({
-    totalPosts: 0,
-    totalViews: 0,
-    totalLikes: 0,
-  });
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
 
-  const fetchPosts = async () => {
-    try {
-      setLoading(true);
-      const token = localStorage.getItem('adminToken');
-      const url = new URL('/api/admin/board', window.location.origin);
-      url.searchParams.append('page', page.toString());
-      url.searchParams.append('limit', '20');
-      if (searchQuery) {
-        url.searchParams.append('search', searchQuery);
-      }
+  const { data, isLoading } = useAdminBoard(page, searchQuery);
+  const posts = data?.posts ?? [];
+  const stats = data?.stats ?? { totalPosts: 0, totalViews: 0, totalLikes: 0 };
+  const totalPages = data?.totalPages ?? 1;
 
-      const response = await fetch(url.toString(), {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('게시글 목록을 불러올 수 없습니다');
-      }
-
-      const data = await response.json();
-      setPosts(data.posts);
-      setStats(data.stats);
-      setTotalPages(data.pagination.totalPages);
-    } catch (error) {
-      console.error('게시글 목록 조회 오류:', error);
-      alert('게시글 목록을 불러올 수 없습니다');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchPosts();
-  }, [page, searchQuery]);
+  const deleteMutation = useAdminDeletePost();
 
   const handleDelete = async (id: string) => {
     if (!confirm('정말 이 게시글을 삭제하시겠습니까?\n(댓글도 함께 삭제됩니다)')) {
       return;
     }
-
     try {
-      const token = localStorage.getItem('adminToken');
-      const response = await fetch(`/api/admin/board/${id}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('게시글 삭제 실패');
-      }
-
+      await deleteMutation.mutateAsync(id);
       alert('게시글이 삭제되었습니다');
-      fetchPosts(); // 목록 새로고침
-    } catch (error) {
-      console.error('게시글 삭제 오류:', error);
+    } catch {
       alert('게시글을 삭제할 수 없습니다');
     }
   };
@@ -99,7 +31,6 @@ export default function BoardManagePage() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setPage(1); // 검색 시 첫 페이지로
-    fetchPosts();
   };
 
   return (
@@ -140,7 +71,7 @@ export default function BoardManagePage() {
       </SearchForm>
 
       {/* 게시글 목록 */}
-      {loading ? (
+      {isLoading ? (
         <LoadingText>로딩 중...</LoadingText>
       ) : posts.length === 0 ? (
         <EmptyText>게시글이 없습니다</EmptyText>

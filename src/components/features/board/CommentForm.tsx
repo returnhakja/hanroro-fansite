@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSession, signIn } from 'next-auth/react';
 import styled from 'styled-components';
 import { theme } from '@/styles/theme';
+import { useCreateComment } from '@/hooks/queries/useBoard';
 
 interface CommentFormProps {
   boardId: string;
@@ -25,7 +26,9 @@ export default function CommentForm({
   const { data: session } = useSession();
   const [content, setContent] = useState('');
   const [author, setAuthor] = useState('');
-  const [submitting, setSubmitting] = useState(false);
+
+  const createComment = useCreateComment(boardId);
+  const submitting = createComment.isPending;
 
   const isReply = !!parentId;
 
@@ -48,37 +51,24 @@ export default function CommentForm({
       return;
     }
 
-    setSubmitting(true);
-
-    try {
-      const response = await fetch(`/api/board/${boardId}/comments`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+    createComment.mutate(
+      {
+        content: content.trim(),
+        author: author.trim() || '익명',
+        parentId,
+      },
+      {
+        onSuccess: () => {
+          setContent('');
+          if (!isReply) setAuthor('');
+          onSubmitSuccess();
         },
-        body: JSON.stringify({
-          content: content.trim(),
-          author: author.trim() || '익명',
-          parentId,
-        }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || '댓글 작성에 실패했습니다');
+        onError: (error) => {
+          console.error('댓글 작성 오류:', error);
+          alert(error instanceof Error ? error.message : '댓글 작성에 실패했습니다');
+        },
       }
-
-      setContent('');
-      if (!isReply) {
-        setAuthor('');
-      }
-      onSubmitSuccess();
-    } catch (error) {
-      console.error('댓글 작성 오류:', error);
-      alert(error instanceof Error ? error.message : '댓글 작성에 실패했습니다');
-    } finally {
-      setSubmitting(false);
-    }
+    );
   };
 
   if (!session) {

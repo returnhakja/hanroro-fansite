@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useReducedMotion } from 'framer-motion';
 import {
   Container,
@@ -22,57 +22,12 @@ import {
   EmptyMessage,
   NoSetlistMessage,
 } from './Setlist.styles';
-
-interface Song {
-  title: string;
-  albumImageUrl?: string;
-  order: number;
-}
-
-interface SetList {
-  _id: string;
-  day: number;
-  date: string;
-  songs: Song[];
-}
-
-interface Concert {
-  _id: string;
-  title: string;
-  venue: string;
-  startDate: string;
-  endDate: string;
-  posterUrl?: string;
-  isActive: boolean;
-  setlists: SetList[];
-}
+import { useConcerts } from '@/hooks/queries/useConcerts';
 
 const SetlistPage = () => {
   const shouldReduceMotion = useReducedMotion();
-  const [concerts, setConcerts] = useState<Concert[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: concerts = [], isLoading: loading } = useConcerts();
   const [activeTabs, setActiveTabs] = useState<{ [key: string]: number }>({});
-
-  useEffect(() => {
-    const loadConcerts = async () => {
-      try {
-        const res = await fetch('/api/concerts');
-        const data = await res.json();
-        setConcerts(data.concerts || []);
-
-        const tabs: { [key: string]: number } = {};
-        (data.concerts || []).forEach((concert: Concert) => {
-          tabs[concert._id] = 0;
-        });
-        setActiveTabs(tabs);
-      } catch (err) {
-        console.error('공연 목록 불러오기 실패:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadConcerts();
-  }, []);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -118,14 +73,14 @@ const SetlistPage = () => {
               </ConcertHeader>
 
               <ConcertBody>
-                {concert.setlists.length > 0 ? (
+                {(concert.setlists ?? []).length > 0 ? (
                   <>
-                    {concert.setlists.length > 1 && (
+                    {(concert.setlists ?? []).length > 1 && (
                       <TabWrapper>
-                        {concert.setlists.map((setlist, idx) => (
+                        {(concert.setlists ?? []).map((setlist, idx) => (
                           <TabButton
                             key={setlist._id}
-                            $active={activeTabs[concert._id] === idx}
+                            $active={(activeTabs[concert._id] ?? 0) === idx}
                             onClick={() => handleTabChange(concert._id, idx)}
                           >
                             Day {setlist.day}
@@ -135,7 +90,7 @@ const SetlistPage = () => {
                     )}
 
                     <SetlistCard>
-                      {concert.setlists[activeTabs[concert._id]]?.songs
+                      {(concert.setlists ?? [])[activeTabs[concert._id] ?? 0]?.songs
                         .sort((a, b) => a.order - b.order)
                         .map((song, idx) => (
                           <SetListItem key={idx}>

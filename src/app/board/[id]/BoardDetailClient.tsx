@@ -1,201 +1,127 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo, memo } from 'react';
-import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
-import styled from 'styled-components';
-import dynamic from 'next/dynamic';
-import Spinner from '@/components/ui/Spinner';
-import CommentSection from '@/components/features/board/CommentSection';
+import { useState, useEffect, memo } from "react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import styled from "styled-components";
+import dynamic from "next/dynamic";
+import Spinner from "@/components/ui/Spinner";
+import CommentSection from "@/components/features/board/CommentSection";
+import {
+  useBoardDetail,
+  useLikePost,
+  useUpdatePost,
+  useDeletePost,
+} from "@/hooks/queries/useBoard";
+import { theme } from "@/styles/theme";
 
 const RichTextEditor = dynamic(
-  () => import('@/components/features/board/RichTextEditor'),
-  { ssr: false, loading: () => <div style={{ minHeight: '300px', border: '1px solid #eee', borderRadius: '4px' }} /> }
+  () => import("@/components/features/board/RichTextEditor"),
+  {
+    ssr: false,
+    loading: () => (
+      <div
+        style={{
+          minHeight: "300px",
+          border: "1px solid #eee",
+          borderRadius: "4px",
+        }}
+      />
+    ),
+  },
 );
-import { theme } from '@/styles/theme';
-
-interface BoardPost {
-  _id: string;
-  title: string;
-  content: string;
-  author: string;
-  userId?: string;
-  createdAt: string;
-  views: number;
-  likes: number;
-  likedBy?: string[];
-  imageUrls?: string[];
-}
 
 function isHtmlContent(content: string): boolean {
   return /<[a-z][\s\S]*>/i.test(content);
 }
 
-// 이미지 아이템 컴포넌트 (메모이제이션으로 불필요한 리렌더링 방지)
 const PostImageItem = memo(({ url, index }: { url: string; index: number }) => (
   <ImageWrapper>
     <PostImage src={url} alt={`첨부 이미지 ${index + 1}`} />
   </ImageWrapper>
 ));
 
-PostImageItem.displayName = 'PostImageItem';
+PostImageItem.displayName = "PostImageItem";
 
-export default function BoardDetailClient({ params }: { params: Promise<{ id: string }> }) {
+export default function BoardDetailClient({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const router = useRouter();
   const { data: session } = useSession();
-  const [post, setPost] = useState<BoardPost | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [postId, setPostId] = useState<string>('');
-  const hasFetched = useRef(false);
+  const [postId, setPostId] = useState<string>("");
 
-  // 수정 모드 상태
   const [editing, setEditing] = useState(false);
-  const [editTitle, setEditTitle] = useState('');
-  const [editContent, setEditContent] = useState('');
-  const [saving, setSaving] = useState(false);
-
-  const fetchPost = useCallback(async (id: string) => {
-    try {
-      const response = await fetch(`/api/board/${id}`);
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || '게시글을 불러올 수 없습니다');
-      }
-
-      setPost(data);
-    } catch (error) {
-      console.error('게시글 로딩 오류:', error);
-      alert('게시글을 불러올 수 없습니다');
-      router.push('/board');
-    } finally {
-      setLoading(false);
-    }
-  }, [router]);
+  const [editTitle, setEditTitle] = useState("");
+  const [editContent, setEditContent] = useState("");
 
   useEffect(() => {
-    if (hasFetched.current) return;
-    hasFetched.current = true;
+    params.then(({ id }) => setPostId(id));
+  }, [params]);
 
-    params.then(({ id }) => {
-      setPostId(id);
-      fetchPost(id);
-    });
-  }, [fetchPost]);
+  const { data: post, isLoading } = useBoardDetail(postId);
+  const likeMutation = useLikePost(postId);
+  const updateMutation = useUpdatePost(postId);
+  const deleteMutation = useDeletePost(postId);
 
-  const isAuthor = useMemo(
-    () => post?.userId && session?.user?.id && post.userId === session.user.id,
-    [post?.userId, session?.user?.id]
-  );
+  const isAuthor =
+    post?.userId && session?.user?.id && post.userId === session.user.id;
+  const isLiked = post?.likedBy?.includes(session?.user?.id || "");
 
-  const isLiked = useMemo(
-    () => post?.likedBy?.includes(session?.user?.id || ''),
-    [post?.likedBy, session?.user?.id]
-  );
-
-  const handleLike = useCallback(async () => {
-    if (!postId) return;
-
+  const handleLike = async () => {
     if (!session?.user?.id) {
-      alert('로그인이 필요합니다');
+      alert("로그인이 필요합니다");
       return;
     }
-
     try {
-      const response = await fetch(`/api/board/${postId}/like`, {
-        method: 'POST',
-      });
-      const data = await response.json();
-
-      if (!response.ok) {
-        alert(data.error || '좋아요에 실패했습니다');
-        return;
-      }
-
-      if (post) {
-        setPost({
-          ...post,
-          likes: data.likes,
-          likedBy: data.liked
-            ? [...(post.likedBy || []), session.user.id]
-            : (post.likedBy || []).filter((id) => id !== session.user.id),
-        });
-      }
-    } catch (error) {
-      console.error('좋아요 오류:', error);
+      await likeMutation.mutateAsync();
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "좋아요에 실패했습니다");
     }
-  }, [postId, session?.user?.id, post]);
+  };
 
-  const handleDelete = useCallback(async () => {
-    if (!postId) return;
-    if (!confirm('정말 삭제하시겠습니까?')) return;
-
+  const handleDelete = async () => {
+    if (!confirm("정말 삭제하시겠습니까?")) return;
     try {
-      const response = await fetch(`/api/board/${postId}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        alert('삭제되었습니다');
-        router.push('/board');
-      } else {
-        const data = await response.json();
-        alert(data.error || '삭제에 실패했습니다');
-      }
-    } catch (error) {
-      console.error('삭제 오류:', error);
-      alert('삭제에 실패했습니다');
+      await deleteMutation.mutateAsync();
+      alert("삭제되었습니다");
+      router.push("/board");
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "삭제에 실패했습니다");
     }
-  }, [postId, router]);
+  };
 
-  const startEdit = useCallback(() => {
+  const handleSave = async () => {
+    if (!editTitle.trim() || !editContent.trim()) {
+      alert("제목과 내용을 입력해주세요");
+      return;
+    }
+    try {
+      await updateMutation.mutateAsync({
+        title: editTitle,
+        content: editContent,
+      });
+      setEditing(false);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "수정에 실패했습니다");
+    }
+  };
+
+  const startEdit = () => {
     if (!post) return;
     setEditTitle(post.title);
     setEditContent(post.content);
     setEditing(true);
-  }, [post]);
+  };
 
-  const cancelEdit = useCallback(() => {
+  const cancelEdit = () => {
     setEditing(false);
-    setEditTitle('');
-    setEditContent('');
-  }, []);
+    setEditTitle("");
+    setEditContent("");
+  };
 
-  const handleSave = useCallback(async () => {
-    if (!postId || !editTitle.trim() || !editContent.trim()) {
-      alert('제목과 내용을 입력해주세요');
-      return;
-    }
-
-    setSaving(true);
-    try {
-      const response = await fetch(`/api/board/${postId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: editTitle,
-          content: editContent,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        alert(data.error || '수정에 실패했습니다');
-        return;
-      }
-
-      setPost(data);
-      setEditing(false);
-    } catch (error) {
-      console.error('수정 오류:', error);
-      alert('수정에 실패했습니다');
-    } finally {
-      setSaving(false);
-    }
-  }, [postId, editTitle, editContent]);
-
-  if (loading) return <Spinner />;
+  if (isLoading) return <Spinner />;
   if (!post) return <div>게시글을 찾을 수 없습니다</div>;
 
   return (
@@ -230,7 +156,7 @@ export default function BoardDetailClient({ params }: { params: Promise<{ id: st
           dangerouslySetInnerHTML={{
             __html: isHtmlContent(post.content)
               ? post.content
-              : post.content.replace(/\n/g, '<br>'),
+              : post.content.replace(/\n/g, "<br>"),
           }}
         />
       )}
@@ -249,17 +175,23 @@ export default function BoardDetailClient({ params }: { params: Promise<{ id: st
       <Actions>
         {editing ? (
           <>
-            <SaveButton onClick={handleSave} disabled={saving}>
-              {saving ? '저장 중...' : '저장'}
+            <SaveButton
+              onClick={handleSave}
+              disabled={updateMutation.isPending}
+            >
+              {updateMutation.isPending ? "저장 중..." : "저장"}
             </SaveButton>
-            <CancelButton onClick={cancelEdit} disabled={saving}>
+            <CancelButton
+              onClick={cancelEdit}
+              disabled={updateMutation.isPending}
+            >
               취소
             </CancelButton>
           </>
         ) : (
           <>
             <LikeButton onClick={handleLike} $liked={!!isLiked}>
-              {isLiked ? '좋아요 취소' : '좋아요'} ({post.likes})
+              {isLiked ? "좋아요 취소" : "좋아요"} ({post.likes})
             </LikeButton>
             {isAuthor && (
               <>
@@ -267,7 +199,7 @@ export default function BoardDetailClient({ params }: { params: Promise<{ id: st
                 <DeleteButton onClick={handleDelete}>삭제</DeleteButton>
               </>
             )}
-            <BackButton onClick={() => router.push('/board')}>목록</BackButton>
+            <BackButton onClick={() => router.push("/board")}>목록</BackButton>
           </>
         )}
       </Actions>
@@ -339,7 +271,9 @@ const Content = styled.div`
   margin-bottom: 3rem;
   min-height: 200px;
 
-  p { margin: 0.5rem 0; }
+  p {
+    margin: 0.5rem 0;
+  }
   h2 {
     font-family: ${theme.typography.fontHeading};
     font-size: 1.5rem;
@@ -354,9 +288,16 @@ const Content = styled.div`
     margin: 1.25rem 0 0.5rem;
     line-height: 1.3;
   }
-  strong { font-weight: 600; }
-  em { font-style: italic; }
-  s { text-decoration: line-through; color: ${theme.colors.textTertiary}; }
+  strong {
+    font-weight: 600;
+  }
+  em {
+    font-style: italic;
+  }
+  s {
+    text-decoration: line-through;
+    color: ${theme.colors.textTertiary};
+  }
   blockquote {
     border-left: 3px solid ${theme.colors.accent};
     padding-left: 1rem;
@@ -367,7 +308,9 @@ const Content = styled.div`
   ul {
     padding-left: 1.5rem;
     margin: 0.5rem 0;
-    li { margin: 0.25rem 0; }
+    li {
+      margin: 0.25rem 0;
+    }
   }
   img {
     max-width: 100%;
@@ -426,7 +369,8 @@ const Actions = styled.div`
 
 const LikeButton = styled.button<{ $liked: boolean }>`
   padding: 0.625rem 1.5rem;
-  background: ${(props) => (props.$liked ? theme.colors.accentDark : theme.colors.accent)};
+  background: ${(props) =>
+    props.$liked ? theme.colors.accentDark : theme.colors.accent};
   color: ${theme.colors.textLight};
   border: none;
   border-radius: ${theme.borderRadius.sm};
@@ -436,7 +380,8 @@ const LikeButton = styled.button<{ $liked: boolean }>`
   transition: all ${theme.transitions.normal};
 
   &:hover {
-    background: ${(props) => (props.$liked ? theme.colors.accent : theme.colors.accentDark)};
+    background: ${(props) =>
+      props.$liked ? theme.colors.accent : theme.colors.accentDark};
   }
 
   @media (max-width: ${theme.breakpoints.mobile}) {

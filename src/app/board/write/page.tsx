@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import styled from "styled-components";
 import dynamic from "next/dynamic";
 import Spinner from "@/components/ui/Spinner";
+import { useCreatePost } from "@/hooks/queries/useBoard";
 
 const RichTextEditor = dynamic(
   () => import("@/components/features/board/RichTextEditor"),
@@ -19,7 +20,8 @@ export default function BoardWritePage() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [author, setAuthor] = useState("");
-  const [loading, setLoading] = useState(false);
+  const createPost = useCreatePost();
+  const loading = createPost.isPending;
 
   useEffect(() => {
     if (status === "loading") return;
@@ -35,7 +37,7 @@ export default function BoardWritePage() {
     }
   }, [session]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!title || !content || !author) {
@@ -43,27 +45,19 @@ export default function BoardWritePage() {
       return;
     }
 
-    setLoading(true);
-
-    try {
-      const response = await fetch("/api/board", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, content, author, imageUrls: [] }),
-      });
-
-      if (response.ok) {
-        alert("작성 완료!");
-        router.push("/board");
-      } else {
-        throw new Error("Failed to create post");
+    createPost.mutate(
+      { title, content, author, imageUrls: [] },
+      {
+        onSuccess: () => {
+          alert("작성 완료!");
+          router.push("/board");
+        },
+        onError: (error) => {
+          console.error("작성 오류:", error);
+          alert(error instanceof Error ? error.message : "작성에 실패했습니다");
+        },
       }
-    } catch (error) {
-      console.error("작성 오류:", error);
-      alert("작성에 실패했습니다");
-    } finally {
-      setLoading(false);
-    }
+    );
   };
 
   return (

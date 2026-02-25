@@ -6,6 +6,7 @@ import styled from 'styled-components';
 import { theme } from '@/styles/theme';
 import { formatRelativeTime } from '@/lib/utils/time';
 import CommentForm from './CommentForm';
+import { useUpdateComment, useDeleteComment } from '@/hooks/queries/useBoard';
 
 interface Comment {
   _id: string;
@@ -36,13 +37,17 @@ export default function CommentItem({
 }: CommentItemProps) {
   const { data: session } = useSession();
   const [showReplyForm, setShowReplyForm] = useState(false);
-  const [deleting, setDeleting] = useState(false);
   const [timeText, setTimeText] = useState('');
 
   // 수정 모드 상태
   const [editing, setEditing] = useState(false);
   const [editContent, setEditContent] = useState('');
-  const [saving, setSaving] = useState(false);
+
+  const updateComment = useUpdateComment(comment.boardId);
+  const deleteComment = useDeleteComment(comment.boardId);
+
+  const deleting = deleteComment.isPending;
+  const saving = updateComment.isPending;
 
   const isAuthor = comment.userId && session?.user?.id && comment.userId === session.user.id;
 
@@ -50,30 +55,15 @@ export default function CommentItem({
     setTimeText(formatRelativeTime(comment.createdAt));
   }, [comment.createdAt]);
 
-  const handleDelete = async () => {
-    if (!confirm('댓글을 삭제하시겠습니까?')) {
-      return;
-    }
-
-    setDeleting(true);
-
-    try {
-      const response = await fetch(`/api/board/comments/${comment._id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || '댓글 삭제에 실패했습니다');
-      }
-
-      onDelete(comment._id);
-    } catch (error) {
-      console.error('댓글 삭제 오류:', error);
-      alert(error instanceof Error ? error.message : '댓글 삭제에 실패했습니다');
-    } finally {
-      setDeleting(false);
-    }
+  const handleDelete = () => {
+    if (!confirm('댓글을 삭제하시겠습니까?')) return;
+    deleteComment.mutate(comment._id, {
+      onSuccess: () => onDelete(comment._id),
+      onError: (error) => {
+        console.error('댓글 삭제 오류:', error);
+        alert(error instanceof Error ? error.message : '댓글 삭제에 실패했습니다');
+      },
+    });
   };
 
   const startEdit = () => {
@@ -86,33 +76,21 @@ export default function CommentItem({
     setEditContent('');
   };
 
-  const handleSave = async () => {
+  const handleSave = () => {
     if (!editContent.trim()) {
       alert('댓글 내용을 입력해주세요');
       return;
     }
-
-    setSaving(true);
-    try {
-      const response = await fetch(`/api/board/comments/${comment._id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: editContent }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || '댓글 수정에 실패했습니다');
+    updateComment.mutate(
+      { commentId: comment._id, content: editContent },
+      {
+        onSuccess: () => setEditing(false),
+        onError: (error) => {
+          console.error('댓글 수정 오류:', error);
+          alert(error instanceof Error ? error.message : '댓글 수정에 실패했습니다');
+        },
       }
-
-      setEditing(false);
-      onReplySubmit(); // 댓글 목록 새로고침
-    } catch (error) {
-      console.error('댓글 수정 오류:', error);
-      alert(error instanceof Error ? error.message : '댓글 수정에 실패했습니다');
-    } finally {
-      setSaving(false);
-    }
+    );
   };
 
   const handleReplySuccess = () => {

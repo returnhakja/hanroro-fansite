@@ -1,42 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import styled from 'styled-components';
 import Spinner from '@/components/ui/Spinner';
 import { theme } from '@/styles/theme';
-
-interface BoardPost {
-  _id: string;
-  title: string;
-  author: string;
-  createdAt: string;
-  views: number;
-  likes: number;
-}
+import { useBoardList } from '@/hooks/queries/useBoard';
 
 export default function BoardPage() {
   const router = useRouter();
-  const [posts, setPosts] = useState<BoardPost[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: posts = [], isLoading } = useBoardList();
 
-  useEffect(() => {
-    fetchPosts();
-  }, []);
-
-  const fetchPosts = async () => {
-    try {
-      const response = await fetch('/api/board');
-      const data = await response.json();
-      setPosts(data);
-    } catch (error) {
-      console.error('게시글 로딩 오류:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) return <Spinner />;
+  if (isLoading) return <Spinner />;
 
   return (
     <Container>

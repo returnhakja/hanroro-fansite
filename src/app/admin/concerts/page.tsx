@@ -2,36 +2,24 @@
 
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
-
-interface Concert {
-  _id: string;
-  title: string;
-  venue: string;
-  startDate: string;
-  endDate: string;
-  posterUrl?: string;
-  isActive: boolean;
-}
-
-interface SetList {
-  _id: string;
-  concertId: string;
-  day: number;
-  date: string;
-  songs: Song[];
-}
-
-interface Song {
-  title: string;
-  albumImageUrl?: string;
-  order: number;
-}
+import {
+  useAdminConcerts,
+  useSetlists,
+  useCreateConcert,
+  useUpdateConcert,
+  useDeleteConcert,
+  useToggleConcertActive,
+  useCreateSetlist,
+  useUpdateSetlist,
+  useDeleteSetlist,
+  type Concert,
+  type SetList,
+  type Song,
+} from '@/hooks/queries/useConcerts';
 
 export default function AdminConcertsPage() {
-  const [concerts, setConcerts] = useState<Concert[]>([]);
+  const { data: concerts = [], isLoading } = useAdminConcerts();
   const [selectedConcert, setSelectedConcert] = useState<Concert | null>(null);
-  const [setlists, setSetlists] = useState<SetList[]>([]);
-  const [loading, setLoading] = useState(true);
   const [showConcertModal, setShowConcertModal] = useState(false);
   const [showSetlistModal, setShowSetlistModal] = useState(false);
   const [editingConcert, setEditingConcert] = useState<Concert | null>(null);
@@ -51,180 +39,85 @@ export default function AdminConcertsPage() {
     songs: [] as Song[],
   });
 
+  // concerts 로드 완료 후 첫 번째 공연 자동 선택
   useEffect(() => {
-    fetchConcerts();
-  }, []);
-
-  useEffect(() => {
-    if (selectedConcert) {
-      fetchSetlists(selectedConcert._id);
+    if (concerts.length > 0 && !selectedConcert) {
+      setSelectedConcert(concerts[0]);
     }
-  }, [selectedConcert]);
+  }, [concerts, selectedConcert]);
 
-  const fetchConcerts = async () => {
-    try {
-      const token = localStorage.getItem('adminToken');
-      const res = await fetch('/api/admin/concerts', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+  const { data: setlists = [] } = useSetlists(selectedConcert?._id ?? null);
 
-      if (res.ok) {
-        const data = await res.json();
-        setConcerts(data.concerts);
-        if (data.concerts.length > 0 && !selectedConcert) {
-          setSelectedConcert(data.concerts[0]);
-        }
-      }
-    } catch (error) {
-      console.error('공연 목록 조회 실패:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchSetlists = async (concertId: string) => {
-    try {
-      const token = localStorage.getItem('adminToken');
-      const res = await fetch(`/api/admin/setlists?concertId=${concertId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setSetlists(data.setlists);
-      }
-    } catch (error) {
-      console.error('셋리스트 조회 실패:', error);
-    }
-  };
+  const createConcert = useCreateConcert();
+  const updateConcert = useUpdateConcert();
+  const deleteConcert = useDeleteConcert();
+  const toggleActive = useToggleConcertActive();
+  const createSetlist = useCreateSetlist(selectedConcert?._id ?? '');
+  const updateSetlist = useUpdateSetlist(selectedConcert?._id ?? '');
+  const deleteSetlist = useDeleteSetlist(selectedConcert?._id ?? '');
 
   const handleSaveConcert = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
-      const token = localStorage.getItem('adminToken');
-      const url = editingConcert
-        ? `/api/admin/concerts/${editingConcert._id}`
-        : '/api/admin/concerts';
-      const method = editingConcert ? 'PUT' : 'POST';
-
-      const res = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(concertForm),
-      });
-
-      if (res.ok) {
-        await fetchConcerts();
-        handleCloseConcertModal();
+      if (editingConcert) {
+        await updateConcert.mutateAsync({ id: editingConcert._id, body: concertForm });
       } else {
-        const data = await res.json();
-        alert(data.error || '저장 실패');
+        await createConcert.mutateAsync(concertForm as any);
       }
-    } catch (error) {
-      console.error('공연 저장 실패:', error);
-      alert('저장 중 오류가 발생했습니다');
+      handleCloseConcertModal();
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : '저장 실패');
     }
   };
 
   const handleDeleteConcert = async (id: string) => {
     if (!confirm('공연을 삭제하면 해당 셋리스트도 모두 삭제됩니다. 계속하시겠습니까?'))
       return;
-
     try {
-      const token = localStorage.getItem('adminToken');
-      const res = await fetch(`/api/admin/concerts/${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (res.ok) {
-        await fetchConcerts();
-        if (selectedConcert?._id === id) {
-          setSelectedConcert(null);
-          setSetlists([]);
-        }
+      await deleteConcert.mutateAsync(id);
+      if (selectedConcert?._id === id) {
+        setSelectedConcert(null);
       }
-    } catch (error) {
-      console.error('공연 삭제 실패:', error);
+    } catch (err: unknown) {
+      console.error('공연 삭제 실패:', err);
     }
   };
 
   const handleToggleActive = async (concert: Concert) => {
     try {
-      const token = localStorage.getItem('adminToken');
-      const res = await fetch(`/api/admin/concerts/${concert._id}/activate`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ isActive: !concert.isActive }),
-      });
-
-      if (res.ok) {
-        await fetchConcerts();
-      }
-    } catch (error) {
-      console.error('공연 활성화 실패:', error);
+      await toggleActive.mutateAsync({ id: concert._id, isActive: !concert.isActive });
+    } catch (err: unknown) {
+      console.error('공연 활성화 실패:', err);
     }
   };
 
   const handleSaveSetlist = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!selectedConcert) return;
-
     try {
-      const token = localStorage.getItem('adminToken');
-      const url = editingSetlist
-        ? `/api/admin/setlists/${editingSetlist._id}`
-        : '/api/admin/setlists';
-      const method = editingSetlist ? 'PUT' : 'POST';
-
-      const res = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
+      if (editingSetlist) {
+        await updateSetlist.mutateAsync({
+          id: editingSetlist._id,
+          body: { day: setlistForm.day, date: setlistForm.date, songs: setlistForm.songs },
+        });
+      } else {
+        await createSetlist.mutateAsync({
           ...setlistForm,
           concertId: selectedConcert._id,
-        }),
-      });
-
-      if (res.ok) {
-        await fetchSetlists(selectedConcert._id);
-        handleCloseSetlistModal();
-      } else {
-        const data = await res.json();
-        alert(data.error || '저장 실패');
+        });
       }
-    } catch (error) {
-      console.error('셋리스트 저장 실패:', error);
-      alert('저장 중 오류가 발생했습니다');
+      handleCloseSetlistModal();
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : '저장 실패');
     }
   };
 
   const handleDeleteSetlist = async (id: string) => {
     if (!confirm('정말 삭제하시겠습니까?')) return;
-
     try {
-      const token = localStorage.getItem('adminToken');
-      const res = await fetch(`/api/admin/setlists/${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (res.ok && selectedConcert) {
-        await fetchSetlists(selectedConcert._id);
-      }
-    } catch (error) {
-      console.error('셋리스트 삭제 실패:', error);
+      await deleteSetlist.mutateAsync(id);
+    } catch (err: unknown) {
+      console.error('셋리스트 삭제 실패:', err);
     }
   };
 
@@ -309,7 +202,7 @@ export default function AdminConcertsPage() {
     setSetlistForm({ ...setlistForm, songs: newSongs });
   };
 
-  if (loading) {
+  if (isLoading) {
     return <Container>로딩 중...</Container>;
   }
 

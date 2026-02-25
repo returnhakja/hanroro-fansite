@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -28,138 +28,58 @@ import {
   BoardList,
   BoardItem,
   BoardItemTitle,
-  BoardItemMeta, TwoColumnItem, TabWrapper,
+  BoardItemMeta,
+  TwoColumnItem,
+  TabWrapper,
   TabButton,
   SetlistCard,
   SetListItem,
   SongOrder,
-  AlbumThumb, VideoSection,
+  AlbumThumb,
+  VideoSection,
   SpinnerWrapper,
   StyledSlider,
   VideoSlide,
   VideoWrapper,
   Thumbnail,
-  StyledIframe
+  StyledIframe,
 } from "./Home.styles";
 import { useReducedMotion } from "framer-motion";
-
-interface Image {
-  _id: string;
-  title: string;
-  filename: string;
-  imageUrl: string;
-  createdAt: string;
-  __v: number;
-}
-
-interface BoardPost {
-  _id: string;
-  title: string;
-  author: string;
-  createdAt: string;
-  views: number;
-  likes: number;
-}
+import { useYoutubeVideos } from "@/hooks/queries/useYoutube";
+import { useImages } from "@/hooks/queries/useGallery";
+import { useBoardList } from "@/hooks/queries/useBoard";
+import { useActiveSetlist } from "@/hooks/queries/useConcerts";
+import { useUpcomingEvents } from "@/hooks/queries/useEvents";
 
 const Home = () => {
   const router = useRouter();
   const setListRef = useRef<HTMLDivElement>(null);
   const shouldReduceMotion = useReducedMotion();
 
-  const [videos, setVideos] = useState<{ id: string; title: string }[]>([]);
-  const [images, setImages] = useState<Image[]>([]);
-  const [posts, setPosts] = useState<BoardPost[]>([]);
-  const [loading, setLoading] = useState(true);
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [activeTab, setActiveTab] = useState<number>(0);
 
-  const [concert, setConcert] = useState<any>(null);
-  const [setlists, setSetlists] = useState<any[]>([]);
-  const [setlistLoading, setSetlistLoading] = useState(true);
-  const [upcomingEvents, setUpcomingEvents] = useState<any[]>([]);
+  const { data: videoData, isLoading: loading } = useYoutubeVideos();
+  const { data: imageData } = useImages();
+  const { data: postData } = useBoardList();
+  const { data: activeSetlistData, isLoading: setlistLoading } =
+    useActiveSetlist();
+  const { data: eventData } = useUpcomingEvents();
+
+  const videos = videoData ?? [];
+  const images = imageData?.slice(0, 6) ?? [];
+  const posts = postData?.slice(0, 5) ?? [];
+  const concert = activeSetlistData?.concert;
+  const setlists = activeSetlistData?.setlists ?? [];
+  const upcomingEvents = (eventData || [])
+    .filter((e) => new Date(e.date) >= new Date())
+    .slice(0, 2);
 
   useLayoutEffect(() => {
     if (setListRef.current) {
       setListRef.current.scrollTop = 0;
     }
   }, [activeTab]);
-
-  useEffect(() => {
-    const fetchVideos = async () => {
-      try {
-        const res = await fetch('/api/youtube/videos');
-        const data = await res.json();
-        const videoData = data.items.map((item: any) => ({
-          id: item.id.videoId,
-          title: item.snippet.title,
-        }));
-        setVideos(videoData);
-      } catch (err) {
-        console.error("유튜브 영상 불러오기 실패:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchVideos();
-  }, []);
-
-  useEffect(() => {
-    const loadImages = async () => {
-      try {
-        const res = await fetch('/api/images');
-        const data = await res.json();
-        setImages(data.slice(0, 6));
-      } catch (err) {
-        console.error("이미지 불러오기 실패:", err);
-      }
-    };
-    loadImages();
-  }, []);
-
-  useEffect(() => {
-    const loadPosts = async () => {
-      try {
-        const res = await fetch('/api/board');
-        const data = await res.json();
-        setPosts(data.slice(0, 5));
-      } catch (err) {
-        console.error("게시글 불러오기 실패:", err);
-      }
-    };
-    loadPosts();
-  }, []);
-
-  useEffect(() => {
-    const loadSetlists = async () => {
-      try {
-        const res = await fetch('/api/setlists/active');
-        const data = await res.json();
-        setConcert(data.concert);
-        setSetlists(data.setlists);
-      } catch (err) {
-        console.error("셋리스트 불러오기 실패:", err);
-      } finally {
-        setSetlistLoading(false);
-      }
-    };
-    loadSetlists();
-  }, []);
-
-  useEffect(() => {
-    const loadUpcomingEvents = async () => {
-      try {
-        const res = await fetch('/api/events/upcoming');
-        const data = await res.json();
-        const futureEvents = (data.events || [])
-          .filter((event: any) => new Date(event.date) >= new Date())
-          .slice(0, 2);
-        setUpcomingEvents(futureEvents);
-      } catch (err) {
-        console.error("일정 불러오기 실패:", err);
-      }
-    };
-    loadUpcomingEvents();
-  }, []);
 
   const settings = useMemo(
     () => ({
@@ -172,7 +92,7 @@ const Home = () => {
         setActiveIndex(index);
       },
     }),
-    [videos]
+    [videos],
   );
 
   const memoizedSlides = useMemo(
@@ -196,22 +116,22 @@ const Home = () => {
           </VideoWrapper>
         </VideoSlide>
       )),
-    [videos, activeIndex]
+    [videos, activeIndex],
   );
 
   const scrollToContent = () => {
     window.scrollTo({
       top: window.innerHeight,
-      behavior: 'smooth'
+      behavior: "smooth",
     });
   };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+    return date.toLocaleDateString("ko-KR", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
@@ -222,7 +142,7 @@ const Home = () => {
         <HeroBackground
           initial={{ scale: 1.1 }}
           animate={{ scale: 1 }}
-          transition={{ duration: 1.5, ease: 'easeOut' }}
+          transition={{ duration: 1.5, ease: "easeOut" }}
         />
         <HeroOverlay />
 
@@ -263,7 +183,7 @@ const Home = () => {
             <SectionOverline>LATEST</SectionOverline>
             <SectionTitle>최신 소식</SectionTitle>
           </SectionHeaderLeft>
-          <SectionLink onClick={() => router.push('/board')}>
+          <SectionLink onClick={() => router.push("/board")}>
             더 보기
           </SectionLink>
         </SectionHeader>
@@ -295,7 +215,7 @@ const Home = () => {
             <SectionOverline>GALLERY</SectionOverline>
             <SectionTitle>갤러리</SectionTitle>
           </SectionHeaderLeft>
-          <SectionLink onClick={() => router.push('/gallery')}>
+          <SectionLink onClick={() => router.push("/gallery")}>
             전체 보기
           </SectionLink>
         </SectionHeader>
@@ -307,7 +227,7 @@ const Home = () => {
               whileInView={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              onClick={() => router.push('/gallery')}
+              onClick={() => router.push("/gallery")}
             >
               <img src={image.imageUrl} alt={image.title} />
               <GalleryItemOverlay>
@@ -325,7 +245,7 @@ const Home = () => {
             <SectionOverline>SCHEDULE</SectionOverline>
             <SectionTitle>다가오는 일정</SectionTitle>
           </SectionHeaderLeft>
-          <SectionLink onClick={() => router.push('/schedule')}>
+          <SectionLink onClick={() => router.push("/schedule")}>
             전체 보기
           </SectionLink>
         </SectionHeader>
@@ -338,7 +258,7 @@ const Home = () => {
                 whileInView={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: index * 0.08 }}
-                onClick={() => router.push('/schedule')}
+                onClick={() => router.push("/schedule")}
               >
                 <BoardItemTitle>{event.title}</BoardItemTitle>
                 <BoardItemMeta>
@@ -367,9 +287,11 @@ const Home = () => {
         <SectionHeader>
           <SectionHeaderLeft>
             <SectionOverline>SETLIST</SectionOverline>
-            <SectionTitle>{concert?.title || '최근 공연 셋리스트'}</SectionTitle>
+            <SectionTitle>
+              {concert?.title || "최근 공연 셋리스트"}
+            </SectionTitle>
           </SectionHeaderLeft>
-          <SectionLink onClick={() => router.push('/setlist')}>
+          <SectionLink onClick={() => router.push("/setlist")}>
             전체 보기
           </SectionLink>
         </SectionHeader>
@@ -403,7 +325,7 @@ const Home = () => {
                 .slice(0, 10)
                 .map((song: any, index: number) => (
                   <SetListItem key={index}>
-                    <SongOrder>{String(song.order).padStart(2, '0')}</SongOrder>
+                    <SongOrder>{String(song.order).padStart(2, "0")}</SongOrder>
                     {song.albumImageUrl && (
                       <AlbumThumb src={song.albumImageUrl} alt={song.title} />
                     )}
@@ -427,8 +349,12 @@ const Home = () => {
 
       {/* Video Section */}
       <VideoSection>
-        <SectionOverline style={{ textAlign: 'center' }}>VIDEOS</SectionOverline>
-        <SectionTitle style={{ textAlign: 'center' }}>Latest Videos</SectionTitle>
+        <SectionOverline style={{ textAlign: "center" }}>
+          VIDEOS
+        </SectionOverline>
+        <SectionTitle style={{ textAlign: "center" }}>
+          Latest Videos
+        </SectionTitle>
         {loading ? (
           <SpinnerWrapper>
             <Spinner />

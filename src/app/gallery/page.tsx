@@ -7,65 +7,41 @@ import Modal from 'react-modal';
 import { CloseButton } from '@/components/ui/CloseButton';
 import Spinner from '@/components/ui/Spinner';
 import { theme } from '@/styles/theme';
-
-interface ImageType {
-  _id: string;
-  title: string;
-  imageUrl: string;
-  userId?: string | null;
-  createdAt: string;
-}
+import { useImages, useUploadImage, useDeleteImage } from '@/hooks/queries/useGallery';
 
 export default function GalleryPage() {
   const { data: session } = useSession();
-  const [images, setImages] = useState<ImageType[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedImg, setSelectedImg] = useState<ImageType | null>(null);
+  const { data, isLoading: loading } = useImages();
+  const images = data ?? [];
+
+  const uploadMutation = useUploadImage();
+  const deleteMutation = useDeleteImage();
+
+  const [selectedImg, setSelectedImg] = useState<typeof images[number] | null>(null);
 
   // 업로드 관련 상태
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploadTitle, setUploadTitle] = useState('');
   const [preview, setPreview] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
 
+  // Modal 접근성 설정
   useEffect(() => {
-    fetchImages();
-    // Modal 접근성 설정
     Modal.setAppElement('body');
   }, []);
 
-  const fetchImages = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('/api/images');
-      const data = await response.json();
-      setImages(data);
-    } catch (error) {
-      console.error('이미지 로딩 오류:', error);
-      alert('이미지를 불러올 수 없습니다');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
     if (!confirm('정말 삭제하시겠습니까?')) return;
-
-    try {
-      const response = await fetch(`/api/image/${id}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        setImages(images.filter((img) => img._id !== id));
+    deleteMutation.mutate(id, {
+      onSuccess: () => {
         setSelectedImg(null);
         alert('삭제되었습니다');
-      }
-    } catch (error) {
-      console.error('삭제 오류:', error);
-      alert('삭제에 실패했습니다');
-    }
+      },
+      onError: (err) => {
+        console.error('삭제 오류:', err);
+        alert('삭제에 실패했습니다');
+      },
+    });
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -76,38 +52,27 @@ export default function GalleryPage() {
     }
   };
 
-  const handleUpload = async () => {
+  const handleUpload = () => {
     if (!uploadFile || !uploadTitle.trim()) {
       alert('파일과 제목을 모두 입력해주세요');
       return;
     }
 
-    try {
-      setUploading(true);
-      const formData = new FormData();
-      formData.append('image', uploadFile);
-      formData.append('title', uploadTitle);
+    const formData = new FormData();
+    formData.append('image', uploadFile);
+    formData.append('title', uploadTitle);
 
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (response.ok) {
+    uploadMutation.mutate(formData, {
+      onSuccess: () => {
         alert('업로드 성공!');
         setUploadModalOpen(false);
         resetUploadForm();
-        fetchImages(); // 이미지 목록 새로고침
-      } else {
-        const error = await response.json();
-        alert(error.error || '업로드 실패');
-      }
-    } catch (error) {
-      console.error('업로드 오류:', error);
-      alert('업로드에 실패했습니다');
-    } finally {
-      setUploading(false);
-    }
+      },
+      onError: (err) => {
+        console.error('업로드 오류:', err);
+        alert(err instanceof Error ? err.message : '업로드에 실패했습니다');
+      },
+    });
   };
 
   const resetUploadForm = () => {
@@ -133,6 +98,8 @@ export default function GalleryPage() {
       alert('다운로드에 실패했습니다');
     }
   };
+
+  const uploading = uploadMutation.isPending;
 
   if (loading) return <Spinner />;
 

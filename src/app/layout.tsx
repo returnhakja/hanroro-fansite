@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import StyledComponentsRegistry from "@/components/providers/StyledComponentsRegistry";
+import { QueryProvider } from "@/components/providers/QueryProvider";
 import AuthProvider from "@/components/providers/AuthProvider";
 import { LoadingProvider } from "@/components/providers/LoadingProvider";
 import Header from "@/components/layout/Header";
@@ -127,17 +128,19 @@ export default function RootLayout({
       </head>
       <body>
         <StyledComponentsRegistry>
-          <AuthProvider>
-            <LoadingProvider>
-              <Header />
-              <main
-                style={{ minHeight: "calc(100vh - 200px)", paddingTop: "70px" }}
-              >
-                {children}
-              </main>
-              <Footer />
-            </LoadingProvider>
-          </AuthProvider>
+          <QueryProvider>
+            <AuthProvider>
+              <LoadingProvider>
+                <Header />
+                <main
+                  style={{ minHeight: "calc(100vh - 200px)", paddingTop: "70px" }}
+                >
+                  {children}
+                </main>
+                <Footer />
+              </LoadingProvider>
+            </AuthProvider>
+          </QueryProvider>
         </StyledComponentsRegistry>
       </body>
     </html>
