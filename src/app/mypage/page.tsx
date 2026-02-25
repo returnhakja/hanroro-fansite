@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSession, signIn } from 'next-auth/react';
+import { useSession, signIn, signOut } from 'next-auth/react';
 import styled from 'styled-components';
 import { theme } from '@/styles/theme';
 
@@ -12,6 +12,8 @@ export default function MyPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const [withdrawing, setWithdrawing] = useState(false);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -64,6 +66,25 @@ export default function MyPage() {
       setError('저장에 실패했습니다');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleWithdraw = async () => {
+    setWithdrawing(true);
+    try {
+      const res = await fetch('/api/user/profile', { method: 'DELETE' });
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.error || '회원탈퇴에 실패했습니다');
+        setShowWithdrawModal(false);
+        return;
+      }
+      await signOut({ callbackUrl: '/' });
+    } catch {
+      setError('회원탈퇴에 실패했습니다');
+      setShowWithdrawModal(false);
+    } finally {
+      setWithdrawing(false);
     }
   };
 
@@ -147,7 +168,36 @@ export default function MyPage() {
             {saving ? '저장 중...' : '저장'}
           </SaveButton>
         </Form>
+
+        <WithdrawSection>
+          <WithdrawButton onClick={() => setShowWithdrawModal(true)}>
+            회원탈퇴
+          </WithdrawButton>
+        </WithdrawSection>
       </ProfileCard>
+
+      {showWithdrawModal && (
+        <ModalOverlay onClick={() => !withdrawing && setShowWithdrawModal(false)}>
+          <Modal onClick={(e) => e.stopPropagation()}>
+            <ModalTitle>회원탈퇴</ModalTitle>
+            <ModalMessage>
+              정말로 탈퇴하시겠습니까?<br />
+              탈퇴 시 모든 데이터가 삭제되며 복구할 수 없습니다.
+            </ModalMessage>
+            <ModalButtons>
+              <ModalCancelButton
+                onClick={() => setShowWithdrawModal(false)}
+                disabled={withdrawing}
+              >
+                취소
+              </ModalCancelButton>
+              <ModalConfirmButton onClick={handleWithdraw} disabled={withdrawing}>
+                {withdrawing ? '처리 중...' : '탈퇴하기'}
+              </ModalConfirmButton>
+            </ModalButtons>
+          </Modal>
+        </ModalOverlay>
+      )}
     </Container>
   );
 }
@@ -356,5 +406,110 @@ const LoginButton = styled.button`
 
   &:hover {
     background: ${theme.colors.primaryDark};
+  }
+`;
+
+const WithdrawSection = styled.div`
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid ${theme.colors.border};
+  display: flex;
+  justify-content: flex-end;
+`;
+
+const WithdrawButton = styled.button`
+  padding: 0.5rem 1rem;
+  background: transparent;
+  color: ${theme.colors.textTertiary};
+  border: 1px solid ${theme.colors.border};
+  border-radius: ${theme.borderRadius.sm};
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all ${theme.transitions.fast};
+
+  &:hover {
+    color: ${theme.colors.error};
+    border-color: ${theme.colors.error};
+  }
+`;
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+`;
+
+const Modal = styled.div`
+  background: ${theme.colors.surface};
+  border-radius: ${theme.borderRadius.md};
+  padding: 2rem;
+  width: 100%;
+  max-width: 400px;
+`;
+
+const ModalTitle = styled.h2`
+  font-family: ${theme.typography.fontHeading};
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${theme.colors.textPrimary};
+  margin: 0 0 0.75rem 0;
+`;
+
+const ModalMessage = styled.p`
+  color: ${theme.colors.textSecondary};
+  line-height: 1.6;
+  margin: 0 0 1.5rem 0;
+  font-size: 0.95rem;
+`;
+
+const ModalButtons = styled.div`
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+`;
+
+const ModalCancelButton = styled.button`
+  padding: 0.625rem 1.25rem;
+  background: transparent;
+  color: ${theme.colors.textSecondary};
+  border: 1px solid ${theme.colors.border};
+  border-radius: ${theme.borderRadius.sm};
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all ${theme.transitions.fast};
+
+  &:hover:not(:disabled) {
+    border-color: ${theme.colors.textSecondary};
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+const ModalConfirmButton = styled.button`
+  padding: 0.625rem 1.25rem;
+  background: ${theme.colors.error};
+  color: #fff;
+  border: none;
+  border-radius: ${theme.borderRadius.sm};
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity ${theme.transitions.fast};
+
+  &:hover:not(:disabled) {
+    opacity: 0.85;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 `;

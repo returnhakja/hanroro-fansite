@@ -39,6 +39,37 @@ export async function GET() {
   }
 }
 
+// 회원탈퇴
+export async function DELETE() {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: '로그인이 필요합니다' },
+        { status: 401 }
+      );
+    }
+
+    await connectDB();
+    const deleted = await User.findByIdAndDelete(session.user.id);
+
+    if (!deleted) {
+      return NextResponse.json(
+        { error: '유저를 찾을 수 없습니다' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ message: '회원탈퇴가 완료되었습니다' });
+  } catch (error) {
+    console.error('회원탈퇴 오류:', error);
+    return NextResponse.json(
+      { error: '회원탈퇴에 실패했습니다' },
+      { status: 500 }
+    );
+  }
+}
+
 // 닉네임 업데이트
 export async function PUT(request: NextRequest) {
   try {
