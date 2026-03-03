@@ -44,6 +44,9 @@ dependencies:
   bcryptjs:
     specifier: ^3.0.3
     version: 3.0.3
+  canvas-confetti:
+    specifier: ^1.9.4
+    version: 1.9.4
   dotenv:
     specifier: ^17.2.3
     version: 17.2.4
@@ -94,6 +97,9 @@ devDependencies:
   '@types/bcryptjs':
     specifier: ^3.0.0
     version: 3.0.0
+  '@types/canvas-confetti':
+    specifier: ^1.9.0
+    version: 1.9.0
   '@types/jsonwebtoken':
     specifier: ^9.0.10
     version: 9.0.10
@@ -1351,6 +1357,10 @@ packages:
       bcryptjs: 3.0.3
     dev: true
 
+  /@types/canvas-confetti@1.9.0:
+    resolution: {integrity: sha512-aBGj/dULrimR1XDZLtG9JwxX1b4HPRF6CX9Yfwh3NvstZEm1ZL7RBnel4keCPSqs1ANRu1u2Aoz9R+VmtjYuTg==}
+    dev: true
+
   /@types/caseless@0.12.5:
     resolution: {integrity: sha512-hWtVTC2q7hc7xZ/RLbxapMvDMgUnDvKvMOpKal4DrMyfGBUfB1oKaZlIRr6mJL+If3bAP6sV/QneGzF6tJjZDg==}
     requiresBuild: true
@@ -1603,6 +1613,10 @@ packages:
 
   /caniuse-lite@1.0.30001769:
     resolution: {integrity: sha512-BCfFL1sHijQlBGWBMuJyhZUhzo7wer5sVj9hqekB/7xn0Ypy+pER/edCYQm4exbXj4WiySGp40P8UuTh6w1srg==}
+    dev: false
+
+  /canvas-confetti@1.9.4:
+    resolution: {integrity: sha512-yxQbJkAVrFXWNbTUjPqjF7G+g6pDotOUHGbkZq2NELZUMDpiJ85rIEazVb8GTaAptNW2miJAXbs1BtioA251Pw==}
     dev: false
 
   /classnames@2.5.1:

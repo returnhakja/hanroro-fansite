@@ -20,6 +20,7 @@
     "@vercel/blob": "^2.0.1",
     "axios": "^1.13.2",
     "bcryptjs": "^3.0.3",
+    "canvas-confetti": "^1.9.4",
     "dotenv": "^17.2.3",
     "firebase-admin": "^13.6.0",
     "framer-motion": "^12.29.2",
@@ -46,6 +47,7 @@
   },
   "devDependencies": {
     "@types/bcryptjs": "^3.0.0",
+    "@types/canvas-confetti": "^1.9.0",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.1.0",
     "@types/react-modal": "^3.16.3",

@@ -95,6 +95,49 @@ export const HeroSubtitle = styled(motion.p)`
   }
 `;
 
+export const AwardBadge = styled(motion.div)`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+  padding: 0.5rem 1.25rem 0.5rem 0.5rem;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid ${theme.colors.accent};
+  border-radius: ${theme.borderRadius.full};
+  color: ${theme.colors.accentLight};
+  font-family: ${theme.typography.fontBody};
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  backdrop-filter: blur(10px);
+  box-shadow:
+    0 0 24px rgba(201, 169, 110, 0.25),
+    inset 0 0 16px rgba(201, 169, 110, 0.06);
+  line-height: 1.6;
+  white-space: nowrap;
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    font-size: 0.6875rem;
+    padding: 0.4rem 1rem 0.4rem 0.4rem;
+    gap: 0.5rem;
+    white-space: normal;
+  }
+`;
+
+export const AwardBadgeImage = styled.img`
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid ${theme.colors.accent};
+  flex-shrink: 0;
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    width: 48px;
+    height: 48px;
+  }
+`;
+
 export const ScrollIndicator = styled(motion.div)`
   position: absolute;
   bottom: 3rem;

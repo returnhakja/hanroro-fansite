@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Spinner from "@/components/Spinner";
+import AwardModal from "@/components/ui/AwardModal";
 
 import {
   Container,
@@ -14,6 +15,8 @@ import {
   HeroContent,
   HeroTitle,
   HeroSubtitle,
+  AwardBadge,
+  AwardBadgeImage,
   ScrollIndicator,
   GalleryPreviewSection,
   SectionOverline,
@@ -58,6 +61,7 @@ const Home = () => {
 
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [activeTab, setActiveTab] = useState<number>(0);
+  const [isAwardModalOpen, setIsAwardModalOpen] = useState(false);
 
   const { data: videoData, isLoading: loading } = useYoutubeVideos();
   const { data: imageData } = useImages();
@@ -166,6 +170,20 @@ const Home = () => {
           >
             Singer-Songwriter
           </HeroSubtitle>
+
+          <AwardBadge
+            initial={shouldReduceMotion ? {} : { opacity: 0, y: 10 }}
+            animate={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 1.1 }}
+            onClick={() => setIsAwardModalOpen(true)}
+            style={{ cursor: "pointer" }}
+          >
+            <AwardBadgeImage
+              src="/assets/대중음악상.jpg"
+              alt="2026 한국대중음악상"
+            />
+            🏆 &nbsp;2026 제23회 한국대중음악상 &nbsp;·&nbsp; 올해의 음악인
+          </AwardBadge>
         </HeroContent>
 
         <ScrollIndicator
@@ -363,6 +381,11 @@ const Home = () => {
           <StyledSlider {...settings}>{memoizedSlides}</StyledSlider>
         )}
       </VideoSection>
+
+      <AwardModal
+        isOpen={isAwardModalOpen}
+        onClose={() => setIsAwardModalOpen(false)}
+      />
     </Container>
   );
 };
