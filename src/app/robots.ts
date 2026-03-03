@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/api/', '/upload/'],
+        disallow: ['/api/', '/upload/', '/admin/'],
       },
     ],
     sitemap: 'https://hanroro-fansite.vercel.app/sitemap.xml',

@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import StructuredData from '@/components/seo/StructuredData';
 
 export const metadata: Metadata = {
   title: '게시판',
@@ -10,6 +11,23 @@ export const metadata: Metadata = {
     url: 'https://hanroro-fansite.vercel.app/board',
     type: 'website',
   },
+  alternates: {
+    canonical: 'https://hanroro-fansite.vercel.app/board',
+  },
+};
+
+const forumSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'DiscussionForum',
+  name: '한로로 팬 게시판',
+  description: '한로로 팬들의 소통 공간. 공연 후기, 팬 활동, 정보 공유 등 다양한 이야기를 나눠보세요.',
+  url: 'https://hanroro-fansite.vercel.app/board',
+  inLanguage: 'ko-KR',
+  isPartOf: {
+    '@type': 'WebSite',
+    name: '한로로 팬사이트',
+    url: 'https://hanroro-fansite.vercel.app',
+  },
 };
 
 export default function BoardLayout({
@@ -17,5 +35,10 @@ export default function BoardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return (
+    <>
+      <StructuredData data={forumSchema} />
+      {children}
+    </>
+  );
 }

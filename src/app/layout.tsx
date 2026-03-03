@@ -110,6 +110,23 @@ export default function RootLayout({
     },
   };
 
+  const musicGroupSchema = {
+    "@context": "https://schema.org",
+    "@type": "MusicGroup",
+    name: "한로로",
+    alternateName: "HANRORO",
+    description: "감성적인 음악으로 많은 팬들의 사랑을 받는 싱어송라이터",
+    genre: ["인디팝", "발라드", "K-POP"],
+    url: "https://hanroro-fansite.vercel.app/profile",
+    image: "https://hanroro-fansite.vercel.app/assets/한로로프로필사진.jpg",
+    sameAs: [
+      "https://www.youtube.com/channel/UCrDa_5OU-rhvXqWlPx5hgKQ",
+      "https://www.instagram.com/hanr0r0/",
+      "https://artist.mnetplus.world/main/stg/hanroro",
+      "https://blog.naver.com/hanr0r0",
+    ],
+  };
+
   return (
     <html lang="ko">
       <head>
@@ -125,6 +142,7 @@ export default function RootLayout({
         />
         <StructuredData data={organizationSchema} />
         <StructuredData data={websiteSchema} />
+        <StructuredData data={musicGroupSchema} />
       </head>
       <body>
         <StyledComponentsRegistry>

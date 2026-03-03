@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import StructuredData from '@/components/seo/StructuredData';
 
 export const metadata: Metadata = {
   title: '갤러리',
@@ -18,6 +19,40 @@ export const metadata: Metadata = {
       },
     ],
   },
+  alternates: {
+    canonical: 'https://hanroro-fansite.vercel.app/gallery',
+  },
+};
+
+const gallerySchema = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: '한로로 팬 갤러리',
+  description: '한로로 팬들이 공유한 공연 사진 및 팬 이미지 모음',
+  url: 'https://hanroro-fansite.vercel.app/gallery',
+  inLanguage: 'ko-KR',
+  about: {
+    '@type': 'MusicGroup',
+    name: '한로로',
+    alternateName: 'HANRORO',
+  },
+  breadcrumb: {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: '홈',
+        item: 'https://hanroro-fansite.vercel.app',
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: '갤러리',
+        item: 'https://hanroro-fansite.vercel.app/gallery',
+      },
+    ],
+  },
 };
 
 export default function GalleryLayout({
@@ -25,5 +60,10 @@ export default function GalleryLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return (
+    <>
+      <StructuredData data={gallerySchema} />
+      {children}
+    </>
+  );
 }

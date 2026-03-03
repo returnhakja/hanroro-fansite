@@ -28,7 +28,7 @@ export interface Comment {
 }
 
 // ─── 쿼리 훅 ────────────────────────────────────────────────────
-export function useBoardList() {
+export function useBoardList(initialData?: BoardPost[]) {
   return useQuery({
     queryKey: queryKeys.board.all,
     queryFn: async () => {
@@ -37,6 +37,7 @@ export function useBoardList() {
       const data: BoardPost[] = await res.json();
       return data;
     },
+    initialData,
   });
 }
 

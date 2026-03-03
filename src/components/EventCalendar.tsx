@@ -1,6 +1,7 @@
-'use client';
+"use client";
 
 import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import "@/styles/calendar.css";
@@ -110,13 +111,18 @@ const EventType = styled.span<{ type: string }>`
   border-radius: ${theme.borderRadius.full};
   font-size: ${theme.typography.small.fontSize};
   font-weight: 600;
-  background: ${props => {
+  background: ${(props) => {
     switch (props.type) {
-      case 'concert': return `linear-gradient(135deg, ${theme.colors.primary} 0%, ${theme.colors.primaryDark} 100%)`;
-      case 'fanmeeting': return `linear-gradient(135deg, ${theme.colors.accent} 0%, ${theme.colors.accentDark} 100%)`;
-      case 'broadcast': return `linear-gradient(135deg, ${theme.colors.info} 0%, #5D7186 100%)`;
-      case 'festival' : return `linear-gradient(135deg, ${theme.colors.success} 0%, #4E6E4E 100%)`;
-      default: return `linear-gradient(135deg, ${theme.colors.secondaryLight} 0%, ${theme.colors.secondary} 100%)`;
+      case "concert":
+        return `linear-gradient(135deg, ${theme.colors.primary} 0%, ${theme.colors.primaryDark} 100%)`;
+      case "fanmeeting":
+        return `linear-gradient(135deg, ${theme.colors.accent} 0%, ${theme.colors.accentDark} 100%)`;
+      case "broadcast":
+        return `linear-gradient(135deg, ${theme.colors.info} 0%, #5D7186 100%)`;
+      case "festival":
+        return `linear-gradient(135deg, ${theme.colors.success} 0%, #4E6E4E 100%)`;
+      default:
+        return `linear-gradient(135deg, ${theme.colors.secondaryLight} 0%, ${theme.colors.secondary} 100%)`;
     }
   }};
   color: white;
@@ -133,37 +139,67 @@ const modalStyles = {
     backdropFilter: "blur(4px)",
   },
   content: {
-    position: 'relative' as const,
-    top: 'auto',
-    left: 'auto',
-    right: 'auto',
-    bottom: 'auto',
-    border: 'none',
-    background: 'transparent',
+    position: "relative" as const,
+    top: "auto",
+    left: "auto",
+    right: "auto",
+    bottom: "auto",
+    border: "none",
+    background: "transparent",
     padding: 0,
-    overflow: 'visible',
-  }
+    overflow: "visible",
+  },
 };
 
 const EventCalendar = () => {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const { data } = useUpcomingEvents();
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   // Modal 접근성 설정
   useEffect(() => {
-    Modal.setAppElement('body');
+    Modal.setAppElement("body");
   }, []);
 
   const events = data ?? [];
 
+  useEffect(() => {
+    const eventId = searchParams.get("event");
+
+    setSelectedEvent((prev) => {
+      if (!eventId) return prev ? null : prev;
+      if (prev?._id === eventId) return prev;
+      const found = events.find((e) => e._id === eventId);
+      return found ?? null;
+    });
+  }, [searchParams, events]);
+
   const getEventTypeLabel = (type: string) => {
     switch (type) {
-      case 'concert': return '콘서트';
-      case 'fanmeeting': return '팬미팅';
-      case 'broadcast': return '방송';
-      case 'festival' : return '페스티벌';
-      default: return '기타';
+      case "concert":
+        return "콘서트";
+      case "fanmeeting":
+        return "팬미팅";
+      case "broadcast":
+        return "방송";
+      case "festival":
+        return "페스티벌";
+      case "award":
+        return "시상식";
+      default:
+        return "기타";
     }
+  };
+
+  const handleEventSelect = (event: Event) => {
+    setSelectedEvent(event);
+    router.push(`/schedule?event=${event._id}`, { scroll: false });
+  };
+
+  const handleModalClose = () => {
+    setSelectedEvent(null);
+    router.push("/schedule", { scroll: false });
   };
 
   return (
@@ -171,31 +207,27 @@ const EventCalendar = () => {
       <Calendar
         tileClassName={({ date }) =>
           events.some(
-            (e) =>
-              new Date(e.date).toDateString() === date.toDateString()
+            (e) => new Date(e.date).toDateString() === date.toDateString(),
           )
             ? "highlight has-event"
             : "no-event"
         }
         onClickDay={(value) => {
           const event = events.find(
-            (e) =>
-              new Date(e.date).toDateString() === value.toDateString()
+            (e) => new Date(e.date).toDateString() === value.toDateString(),
           );
-          if (event) setSelectedEvent(event);
+          if (event) handleEventSelect(event);
         }}
       />
 
       <Modal
         isOpen={!!selectedEvent}
-        onRequestClose={() => setSelectedEvent(null)}
+        onRequestClose={handleModalClose}
         contentLabel="Event Details"
         style={modalStyles}
       >
         <ModalContent>
-          <CloseButton onClick={() => setSelectedEvent(null)}>
-            ✕
-          </CloseButton>
+          <CloseButton onClick={handleModalClose}>✕</CloseButton>
 
           {selectedEvent && (
             <>
@@ -220,12 +252,14 @@ const EventCalendar = () => {
                 )}
                 <EventDetail>
                   <strong>날짜</strong>
-                  <span>{new Date(selectedEvent.date).toLocaleDateString('ko-KR', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                    weekday: 'short'
-                  })}</span>
+                  <span>
+                    {new Date(selectedEvent.date).toLocaleDateString("ko-KR", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                      weekday: "short",
+                    })}
+                  </span>
                 </EventDetail>
               </EventDetails>
 

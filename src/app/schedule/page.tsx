@@ -1,131 +1,338 @@
-'use client';
+import { cache, Suspense } from "react";
+import type { Metadata } from "next";
+import connectDB from "@/lib/db/mongoose";
+import Event from "@/lib/db/models/Event";
+import StructuredData from "@/components/seo/StructuredData";
+import SchedulePageClient from "./SchedulePageClient";
 
-import { useReducedMotion } from 'framer-motion';
-import EventCalendar from '@/components/EventCalendar';
-import {
-  Container,
-  PageTitle,
-  PageSubtitle,
-  UpcomingSection,
-  SectionTitle,
-  UpcomingGrid,
-  EventCard,
-  EventPoster,
-  DdayBadge,
-  EventContent,
-  EventType,
-  EventTitle,
-  EventDetails,
-  EventDetail,
-  CalendarSection,
-  EmptyMessage,
-} from './Schedule.styles';
-import { useUpcomingEvents } from '@/hooks/queries/useEvents';
+const BASE_URL = "https://hanroro-fansite.vercel.app";
 
-const SchedulePage = () => {
-  const shouldReduceMotion = useReducedMotion();
-  const { data, isLoading: loading } = useUpcomingEvents();
+const getEventById = cache(async (id: string) => {
+  await connectDB();
+  return Event.findById(id).lean();
+});
 
-  // 오늘 이후 일정만 최대 3개 표시
-  const upcomingEvents = (data || [])
-    .filter(e => new Date(e.date) >= new Date())
-    .slice(0, 3);
+const getUpcomingEventsForSchema = cache(async () => {
+  await connectDB();
+  const now = new Date();
+  return Event.find({
+    $or: [{ date: { $gte: now } }, { isPinned: true }],
+  })
+    .sort({ isPinned: -1, date: 1 })
+    .limit(10)
+    .lean();
+});
 
-  // D-day를 렌더링 시점에 인라인으로 계산
-  const calcDaysUntil = (dateString: string): number => {
-    const today = new Date();
-    const eventDate = new Date(dateString);
-    today.setHours(0, 0, 0, 0);
-    eventDate.setHours(0, 0, 0, 0);
-    const diffTime = eventDate.getTime() - today.getTime();
-    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  };
+function getEventTypeLabel(type: string) {
+  switch (type) {
+    case "concert":
+      return "콘서트";
+    case "fanmeeting":
+      return "팬미팅";
+    case "broadcast":
+      return "방송";
+    case "festival":
+      return "페스티벌";
+    case "award":
+      return "시상식";
+    default:
+      return "기타";
+  }
+}
 
-  const getEventTypeLabel = (type: string) => {
-    switch (type) {
-      case 'concert': return '콘서트';
-      case 'fanmeeting': return '팬미팅';
-      case 'broadcast': return '방송';
-      case 'festival': return '페스티벌';
-      default: return '기타';
+function buildStartDate(date: Date, time?: string): string {
+  const kstDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+  const [dateStr] = kstDate.toISOString().split("T");
+
+  if (time) {
+    const match = time.match(/(\d{1,2}):(\d{2})/);
+    if (match) {
+      const h = match[1].padStart(2, "0");
+      const m = match[2];
+      return `${dateStr}T${h}:${m}:00+09:00`;
     }
-  };
+  }
+  return dateStr;
+}
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      weekday: 'short',
-    });
-  };
+function buildDescription(event: {
+  title: string;
+  type: string;
+  date: Date;
+  time?: string | null;
+  place?: string | null;
+}): string {
+  const dateStr = new Date(event.date).toLocaleDateString("ko-KR", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    weekday: "short",
+    timeZone: "Asia/Seoul",
+  });
+  const typeLabel = getEventTypeLabel(event.type);
 
-  return (
-    <Container>
-      <PageTitle>일정</PageTitle>
-      <PageSubtitle>한로로의 다가오는 일정을 확인하세요</PageSubtitle>
+  let desc = `${dateStr}`;
+  if (event.place) desc += ` ${event.place}에서`;
+  desc += ` 열리는 한로로 ${typeLabel}입니다.`;
+  if (event.time) desc += ` ${event.time}에 시작합니다.`;
 
-      <UpcomingSection>
-        <SectionTitle>다가오는 공연</SectionTitle>
-        {loading ? (
-          <EmptyMessage>로딩 중...</EmptyMessage>
-        ) : upcomingEvents.length > 0 ? (
-          <UpcomingGrid>
-            {upcomingEvents.map((event, index) => {
-              const daysUntil = calcDaysUntil(event.date);
-              return (
-                <EventCard
-                  key={event._id}
-                  initial={shouldReduceMotion ? {} : { opacity: 0, y: 20 }}
-                  animate={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                >
-                  <EventPoster $posterUrl={event.posterUrl}>
-                    <DdayBadge $isToday={daysUntil === 0}>
-                      {daysUntil === 0 ? 'D-DAY' : `D-${daysUntil}`}
-                    </DdayBadge>
-                  </EventPoster>
-                  <EventContent>
-                    <EventType type={event.type}>
-                      {getEventTypeLabel(event.type)}
-                    </EventType>
-                    <EventTitle>{event.title}</EventTitle>
-                    <EventDetails>
-                      <EventDetail>
-                        <strong>날짜</strong>
-                        <span>{formatDate(event.date)}</span>
-                      </EventDetail>
-                      {event.time && (
-                        <EventDetail>
-                          <strong>시간</strong>
-                          <span>{event.time}</span>
-                        </EventDetail>
-                      )}
-                      {event.place && (
-                        <EventDetail>
-                          <strong>장소</strong>
-                          <span>{event.place}</span>
-                        </EventDetail>
-                      )}
-                    </EventDetails>
-                  </EventContent>
-                </EventCard>
-              );
-            })}
-          </UpcomingGrid>
-        ) : (
-          <EmptyMessage>다가오는 공연이 없습니다</EmptyMessage>
-        )}
-      </UpcomingSection>
+  return desc;
+}
 
-
-      <CalendarSection>
-        <SectionTitle>전체 일정</SectionTitle>
-        <EventCalendar />
-      </CalendarSection>
-    </Container>
-  );
+const defaultMetadata: Metadata = {
+  title: "일정",
+  description:
+    "한로로의 다가오는 공연, 팬미팅, 방송 일정을 확인하세요. D-day 카운트다운과 전체 캘린더를 제공합니다.",
+  keywords: [
+    "한로로",
+    "HANRORO",
+    "공연 일정",
+    "팬미팅",
+    "콘서트",
+    "일정",
+    "스케줄",
+  ],
+  openGraph: {
+    title: "일정 | 한로로 팬사이트",
+    description: "한로로의 다가오는 공연, 팬미팅, 방송 일정을 확인하세요.",
+    url: `${BASE_URL}/schedule`,
+    type: "website",
+    images: [
+      {
+        url: "/assets/한로로프로필사진.jpg",
+        width: 1200,
+        height: 630,
+        alt: "한로로 일정",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "일정 | 한로로 팬사이트",
+    description: "한로로의 다가오는 공연, 팬미팅, 방송 일정을 확인하세요.",
+    images: ["/assets/한로로프로필사진.jpg"],
+  },
+  alternates: {
+    canonical: `${BASE_URL}/schedule`,
+  },
 };
 
-export default SchedulePage;
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ event?: string }>;
+}): Promise<Metadata> {
+  try {
+    const { event: eventId } = await searchParams;
+    if (!eventId) return defaultMetadata;
+
+    const event = await getEventById(eventId);
+    if (!event) return defaultMetadata;
+
+    const title = event.title as string;
+    const description = buildDescription({
+      title,
+      type: event.type as string,
+      date: event.date as Date,
+      time: event.time as string | undefined,
+      place: event.place as string | undefined,
+    });
+    const posterUrl = event.posterUrl as string | undefined;
+
+    return {
+      title,
+      description,
+      keywords: [
+        "한로로",
+        "HANRORO",
+        title,
+        getEventTypeLabel(event.type as string),
+        "공연",
+        "일정",
+      ],
+      openGraph: {
+        title: `${title} | 한로로 팬사이트`,
+        description,
+        url: `${BASE_URL}/schedule?event=${eventId}`,
+        type: "website",
+        images: posterUrl
+          ? [{ url: posterUrl, alt: title }]
+          : [
+              {
+                url: "/assets/한로로프로필사진.jpg",
+                width: 1200,
+                height: 630,
+                alt: title,
+              },
+            ],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: `${title} | 한로로 팬사이트`,
+        description,
+        images: posterUrl ? [posterUrl] : ["/assets/한로로프로필사진.jpg"],
+      },
+      alternates: {
+        canonical: `${BASE_URL}/schedule?event=${eventId}`,
+      },
+    };
+  } catch {
+    return defaultMetadata;
+  }
+}
+
+// ─── 페이지 컴포넌트 ──────────────────────────────────────────────
+
+export default async function SchedulePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ event?: string }>;
+}) {
+  const { event: eventId } = await searchParams;
+
+  let eventSchema: object | null = null;
+  let breadcrumbSchema: object | null = null;
+  let itemListSchema: object | null = null;
+
+  if (eventId) {
+    try {
+      const event = await getEventById(eventId);
+      if (event) {
+        const title = event.title as string;
+        const date = event.date as Date;
+        const time = event.time as string | undefined;
+        const place = event.place as string | undefined;
+        const posterUrl = event.posterUrl as string | undefined;
+        const eventType = event.type as string;
+
+        eventSchema = {
+          "@context": "https://schema.org",
+          "@type": "Event",
+          name: title,
+          startDate: buildStartDate(date, time),
+          description: buildDescription({
+            title,
+            type: eventType,
+            date,
+            time,
+            place,
+          }),
+          url: `${BASE_URL}/schedule?event=${eventId}`,
+          eventStatus: "https://schema.org/EventScheduled",
+          eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+          ...(place && {
+            location: {
+              "@type": "Place",
+              name: place,
+              address: {
+                "@type": "PostalAddress",
+                addressLocality: "서울",
+                addressCountry: "KR",
+              },
+            },
+          }),
+          performer: {
+            "@type": "MusicGroup",
+            name: "한로로",
+            alternateName: "HANRORO",
+            url: `${BASE_URL}/profile`,
+            sameAs: [
+              "https://www.youtube.com/channel/UCrDa_5OU-rhvXqWlPx5hgKQ",
+              "https://www.instagram.com/hanr0r0/",
+            ],
+          },
+          organizer: {
+            "@type": "Organization",
+            name: "한로로 팬사이트",
+            url: BASE_URL,
+          },
+          ...(posterUrl && { image: [posterUrl] }),
+        };
+
+        breadcrumbSchema = {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "홈", item: BASE_URL },
+            {
+              "@type": "ListItem",
+              position: 2,
+              name: "일정",
+              item: `${BASE_URL}/schedule`,
+            },
+            {
+              "@type": "ListItem",
+              position: 3,
+              name: title,
+              item: `${BASE_URL}/schedule?event=${eventId}`,
+            },
+          ],
+        };
+      }
+    } catch {}
+  } else {
+    breadcrumbSchema = {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "홈", item: BASE_URL },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: "일정",
+          item: `${BASE_URL}/schedule`,
+        },
+      ],
+    };
+
+    try {
+      const events = await getUpcomingEventsForSchema();
+      if (events.length > 0) {
+        itemListSchema = {
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          name: "한로로 다가오는 일정",
+          description: "한로로의 다가오는 공연, 팬미팅, 방송 일정",
+          url: `${BASE_URL}/schedule`,
+          numberOfItems: events.length,
+          itemListElement: events.map((event, index) => ({
+            "@type": "ListItem",
+            position: index + 1,
+            item: {
+              "@type": "Event",
+              name: event.title,
+              startDate: buildStartDate(
+                event.date as Date,
+                event.time as string | undefined,
+              ),
+              url: `${BASE_URL}/schedule?event=${(event._id as { toString(): string }).toString()}`,
+              eventStatus: "https://schema.org/EventScheduled",
+              eventAttendanceMode:
+                "https://schema.org/OfflineEventAttendanceMode",
+              ...(event.place && {
+                location: { "@type": "Place", name: event.place },
+              }),
+              performer: {
+                "@type": "MusicGroup",
+                name: "한로로",
+                alternateName: "HANRORO",
+              },
+              ...(event.posterUrl && { image: [event.posterUrl] }),
+            },
+          })),
+        };
+      }
+    } catch {}
+  }
+
+  return (
+    <>
+      {eventSchema && <StructuredData data={eventSchema} />}
+      {breadcrumbSchema && <StructuredData data={breadcrumbSchema} />}
+      {itemListSchema && <StructuredData data={itemListSchema} />}
+      <Suspense fallback={null}>
+        <SchedulePageClient />
+      </Suspense>
+    </>
+  );
+}
