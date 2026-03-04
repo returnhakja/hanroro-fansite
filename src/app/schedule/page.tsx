@@ -40,6 +40,12 @@ function getEventTypeLabel(type: string) {
   }
 }
 
+function getSchemaEventType(type: string): "MusicEvent" | "Event" {
+  return ["concert", "fanmeeting", "festival"].includes(type)
+    ? "MusicEvent"
+    : "Event";
+}
+
 function buildStartDate(date: Date, time?: string): string {
   const kstDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
   const [dateStr] = kstDate.toISOString().split("T");
@@ -207,7 +213,7 @@ export default async function SchedulePage({
 
         eventSchema = {
           "@context": "https://schema.org",
-          "@type": "Event",
+          "@type": getSchemaEventType(eventType),
           name: title,
           startDate: buildStartDate(date, time),
           description: buildDescription({
@@ -299,7 +305,7 @@ export default async function SchedulePage({
             "@type": "ListItem",
             position: index + 1,
             item: {
-              "@type": "Event",
+              "@type": getSchemaEventType(event.type as string),
               name: event.title,
               startDate: buildStartDate(
                 event.date as Date,
