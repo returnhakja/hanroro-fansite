@@ -145,6 +145,18 @@ export default function RootLayout({
         <StructuredData data={organizationSchema} />
         <StructuredData data={websiteSchema} />
         <StructuredData data={musicGroupSchema} />
+        <link
+          rel="alternate"
+          type="application/rss+xml"
+          title="한로로 팬사이트 - 커뮤니티"
+          href="https://hanroro-fansite.vercel.app/feed.xml"
+        />
+        <link
+          rel="alternate"
+          type="application/rss+xml"
+          title="한로로 팬사이트 - 일정"
+          href="https://hanroro-fansite.vercel.app/events.xml"
+        />
       </head>
       <body>
         <GoogleAnalytics />
