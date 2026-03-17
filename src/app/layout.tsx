@@ -6,6 +6,8 @@ import { LoadingProvider } from "@/components/providers/LoadingProvider";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import StructuredData from "@/components/seo/StructuredData";
+import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
+import NaverAnalytics from "@/components/analytics/NaverAnalytics";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -145,6 +147,8 @@ export default function RootLayout({
         <StructuredData data={musicGroupSchema} />
       </head>
       <body>
+        <GoogleAnalytics />
+        <NaverAnalytics />
         <StyledComponentsRegistry>
           <QueryProvider>
             <AuthProvider>
