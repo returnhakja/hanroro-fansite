@@ -41,8 +41,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           );
           return true;
         } catch (error) {
-          console.error('User upsert error:', error);
-          return false;
+          const err = error as { code?: number; message?: string };
+          console.error('User upsert error:', JSON.stringify({ code: err.code, message: err.message, email: profile.email, googleId: profile.sub }));
+          // DB 에러가 있어도 로그인은 허용 (사용자 차단 방지)
+          return true;
         }
       }
       return true;
