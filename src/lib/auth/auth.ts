@@ -49,7 +49,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return true;
     },
-    async jwt({ token, account, profile, trigger }) {
+    async jwt({ token, account, profile, trigger, session }) {
       if (account && profile) {
         token.googleId = profile.sub;
         try {
@@ -68,17 +68,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
       }
 
-      // update() 호출 시 DB에서 최신 닉네임 반영
-      if (trigger === 'update' && token.userId) {
-        try {
-          await connectDB();
-          const dbUser = await User.findById(token.userId);
-          if (dbUser) {
-            token.nickname = dbUser.nickname || '';
-          }
-        } catch (error) {
-          console.error('JWT update error:', error);
-        }
+      // update({ nickname }) 호출 시 즉시 토큰에 반영
+      if (trigger === 'update' && session?.nickname !== undefined) {
+        token.nickname = session.nickname;
       }
 
       return token;

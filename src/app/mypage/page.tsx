@@ -61,7 +61,7 @@ export default function MyPage() {
 
       setMessage(data.message);
       // 세션 갱신하여 Header 등에 즉시 반영
-      await update();
+      await update({ nickname: nickname.trim() });
     } catch {
       setError('저장에 실패했습니다');
     } finally {
