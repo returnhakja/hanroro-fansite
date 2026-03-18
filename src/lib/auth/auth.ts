@@ -54,7 +54,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.googleId = profile.sub;
         try {
           await connectDB();
-          const dbUser = await User.findOne({ googleId: profile.sub });
+          // upsert: signIn에서 실패했을 경우를 대비해 여기서도 보장
+          const dbUser = await User.findOneAndUpdate(
+            { googleId: profile.sub },
+            {
+              $set: {
+                name: profile.name || '',
+                email: profile.email || '',
+                image: (profile as { picture?: string }).picture || '',
+                googleId: profile.sub,
+                lastLogin: new Date(),
+              },
+              $setOnInsert: {
+                nickname: null,
+              },
+            },
+            { upsert: true, new: true }
+          );
           if (dbUser) {
             token.userId = dbUser._id.toString();
             token.nickname = dbUser.nickname || '';
