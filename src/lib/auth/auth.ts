@@ -74,9 +74,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           if (dbUser) {
             token.userId = dbUser._id.toString();
             token.nickname = dbUser.nickname || '';
+            console.log('JWT upsert success:', { userId: token.userId, email: profile.email });
+          } else {
+            console.error('JWT upsert returned null:', { email: profile.email, googleId: profile.sub });
           }
         } catch (error) {
-          console.error('JWT callback error:', error);
+          const err = error as { code?: number; message?: string };
+          console.error('JWT callback error:', JSON.stringify({ code: err.code, message: err.message, email: profile.email, googleId: profile.sub }));
         }
       }
 
