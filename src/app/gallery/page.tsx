@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSession } from 'next-auth/react';
 import { useSearchParams } from 'next/navigation';
 import styled from 'styled-components';
@@ -12,7 +12,7 @@ import { useImages, useUploadMedia, useDeleteImage, type GalleryImage } from '@/
 
 type MediaTab = 'image' | 'video';
 
-export default function GalleryPage() {
+function GalleryContent() {
   const { data: session } = useSession();
   const searchParams = useSearchParams();
   const initialTab = searchParams.get('tab') === 'video' ? 'video' : 'image';
@@ -285,6 +285,14 @@ export default function GalleryPage() {
         </UploadModalContent>
       </Modal>
     </Container>
+  );
+}
+
+export default function GalleryPage() {
+  return (
+    <Suspense fallback={<Spinner />}>
+      <GalleryContent />
+    </Suspense>
   );
 }
 
