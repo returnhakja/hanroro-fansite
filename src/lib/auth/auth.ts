@@ -34,7 +34,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 lastLogin: new Date(),
               },
               $setOnInsert: {
-                nickname: null,
+                createdAt: new Date(),
               },
             },
             { upsert: true, new: true }
@@ -54,29 +54,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.googleId = profile.sub;
         try {
           await connectDB();
-          // upsert: signIn에서 실패했을 경우를 대비해 여기서도 보장
-          const dbUser = await User.findOneAndUpdate(
-            { googleId: profile.sub },
-            {
-              $set: {
-                name: profile.name || '',
-                email: profile.email || '',
-                image: (profile as { picture?: string }).picture || '',
-                googleId: profile.sub,
-                lastLogin: new Date(),
-              },
-              $setOnInsert: {
-                nickname: null,
-              },
-            },
-            { upsert: true, new: true }
-          );
+          // signIn에서 이미 upsert 완료 → 여기서는 조회만
+          const dbUser = await User.findOne({ googleId: profile.sub });
           if (dbUser) {
             token.userId = dbUser._id.toString();
             token.nickname = dbUser.nickname || '';
-            console.log('JWT upsert success:', { userId: token.userId, email: profile.email });
           } else {
-            console.error('JWT upsert returned null:', { email: profile.email, googleId: profile.sub });
+            console.error('JWT: user not found after signIn upsert', { email: profile.email, googleId: profile.sub });
           }
         } catch (error) {
           const err = error as { code?: number; message?: string };
