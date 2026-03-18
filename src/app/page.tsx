@@ -27,6 +27,7 @@ import {
   GalleryGrid,
   GalleryItem,
   GalleryItemOverlay,
+  VideoPlayIcon,
   BoardPreviewSection,
   BoardList,
   BoardItem,
@@ -245,9 +246,16 @@ const Home = () => {
               whileInView={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              onClick={() => router.push("/gallery")}
+              onClick={() => router.push(`/gallery?tab=${image.type === 'video' ? 'video' : 'image'}`)}
             >
-              <img src={image.imageUrl} alt={image.title} />
+              {image.type === 'video' ? (
+                <>
+                  <video src={image.imageUrl} preload="metadata" muted />
+                  <VideoPlayIcon>▶</VideoPlayIcon>
+                </>
+              ) : (
+                <img src={image.imageUrl} alt={image.title} />
+              )}
               <GalleryItemOverlay>
                 <h4>{image.title}</h4>
               </GalleryItemOverlay>

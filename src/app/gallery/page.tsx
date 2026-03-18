@@ -2,30 +2,38 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import { useSearchParams } from 'next/navigation';
 import styled from 'styled-components';
 import Modal from 'react-modal';
 import { CloseButton } from '@/components/ui/CloseButton';
 import Spinner from '@/components/ui/Spinner';
 import { theme } from '@/styles/theme';
-import { useImages, useUploadImage, useDeleteImage } from '@/hooks/queries/useGallery';
+import { useImages, useUploadMedia, useDeleteImage, type GalleryImage } from '@/hooks/queries/useGallery';
+
+type MediaTab = 'image' | 'video';
 
 export default function GalleryPage() {
   const { data: session } = useSession();
-  const { data, isLoading: loading } = useImages();
-  const images = data ?? [];
+  const searchParams = useSearchParams();
+  const initialTab = searchParams.get('tab') === 'video' ? 'video' : 'image';
+  const [activeTab, setActiveTab] = useState<MediaTab>(initialTab);
 
-  const uploadMutation = useUploadImage();
+  const { data, isLoading: loading } = useImages(activeTab);
+  const items = data ?? [];
+
+  const { uploadMedia } = useUploadMedia();
   const deleteMutation = useDeleteImage();
 
-  const [selectedImg, setSelectedImg] = useState<typeof images[number] | null>(null);
+  const [selectedItem, setSelectedItem] = useState<GalleryImage | null>(null);
 
   // 업로드 관련 상태
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploadTitle, setUploadTitle] = useState('');
   const [preview, setPreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
-  // Modal 접근성 설정
   useEffect(() => {
     Modal.setAppElement('body');
   }, []);
@@ -34,13 +42,10 @@ export default function GalleryPage() {
     if (!confirm('정말 삭제하시겠습니까?')) return;
     deleteMutation.mutate(id, {
       onSuccess: () => {
-        setSelectedImg(null);
+        setSelectedItem(null);
         alert('삭제되었습니다');
       },
-      onError: (err) => {
-        console.error('삭제 오류:', err);
-        alert('삭제에 실패했습니다');
-      },
+      onError: () => alert('삭제에 실패했습니다'),
     });
   };
 
@@ -52,27 +57,28 @@ export default function GalleryPage() {
     }
   };
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
     if (!uploadFile || !uploadTitle.trim()) {
       alert('파일과 제목을 모두 입력해주세요');
       return;
     }
-
-    const formData = new FormData();
-    formData.append('image', uploadFile);
-    formData.append('title', uploadTitle);
-
-    uploadMutation.mutate(formData, {
-      onSuccess: () => {
-        alert('업로드 성공!');
-        setUploadModalOpen(false);
-        resetUploadForm();
-      },
-      onError: (err) => {
-        console.error('업로드 오류:', err);
-        alert(err instanceof Error ? err.message : '업로드에 실패했습니다');
-      },
-    });
+    setUploading(true);
+    setUploadProgress(0);
+    try {
+      await uploadMedia({
+        file: uploadFile,
+        title: uploadTitle,
+        onProgress: setUploadProgress,
+      });
+      alert('업로드 성공!');
+      setUploadModalOpen(false);
+      resetUploadForm();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : '업로드에 실패했습니다');
+    } finally {
+      setUploading(false);
+      setUploadProgress(0);
+    }
   };
 
   const resetUploadForm = () => {
@@ -81,25 +87,25 @@ export default function GalleryPage() {
     setPreview(null);
   };
 
-  const handleDownload = async (imageUrl: string, title: string) => {
+  const handleDownload = async (url: string, title: string) => {
     try {
-      const response = await fetch(imageUrl);
+      const response = await fetch(url);
       const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
+      const objectUrl = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url;
-      a.download = `${title}.jpg`;
+      a.href = objectUrl;
+      const ext = url.split('.').pop()?.split('?')[0] || 'mp4';
+      a.download = `${title}.${ext}`;
       document.body.appendChild(a);
       a.click();
-      window.URL.revokeObjectURL(url);
+      window.URL.revokeObjectURL(objectUrl);
       document.body.removeChild(a);
-    } catch (error) {
-      console.error('다운로드 오류:', error);
+    } catch {
       alert('다운로드에 실패했습니다');
     }
   };
 
-  const uploading = uploadMutation.isPending;
+  const isVideoFile = (file: File | null) => file?.type.startsWith('video/') ?? false;
 
   if (loading) return <Spinner />;
 
@@ -113,33 +119,53 @@ export default function GalleryPage() {
         </div>
         {session && (
           <UploadButton onClick={() => setUploadModalOpen(true)}>
-            이미지 업로드
+            미디어 업로드
           </UploadButton>
         )}
       </Header>
 
-      {images.length === 0 ? (
-        <EmptyState>아직 업로드된 이미지가 없습니다</EmptyState>
+      <TabBar>
+        <Tab $active={activeTab === 'image'} onClick={() => setActiveTab('image')}>
+          이미지
+        </Tab>
+        <Tab $active={activeTab === 'video'} onClick={() => setActiveTab('video')}>
+          동영상
+        </Tab>
+      </TabBar>
+
+      {items.length === 0 ? (
+        <EmptyState>
+          {activeTab === 'image' ? '업로드된 이미지가 없습니다' : '업로드된 동영상이 없습니다'}
+        </EmptyState>
       ) : (
         <Grid>
-          {images.map((img) => (
-            <ImageCard key={img._id} onClick={() => setSelectedImg(img)}>
-              <ImageWrapper>
-                <StyledImage src={img.imageUrl} alt={img.title} />
-              </ImageWrapper>
-              <ImageTitle>{img.title}</ImageTitle>
-            </ImageCard>
+          {items.map((item) => (
+            <MediaCard key={item._id} onClick={() => setSelectedItem(item)}>
+              <MediaWrapper>
+                {item.type === 'video' ? (
+                  <>
+                    <VideoThumb>
+                      <video src={item.imageUrl} preload="metadata" muted />
+                      <PlayIcon>▶</PlayIcon>
+                    </VideoThumb>
+                  </>
+                ) : (
+                  <StyledImage src={item.imageUrl} alt={item.title} />
+                )}
+              </MediaWrapper>
+              <MediaTitle>{item.title}</MediaTitle>
+            </MediaCard>
           ))}
         </Grid>
       )}
 
-      {/* 이미지 상세보기 모달 */}
+      {/* 상세보기 모달 */}
       <Modal
-        isOpen={!!selectedImg}
-        onRequestClose={() => setSelectedImg(null)}
+        isOpen={!!selectedItem}
+        onRequestClose={() => setSelectedItem(null)}
         style={{
           overlay: {
-            backgroundColor: 'rgba(44, 36, 24, 0.75)',
+            backgroundColor: 'rgba(44, 36, 24, 0.85)',
             backdropFilter: 'blur(8px)',
             WebkitBackdropFilter: 'blur(8px)',
             zIndex: 1000,
@@ -152,19 +178,21 @@ export default function GalleryPage() {
           },
         }}
       >
-        {selectedImg && (
+        {selectedItem && (
           <ModalContent>
-            <CloseButton onClick={() => setSelectedImg(null)} />
-            <ModalImage src={selectedImg.imageUrl} alt={selectedImg.title} />
-            <ModalTitle>{selectedImg.title}</ModalTitle>
+            <CloseButton onClick={() => setSelectedItem(null)} />
+            {selectedItem.type === 'video' ? (
+              <ModalVideo src={selectedItem.imageUrl} controls autoPlay={false} />
+            ) : (
+              <ModalImage src={selectedItem.imageUrl} alt={selectedItem.title} />
+            )}
+            <ModalTitle>{selectedItem.title}</ModalTitle>
             <ButtonGroup>
-              <DownloadButton
-                onClick={() => handleDownload(selectedImg.imageUrl, selectedImg.title)}
-              >
-                ⬇️ 다운로드
+              <DownloadButton onClick={() => handleDownload(selectedItem.imageUrl, selectedItem.title)}>
+                ⬇ 다운로드
               </DownloadButton>
-              {session && selectedImg.userId === session.user?.id && (
-                <DeleteButton onClick={() => handleDelete(selectedImg._id)}>
+              {session && selectedItem.userId === session.user?.id && (
+                <DeleteButton onClick={() => handleDelete(selectedItem._id)}>
                   삭제
                 </DeleteButton>
               )}
@@ -177,6 +205,7 @@ export default function GalleryPage() {
       <Modal
         isOpen={uploadModalOpen}
         onRequestClose={() => {
+          if (uploading) return;
           setUploadModalOpen(false);
           resetUploadForm();
         }}
@@ -202,41 +231,55 @@ export default function GalleryPage() {
         <UploadModalContent>
           <CloseButton
             onClick={() => {
+              if (uploading) return;
               setUploadModalOpen(false);
               resetUploadForm();
             }}
           />
-          <UploadModalTitle>이미지 업로드</UploadModalTitle>
+          <UploadModalTitle>미디어 업로드</UploadModalTitle>
 
           <UploadForm>
             <Label>제목</Label>
             <Input
               type="text"
-              placeholder="이미지 제목을 입력하세요"
+              placeholder="제목을 입력하세요"
               value={uploadTitle}
               onChange={(e) => setUploadTitle(e.target.value)}
               disabled={uploading}
             />
 
-            <Label>이미지 파일</Label>
+            <Label>파일 선택 (이미지 또는 동영상)</Label>
             <FileInput
               type="file"
-              accept="image/*"
+              accept="image/*,video/*"
               onChange={handleFileChange}
               disabled={uploading}
             />
 
             {preview && (
               <PreviewContainer>
-                <PreviewImage src={preview} alt="미리보기" />
+                {isVideoFile(uploadFile) ? (
+                  <PreviewVideo src={preview} controls />
+                ) : (
+                  <PreviewImage src={preview} alt="미리보기" />
+                )}
               </PreviewContainer>
+            )}
+
+            {uploading && (
+              <ProgressWrapper>
+                <ProgressBar>
+                  <ProgressFill $percent={uploadProgress} />
+                </ProgressBar>
+                <ProgressText>{uploadProgress}%</ProgressText>
+              </ProgressWrapper>
             )}
 
             <UploadSubmitButton
               onClick={handleUpload}
               disabled={!uploadFile || !uploadTitle.trim() || uploading}
             >
-              {uploading ? '업로드 중...' : '업로드'}
+              {uploading ? `업로드 중... ${uploadProgress}%` : '업로드'}
             </UploadSubmitButton>
           </UploadForm>
         </UploadModalContent>
@@ -255,7 +298,7 @@ const Header = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 2.5rem;
+  margin-bottom: 2rem;
   gap: 1rem;
 
   @media (max-width: ${theme.breakpoints.mobile}) {
@@ -315,6 +358,31 @@ const UploadButton = styled.button`
   }
 `;
 
+const TabBar = styled.div`
+  display: flex;
+  gap: 0;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid ${theme.colors.border};
+`;
+
+const Tab = styled.button<{ $active: boolean }>`
+  padding: 0.75rem 2rem;
+  background: transparent;
+  color: ${({ $active }) => ($active ? theme.colors.accent : theme.colors.textSecondary)};
+  border: none;
+  border-bottom: 2px solid ${({ $active }) => ($active ? theme.colors.accent : 'transparent')};
+  margin-bottom: -2px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: ${({ $active }) => ($active ? '600' : '400')};
+  font-family: ${theme.typography.fontBody};
+  transition: all ${theme.transitions.fast};
+
+  &:hover {
+    color: ${theme.colors.accent};
+  }
+`;
+
 const Grid = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -331,7 +399,7 @@ const Grid = styled.div`
   }
 `;
 
-const ImageCard = styled.div`
+const MediaCard = styled.div`
   cursor: pointer;
   border-radius: ${theme.borderRadius.md};
   overflow: hidden;
@@ -346,8 +414,9 @@ const ImageCard = styled.div`
   }
 `;
 
-const ImageWrapper = styled.div`
+const MediaWrapper = styled.div`
   overflow: hidden;
+  position: relative;
 `;
 
 const StyledImage = styled.img`
@@ -357,12 +426,49 @@ const StyledImage = styled.img`
   display: block;
   transition: transform ${theme.transitions.normal};
 
-  ${ImageCard}:hover & {
+  ${MediaCard}:hover & {
     transform: scale(1.03);
   }
 `;
 
-const ImageTitle = styled.div`
+const VideoThumb = styled.div`
+  position: relative;
+  width: 100%;
+  height: 220px;
+  background: ${theme.colors.surfaceWarm};
+  overflow: hidden;
+
+  video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+  }
+
+  ${MediaCard}:hover & video {
+    transform: scale(1.03);
+    transition: transform ${theme.transitions.normal};
+  }
+`;
+
+const PlayIcon = styled.div`
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  color: white;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.2);
+  transition: background ${theme.transitions.fast};
+
+  ${MediaCard}:hover & {
+    background: rgba(0, 0, 0, 0.35);
+  }
+`;
+
+const MediaTitle = styled.div`
   padding: 0.75rem 1rem;
   background: ${theme.colors.surfaceAlt};
   font-size: 0.9rem;
@@ -393,6 +499,13 @@ const ModalImage = styled.img`
   max-height: 70vh;
   object-fit: contain;
   border-radius: ${theme.borderRadius.md};
+`;
+
+const ModalVideo = styled.video`
+  max-width: 90%;
+  max-height: 70vh;
+  border-radius: ${theme.borderRadius.md};
+  outline: none;
 `;
 
 const ModalTitle = styled.h3`
@@ -480,16 +593,12 @@ const Input = styled.input`
   color: ${theme.colors.textPrimary};
   transition: border-color ${theme.transitions.fast};
 
-  &::placeholder {
-    color: ${theme.colors.textTertiary};
-  }
-
+  &::placeholder { color: ${theme.colors.textTertiary}; }
   &:focus {
     outline: none;
     border-color: ${theme.colors.accent};
     box-shadow: 0 0 0 3px rgba(201, 169, 110, 0.15);
   }
-
   &:disabled {
     background: ${theme.colors.surfaceWarm};
     cursor: not-allowed;
@@ -507,29 +616,59 @@ const FileInput = styled.input`
   cursor: pointer;
   transition: border-color ${theme.transitions.fast};
 
-  &:hover {
-    border-color: ${theme.colors.accent};
-  }
-
-  &:disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
-  }
+  &:hover { border-color: ${theme.colors.accent}; }
+  &:disabled { cursor: not-allowed; opacity: 0.5; }
 `;
 
 const PreviewContainer = styled.div`
   display: flex;
   justify-content: center;
-  margin: 1rem 0;
+  margin: 0.5rem 0;
 `;
 
 const PreviewImage = styled.img`
   max-width: 100%;
-  max-height: 300px;
+  max-height: 240px;
   object-fit: contain;
   border-radius: ${theme.borderRadius.md};
   border: 1px solid ${theme.colors.border};
-  box-shadow: ${theme.shadows.sm};
+`;
+
+const PreviewVideo = styled.video`
+  max-width: 100%;
+  max-height: 240px;
+  border-radius: ${theme.borderRadius.md};
+  border: 1px solid ${theme.colors.border};
+`;
+
+const ProgressWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+`;
+
+const ProgressBar = styled.div`
+  flex: 1;
+  height: 8px;
+  background: ${theme.colors.borderLight};
+  border-radius: 4px;
+  overflow: hidden;
+`;
+
+const ProgressFill = styled.div<{ $percent: number }>`
+  height: 100%;
+  width: ${({ $percent }) => $percent}%;
+  background: ${theme.colors.accent};
+  border-radius: 4px;
+  transition: width 0.2s ease;
+`;
+
+const ProgressText = styled.span`
+  font-size: 0.85rem;
+  color: ${theme.colors.textSecondary};
+  font-family: ${theme.typography.fontBody};
+  min-width: 40px;
+  text-align: right;
 `;
 
 const UploadSubmitButton = styled.button`
@@ -543,12 +682,9 @@ const UploadSubmitButton = styled.button`
   font-weight: 500;
   font-family: ${theme.typography.fontBody};
   transition: all ${theme.transitions.normal};
-  margin-top: 1rem;
+  margin-top: 0.5rem;
 
-  &:hover:not(:disabled) {
-    background: ${theme.colors.accent};
-  }
-
+  &:hover:not(:disabled) { background: ${theme.colors.accent}; }
   &:disabled {
     background: ${theme.colors.borderLight};
     color: ${theme.colors.textTertiary};

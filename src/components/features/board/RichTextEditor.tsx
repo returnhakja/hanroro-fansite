@@ -1,12 +1,13 @@
 "use client";
 
-import { EditorContent, useEditor } from "@tiptap/react";
+import { EditorContent, useEditor, Node, mergeAttributes } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import { useEffect, useRef, useCallback } from "react";
 import styled from "styled-components";
 import { theme } from "@/styles/theme";
+import { upload } from "@vercel/blob/client";
 
 interface RichTextEditorProps {
   value: string;
@@ -15,39 +16,60 @@ interface RichTextEditorProps {
   minHeight?: string;
 }
 
+// 커스텀 동영상 노드
+const VideoExtension = Node.create({
+  name: "video",
+  group: "block",
+  atom: true,
+  addAttributes() {
+    return { src: { default: null } };
+  },
+  parseHTML() {
+    return [{ tag: "video[src]" }];
+  },
+  renderHTML({ HTMLAttributes }) {
+    return [
+      "video",
+      mergeAttributes(HTMLAttributes, {
+        controls: true,
+        style: "max-width:100%; border-radius:6px; margin:0.5rem 0;",
+      }),
+    ];
+  },
+});
+
 export default function RichTextEditor({
   value,
   onChange,
   placeholder = "내용을 입력하세요...",
   minHeight = "300px",
 }: RichTextEditorProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
   const isUpdatingRef = useRef(false);
 
-  const uploadImage = useCallback(
-    async (file: File): Promise<string | null> => {
-      const formData = new FormData();
-      formData.append("image", file);
-      try {
-        const res = await fetch("/api/board/upload", {
-          method: "POST",
-          body: formData,
-        });
-        if (!res.ok) return null;
-        const data = await res.json();
-        return data.imageUrl;
-      } catch {
-        return null;
-      }
-    },
-    [],
-  );
+  // 공통 업로드 함수 (Vercel Blob 클라이언트 직접 업로드)
+  const uploadFile = useCallback(async (file: File): Promise<string | null> => {
+    try {
+      const timestamp = Date.now();
+      const sanitized = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
+      const pathname = `board/${timestamp}-${sanitized}`;
+      const blob = await upload(pathname, file, {
+        access: "public",
+        handleUploadUrl: "/api/board/upload",
+      });
+      return blob.url;
+    } catch {
+      return null;
+    }
+  }, []);
 
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
       StarterKit,
       Image.configure({ inline: false, allowBase64: false }),
+      VideoExtension,
       Placeholder.configure({ placeholder }),
     ],
     content: value || "",
@@ -65,14 +87,13 @@ export default function RichTextEditor({
           if (item.type.startsWith("image/")) {
             const file = item.getAsFile();
             if (!file) continue;
-
             event.preventDefault();
-            uploadImage(file).then((url) => {
+            uploadFile(file).then((url) => {
               if (url) {
                 view.dispatch(
                   view.state.tr.replaceSelectionWith(
-                    view.state.schema.nodes.image.create({ src: url }),
-                  ),
+                    view.state.schema.nodes.image.create({ src: url })
+                  )
                 );
               }
             });
@@ -85,21 +106,29 @@ export default function RichTextEditor({
         const files = event.dataTransfer?.files;
         if (!files || files.length === 0) return false;
 
-        const imageFiles = Array.from(files).filter((f) =>
-          f.type.startsWith("image/"),
+        const mediaFiles = Array.from(files).filter(
+          (f) => f.type.startsWith("image/") || f.type.startsWith("video/")
         );
-        if (imageFiles.length === 0) return false;
+        if (mediaFiles.length === 0) return false;
 
         event.preventDefault();
-        imageFiles.forEach((file) => {
-          uploadImage(file).then((url) => {
-            if (url) {
-              const { schema, tr, selection } = view.state;
+        mediaFiles.forEach((file) => {
+          uploadFile(file).then((url) => {
+            if (!url) return;
+            const { schema, tr, selection } = view.state;
+            if (file.type.startsWith("video/")) {
               view.dispatch(
                 tr.insert(
                   selection.from,
-                  schema.nodes.image.create({ src: url }),
-                ),
+                  schema.nodes.video.create({ src: url })
+                )
+              );
+            } else {
+              view.dispatch(
+                tr.insert(
+                  selection.from,
+                  schema.nodes.image.create({ src: url })
+                )
               );
             }
           });
@@ -119,15 +148,20 @@ export default function RichTextEditor({
     }
   }, [value, editor]);
 
-  const handleImageUploadClick = () => fileInputRef.current?.click();
-
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !editor) return;
+    const url = await uploadFile(file);
+    if (url) editor.chain().focus().setImage({ src: url }).run();
+    e.target.value = "";
+  };
 
-    const url = await uploadImage(file);
+  const handleVideoFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !editor) return;
+    const url = await uploadFile(file);
     if (url) {
-      editor.chain().focus().setImage({ src: url }).run();
+      editor.chain().focus().insertContent({ type: "video", attrs: { src: url } }).run();
     }
     e.target.value = "";
   };
@@ -169,9 +203,7 @@ export default function RichTextEditor({
         <ToolbarGroup>
           <ToolbarButton
             type="button"
-            onClick={() =>
-              editor.chain().focus().toggleHeading({ level: 2 }).run()
-            }
+            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
             $active={editor.isActive("heading", { level: 2 })}
             title="제목 2"
           >
@@ -179,9 +211,7 @@ export default function RichTextEditor({
           </ToolbarButton>
           <ToolbarButton
             type="button"
-            onClick={() =>
-              editor.chain().focus().toggleHeading({ level: 3 }).run()
-            }
+            onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
             $active={editor.isActive("heading", { level: 3 })}
             title="제목 3"
           >
@@ -212,13 +242,22 @@ export default function RichTextEditor({
 
         <ToolbarDivider />
 
-        <ImageUploadButton
-          type="button"
-          onClick={handleImageUploadClick}
-          title="이미지 삽입"
-        >
-          🖼 이미지
-        </ImageUploadButton>
+        <MediaButtonGroup>
+          <MediaUploadButton
+            type="button"
+            onClick={() => imageInputRef.current?.click()}
+            title="이미지 삽입"
+          >
+            🖼 이미지
+          </MediaUploadButton>
+          <MediaUploadButton
+            type="button"
+            onClick={() => videoInputRef.current?.click()}
+            title="동영상 삽입"
+          >
+            🎬 동영상
+          </MediaUploadButton>
+        </MediaButtonGroup>
       </Toolbar>
 
       <EditorContentWrapper $minHeight={minHeight}>
@@ -226,11 +265,18 @@ export default function RichTextEditor({
       </EditorContentWrapper>
 
       <input
-        ref={fileInputRef}
+        ref={imageInputRef}
         type="file"
         accept="image/*"
         style={{ display: "none" }}
-        onChange={handleFileSelect}
+        onChange={handleImageFileSelect}
+      />
+      <input
+        ref={videoInputRef}
+        type="file"
+        accept="video/*"
+        style={{ display: "none" }}
+        onChange={handleVideoFileSelect}
       />
     </EditorContainer>
   );
@@ -275,10 +321,8 @@ const ToolbarButton = styled.button<{ $active?: boolean }>`
   padding: 0.25rem 0.5rem;
   min-width: 30px;
   height: 30px;
-  background: ${({ $active }) =>
-    $active ? theme.colors.accent : "transparent"};
-  color: ${({ $active }) =>
-    $active ? theme.colors.textLight : theme.colors.textSecondary};
+  background: ${({ $active }) => ($active ? theme.colors.accent : "transparent")};
+  color: ${({ $active }) => ($active ? theme.colors.textLight : theme.colors.textSecondary)};
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -290,12 +334,17 @@ const ToolbarButton = styled.button<{ $active?: boolean }>`
   transition: all ${theme.transitions.fast};
 
   &:hover {
-    background: ${({ $active }) =>
-      $active ? theme.colors.accentDark : theme.colors.surfaceWarm};
+    background: ${({ $active }) => ($active ? theme.colors.accentDark : theme.colors.surfaceWarm)};
   }
 `;
 
-const ImageUploadButton = styled.button`
+const MediaButtonGroup = styled.div`
+  display: flex;
+  gap: 0.375rem;
+  margin-left: auto;
+`;
+
+const MediaUploadButton = styled.button`
   padding: 0.25rem 0.625rem;
   height: 30px;
   background: transparent;
@@ -309,7 +358,6 @@ const ImageUploadButton = styled.button`
   align-items: center;
   gap: 0.25rem;
   transition: all ${theme.transitions.fast};
-  margin-left: auto;
 
   &:hover {
     background: ${theme.colors.primary};
@@ -327,9 +375,7 @@ const EditorContentWrapper = styled.div<{ $minHeight: string }>`
     line-height: 1.75;
     color: ${theme.colors.textPrimary};
 
-    p {
-      margin: 0.5rem 0;
-    }
+    p { margin: 0.5rem 0; }
 
     h2 {
       font-family: ${theme.typography.fontHeading};
@@ -349,18 +395,9 @@ const EditorContentWrapper = styled.div<{ $minHeight: string }>`
       line-height: 1.3;
     }
 
-    strong {
-      font-weight: 600;
-    }
-
-    em {
-      font-style: italic;
-    }
-
-    s {
-      text-decoration: line-through;
-      color: ${theme.colors.textTertiary};
-    }
+    strong { font-weight: 600; }
+    em { font-style: italic; }
+    s { text-decoration: line-through; color: ${theme.colors.textTertiary}; }
 
     blockquote {
       border-left: 3px solid ${theme.colors.accent};
@@ -373,15 +410,19 @@ const EditorContentWrapper = styled.div<{ $minHeight: string }>`
     ul {
       padding-left: 1.5rem;
       margin: 0.5rem 0;
-
-      li {
-        margin: 0.25rem 0;
-      }
+      li { margin: 0.25rem 0; }
     }
 
     img {
       max-width: 100%;
       height: auto;
+      border-radius: ${theme.borderRadius.sm};
+      margin: 0.5rem 0;
+      display: block;
+    }
+
+    video {
+      max-width: 100%;
       border-radius: ${theme.borderRadius.sm};
       margin: 0.5rem 0;
       display: block;

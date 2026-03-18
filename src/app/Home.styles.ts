@@ -397,11 +397,25 @@ export const GalleryItem = styled(motion.div)`
     box-shadow: ${theme.shadows.md};
   }
 
-  img {
+  img, video {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    pointer-events: none;
   }
+`;
+
+export const VideoPlayIcon = styled.div`
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: white;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.2);
+  pointer-events: none;
 `;
 
 export const GalleryItemOverlay = styled.div`

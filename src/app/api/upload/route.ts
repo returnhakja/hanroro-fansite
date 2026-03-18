@@ -1,53 +1,44 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { handleUpload, type HandleUploadBody } from '@vercel/blob/client';
 import { auth } from '@/lib/auth/auth';
-import connectDB from '@/lib/db/mongoose';
-import Image from '@/lib/db/models/Image';
-import { uploadToBlob } from '@/lib/storage/vercel-blob';
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
+  const body = (await request.json()) as HandleUploadBody;
+
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: '로그인이 필요합니다' },
-        { status: 401 }
-      );
-    }
-
-    const formData = await request.formData();
-    const file = formData.get('image') as File;
-    const title = formData.get('title') as string;
-
-    if (!file || !title) {
-      return NextResponse.json(
-        { error: '제목과 파일이 필요합니다' },
-        { status: 400 }
-      );
-    }
-
-    // Vercel Blob에 업로드
-    const imageUrl = await uploadToBlob(file, 'gallery');
-
-    // MongoDB에 저장
-    await connectDB();
-    const image = await Image.create({
-      title,
-      filename: file.name,
-      imageUrl,
-      userId: session.user.id,
+    const jsonResponse = await handleUpload({
+      body,
+      request,
+      onBeforeGenerateToken: async (_pathname, clientPayload) => {
+        const session = await auth();
+        if (!session?.user?.id) {
+          throw new Error('로그인이 필요합니다');
+        }
+        const payload = clientPayload ? JSON.parse(clientPayload) : {};
+        return {
+          allowedContentTypes: [
+            'image/*',
+            'video/*',
+            'application/octet-stream',
+          ],
+          maximumSizeInBytes: 500 * 1024 * 1024, // 500MB
+          tokenPayload: JSON.stringify({
+            userId: session.user.id,
+            title: payload.title || '',
+            mediaType: payload.mediaType || 'image',
+          }),
+        };
+      },
+      onUploadCompleted: async () => {
+        // DB 저장은 클라이언트에서 /api/images POST로 처리
+      },
     });
 
-    return NextResponse.json({
-      message: '업로드 성공',
-      imageUrl,
-      title,
-      _id: image._id,
-    });
+    return NextResponse.json(jsonResponse);
   } catch (error) {
-    console.error('업로드 오류:', error);
     return NextResponse.json(
-      { error: '서버 오류' },
-      { status: 500 }
+      { error: (error as Error).message },
+      { status: 400 }
     );
   }
 }
