@@ -12,10 +12,11 @@ export default function NaverAnalytics() {
       src="//wcs.pstatic.net/wcslog.js"
       strategy="afterInteractive"
       onLoad={() => {
-        if (!window.wcs_add) window.wcs_add = {};
-        window.wcs_add["wa"] = NAVER_ANALYTICS_ID;
-        if (window.wcs) {
-          window.wcs_do();
+        const w = window as any;
+        if (!w.wcs_add) w.wcs_add = {};
+        w.wcs_add["wa"] = NAVER_ANALYTICS_ID;
+        if (w.wcs) {
+          w.wcs_do();
         }
       }}
     />
