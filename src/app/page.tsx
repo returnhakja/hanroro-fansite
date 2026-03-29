@@ -47,6 +47,20 @@ import {
   VideoWrapper,
   Thumbnail,
   StyledIframe,
+  NewReleaseSection,
+  NewReleaseInner,
+  AlbumCoverWrap,
+  ReleaseInfo,
+  DdayBadge,
+  ReleaseTitle,
+  ReleaseMeta,
+  ReleaseDivider,
+  ReleaseTrackList,
+  ReleaseTrackItem,
+  TrackNumber,
+  TitleBadge,
+  ReleaseDesc,
+  TeaserLink,
 } from "./Home.styles";
 import { useReducedMotion } from "framer-motion";
 import { useYoutubeVideos } from "@/hooks/queries/useYoutube";
@@ -54,6 +68,8 @@ import { useImages } from "@/hooks/queries/useGallery";
 import { useBoardList } from "@/hooks/queries/useBoard";
 import { useActiveSetlist } from "@/hooks/queries/useConcerts";
 import { useUpcomingEvents } from "@/hooks/queries/useEvents";
+
+const RELEASE_DATE = new Date("2026-04-02");
 
 const Home = () => {
   const router = useRouter();
@@ -63,6 +79,20 @@ const Home = () => {
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [activeTab, setActiveTab] = useState<number>(0);
   const [isAwardModalOpen, setIsAwardModalOpen] = useState(false);
+  const [dday, setDday] = useState<string>("");
+
+  useLayoutEffect(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const release = new Date(RELEASE_DATE);
+    release.setHours(0, 0, 0, 0);
+    const diff = Math.ceil(
+      (release.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+    );
+    if (diff > 0) setDday(`D-${diff}`);
+    else if (diff === 0) setDday("D-DAY");
+    else setDday("OUT NOW");
+  }, []);
 
   const { data: videoData, isLoading: loading } = useYoutubeVideos();
   const { data: imageData } = useImages();
@@ -194,6 +224,63 @@ const Home = () => {
           onClick={scrollToContent}
         />
       </HeroSection>
+
+      {/* New Release Section - 애증 */}
+      <NewReleaseSection>
+        <NewReleaseInner>
+          <AlbumCoverWrap
+            initial={shouldReduceMotion ? {} : { opacity: 0, x: -20 }}
+            whileInView={shouldReduceMotion ? {} : { opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7 }}
+          >
+            <img src="/assets/애증.png" alt="애증 앨범 커버" />
+          </AlbumCoverWrap>
+          <ReleaseInfo
+            initial={shouldReduceMotion ? {} : { opacity: 0, x: 20 }}
+            whileInView={shouldReduceMotion ? {} : { opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7, delay: 0.15 }}
+          >
+            <SectionOverline>NEW RELEASE</SectionOverline>
+            {dday && <DdayBadge>{dday}</DdayBadge>}
+            <ReleaseTitle
+              initial={shouldReduceMotion ? {} : { opacity: 0 }}
+              whileInView={shouldReduceMotion ? {} : { opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
+              애증
+            </ReleaseTitle>
+            <ReleaseMeta>2026.04.02 · Single</ReleaseMeta>
+            <ReleaseDivider />
+            <ReleaseTrackList>
+              <ReleaseTrackItem>
+                <TrackNumber>01</TrackNumber>
+                <span>Game Over?</span>
+                <TitleBadge>TITLE</TitleBadge>
+              </ReleaseTrackItem>
+              <ReleaseTrackItem>
+                <TrackNumber>02</TrackNumber>
+                <span>1111</span>
+              </ReleaseTrackItem>
+            </ReleaseTrackList>
+            <ReleaseDivider />
+            <ReleaseDesc>
+              사랑은 죽 사랑일 수 없고, 미움은 죽 미움일 수 없습니다. 우리는
+              미워하고 미움 받다 사랑하고 사랑 받는 공간. 이 헛구역질 나는
+              세계 속에서 어떻게든 &apos;나&apos;를 알아가려 합니다.
+            </ReleaseDesc>
+            <TeaserLink
+              href="https://www.youtube.com/watch?v=9QBkOZHJaiE"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              1111 티저 영상 보기
+            </TeaserLink>
+          </ReleaseInfo>
+        </NewReleaseInner>
+      </NewReleaseSection>
 
       {/* Board Preview Section - 최신 소식 */}
       <BoardPreviewSection>

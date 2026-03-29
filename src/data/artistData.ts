@@ -9,6 +9,16 @@ export const artistData = {
   imageUrl: "/assets/한로로프로필사진.jpg",
   albums: [
     {
+      id: "15",
+      title: "애증",
+      releaseDate: "2026-04-02",
+      coverUrl: "/assets/애증.png",
+      tracks: [
+        { title: "Game Over?", duration: "" },
+        { title: "1111", duration: "" },
+      ],
+    },
+    {
       id: "14",
       title: "자몽살구클럽",
       releaseDate: "2025-08-04",
