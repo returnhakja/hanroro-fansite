@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     default: "한로로 팬사이트 - HANRORO FANSITE",
     template: "%s | 한로로 팬사이트",
   },
-  description: "싱어송라이터 한로로의 팬사이트 - 갤러리, 공연 일정, 커뮤니티",
+  description: "2026 한국대중음악상 올해의 음악인 · 싱어송라이터 한로로의 팬사이트. 신보 '애증' 발매 — 공연 일정, 갤러리, 팬 커뮤니티",
   applicationName: "한로로 팬사이트",
   keywords: [
     "한로로",
@@ -28,6 +28,10 @@ export const metadata: Metadata = {
     "갤러리",
     "커뮤니티",
     "한로로 팬사이트",
+    "애증",
+    "한국대중음악상",
+    "꼰대희",
+    "꼰대희 한로로",
   ],
   authors: [{ name: "HANRORO Fansite Team" }],
   creator: "HANRORO Fansite",
@@ -38,7 +42,7 @@ export const metadata: Metadata = {
     url: "https://hanroro-fansite.vercel.app",
     siteName: "한로로 팬사이트",
     title: "한로로 팬사이트 - HANRORO Fansite",
-    description: "싱어송라이터 한로로의 팬사이트 - 갤러리, 공연 일정, 커뮤니티",
+    description: "2026 한국대중음악상 올해의 음악인 · 싱어송라이터 한로로의 팬사이트. 신보 '애증' 발매 — 공연 일정, 갤러리, 팬 커뮤니티",
     images: [
       {
         url: "/assets/한로로프로필사진.jpg",

@@ -272,11 +272,11 @@ const Home = () => {
               세계 속에서 어떻게든 &apos;나&apos;를 알아가려 합니다.
             </ReleaseDesc>
             <TeaserLink
-              href="https://www.youtube.com/watch?v=9QBkOZHJaiE"
+              href="https://youtu.be/Gofn_ULNd5Q?si=wQtnKuUHxb7ktUt_"
               target="_blank"
               rel="noopener noreferrer"
             >
-              1111 티저 영상 보기
+              1111 뮤직비디오 보기
             </TeaserLink>
           </ReleaseInfo>
         </NewReleaseInner>
