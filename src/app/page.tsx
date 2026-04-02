@@ -258,7 +258,6 @@ const Home = () => {
                 <span>Game Over?</span>
                 <TitleBadge>TITLE</TitleBadge>
               </ReleaseTrackItem>
-              <br />
               <ReleaseTrackItem>
                 <TrackNumber>02</TrackNumber>
                 <span>1111</span>
@@ -277,6 +276,7 @@ const Home = () => {
             >
               게임오버 ? 뮤직비디오 보기
             </TeaserLink>
+            <br />
             <TeaserLink
               href="https://youtu.be/Gofn_ULNd5Q?si=wQtnKuUHxb7ktUt_"
               target="_blank"
