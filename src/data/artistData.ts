@@ -14,8 +14,8 @@ export const artistData = {
       releaseDate: "2026-04-02",
       coverUrl: "/assets/애증.png",
       tracks: [
-        { title: "Game Over?", duration: "" },
-        { title: "1111", duration: "" },
+        { title: "Game Over?", duration: "3:17" },
+        { title: "1111", duration: "3:52" },
       ],
     },
     {
