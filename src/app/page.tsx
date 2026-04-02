@@ -258,6 +258,7 @@ const Home = () => {
                 <span>Game Over?</span>
                 <TitleBadge>TITLE</TitleBadge>
               </ReleaseTrackItem>
+              <br />
               <ReleaseTrackItem>
                 <TrackNumber>02</TrackNumber>
                 <span>1111</span>
