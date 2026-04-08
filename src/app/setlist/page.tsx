@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useReducedMotion } from 'framer-motion';
 import {
   Container,
@@ -24,18 +25,35 @@ import {
 } from './Setlist.styles';
 import { useConcerts } from '@/hooks/queries/useConcerts';
 
-const SetlistPage = () => {
-  const shouldReduceMotion = useReducedMotion();
+function SetlistContent() {
+  const prefersReducedMotion = useReducedMotion();
+  const [shouldReduceMotion, setShouldReduceMotion] = useState(false);
+  const searchParams = useSearchParams();
+  const targetConcertId = searchParams.get('concertId');
   const { data: concerts = [], isLoading: loading } = useConcerts();
   const [activeTabs, setActiveTabs] = useState<{ [key: string]: number }>({});
+  const cardRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+
+  useEffect(() => {
+    setShouldReduceMotion(prefersReducedMotion ?? false);
+  }, [prefersReducedMotion]);
+
+  useEffect(() => {
+    if (!targetConcertId || loading) return;
+    const el = cardRefs.current[targetConcertId];
+    if (el) {
+      setTimeout(() => {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 300);
+    }
+  }, [targetConcertId, loading]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    return `${year}년 ${month}월 ${day}일`;
   };
 
   const handleTabChange = (concertId: string, tabIndex: number) => {
@@ -57,6 +75,8 @@ const SetlistPage = () => {
           {concerts.map((concert, index) => (
             <ConcertCard
               key={concert._id}
+              ref={(el: HTMLDivElement | null) => { cardRefs.current[concert._id] = el; }}
+              $highlighted={concert._id === targetConcertId}
               initial={shouldReduceMotion ? {} : { opacity: 0, y: 20 }}
               animate={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
@@ -117,4 +137,10 @@ const SetlistPage = () => {
   );
 };
 
-export default SetlistPage;
+export default function SetlistPage() {
+  return (
+    <Suspense>
+      <SetlistContent />
+    </Suspense>
+  );
+}

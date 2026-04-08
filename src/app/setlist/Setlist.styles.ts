@@ -50,12 +50,25 @@ export const ConcertGrid = styled.div`
   }
 `;
 
-export const ConcertCard = styled(motion.div)`
+export const ConcertCard = styled(motion.div)<{ $highlighted?: boolean }>`
   background: ${theme.colors.surface};
   border-radius: ${theme.borderRadius.xl};
   overflow: hidden;
-  box-shadow: ${theme.shadows.lg};
+  box-shadow: ${props =>
+    props.$highlighted
+      ? `0 0 0 3px ${theme.colors.primary}, ${theme.shadows.xl}`
+      : theme.shadows.lg};
   transition: box-shadow ${theme.transitions.normal};
+
+  ${props =>
+    props.$highlighted &&
+    `
+    animation: highlightPulse 1.5s ease-out;
+    @keyframes highlightPulse {
+      0% { box-shadow: 0 0 0 6px ${theme.colors.primary}80, ${theme.shadows.xl}; }
+      100% { box-shadow: 0 0 0 3px ${theme.colors.primary}, ${theme.shadows.xl}; }
+    }
+  `}
 
   &:hover {
     box-shadow: ${theme.shadows.xl};

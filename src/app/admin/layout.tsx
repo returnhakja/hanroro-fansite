@@ -80,6 +80,12 @@ export default function AdminLayout({
           >
             📝 게시글 관리
           </NavItem>
+          <NavItem
+            href="/admin/fanchants"
+            $active={pathname.startsWith('/admin/fanchants')}
+          >
+            🎶 응원법 관리
+          </NavItem>
         </Nav>
         <LogoutButton onClick={handleLogout}>로그아웃</LogoutButton>
       </Sidebar>

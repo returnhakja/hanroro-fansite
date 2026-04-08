@@ -29,4 +29,8 @@ export const queryKeys = {
   adminBoard: {
     list: (page: number, search: string) => ['admin', 'board', page, search] as const,
   },
+  fanchants: {
+    all: ['fanchants'] as const,
+    admin: ['admin', 'fanchants'] as const,
+  },
 } as const;

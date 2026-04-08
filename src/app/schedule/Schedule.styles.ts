@@ -209,3 +209,88 @@ export const EmptyMessage = styled.div`
     font-size: 1rem;
   }
 `;
+
+export const PastSection = styled.section`
+  margin-top: 5rem;
+`;
+
+export const PastGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+
+  @media (max-width: 1200px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+`;
+
+export const PastConcertCard = styled(motion.div)<{ $hasSetlist: boolean }>`
+  position: relative;
+  border-radius: ${theme.borderRadius.xl};
+  overflow: hidden;
+  box-shadow: ${theme.shadows.md};
+  background: ${theme.colors.surface};
+  cursor: ${props => (props.$hasSetlist ? 'pointer' : 'default')};
+  transition: transform ${theme.transitions.normal}, box-shadow ${theme.transitions.normal};
+
+  &:hover {
+    transform: ${props => (props.$hasSetlist ? 'translateY(-4px)' : 'none')};
+    box-shadow: ${props => (props.$hasSetlist ? theme.shadows.lg : theme.shadows.md)};
+  }
+`;
+
+export const PastPoster = styled.div<{ $posterUrl?: string }>`
+  width: 100%;
+  height: 160px;
+  background: ${props =>
+    props.$posterUrl
+      ? `linear-gradient(to bottom, rgba(0,0,0,0.25), rgba(0,0,0,0.6)), url(${props.$posterUrl})`
+      : `linear-gradient(135deg, ${theme.colors.secondaryLight} 0%, ${theme.colors.secondary} 100%)`};
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  filter: grayscale(20%);
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    height: 130px;
+  }
+`;
+
+export const SetlistBadge = styled.div`
+  position: absolute;
+  bottom: 0.75rem;
+  right: 0.75rem;
+  background: linear-gradient(135deg, ${theme.colors.primary} 0%, ${theme.colors.primaryDark} 100%);
+  color: white;
+  padding: 0.3rem 0.7rem;
+  border-radius: ${theme.borderRadius.full};
+  font-size: 0.75rem;
+  font-weight: 700;
+  box-shadow: ${theme.shadows.sm};
+`;
+
+export const PastConcertContent = styled.div`
+  padding: 1rem;
+`;
+
+export const PastConcertTitle = styled.h3`
+  font-family: ${theme.typography.fontHeading};
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: ${theme.colors.textPrimary};
+  margin-bottom: 0.375rem;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+export const PastConcertDate = styled.p`
+  font-size: 0.8rem;
+  color: ${theme.colors.textSecondary};
+`;

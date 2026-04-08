@@ -16,7 +16,8 @@ export const metadata: Metadata = {
     default: "한로로 팬사이트 - HANRORO FANSITE",
     template: "%s | 한로로 팬사이트",
   },
-  description: "2026 한국대중음악상 올해의 음악인 · 싱어송라이터 한로로의 팬사이트. 신보 '애증' 발매 — 공연 일정, 갤러리, 팬 커뮤니티",
+  description:
+    "유퀴즈온더블럭 출연 · 2026 한국대중음악상 올해의 음악인 · 싱어송라이터 한로로의 팬사이트. 신보 '애증' 발매 — 공연 일정, 갤러리, 팬 커뮤니티",
   applicationName: "한로로 팬사이트",
   keywords: [
     "한로로",
@@ -32,6 +33,13 @@ export const metadata: Metadata = {
     "한국대중음악상",
     "꼰대희",
     "꼰대희 한로로",
+    "유퀴즈",
+    "유퀴즈온더블럭",
+    "한로로 유퀴즈",
+    "성시경의 고막남친",
+    "고막남친",
+    "성시경",
+    "유퀴즈 한로로",
   ],
   authors: [{ name: "HANRORO Fansite Team" }],
   creator: "HANRORO Fansite",
@@ -42,7 +50,8 @@ export const metadata: Metadata = {
     url: "https://hanroro-fansite.vercel.app",
     siteName: "한로로 팬사이트",
     title: "한로로 팬사이트 - HANRORO Fansite",
-    description: "2026 한국대중음악상 올해의 음악인 · 싱어송라이터 한로로의 팬사이트. 신보 '애증' 발매 — 공연 일정, 갤러리, 팬 커뮤니티",
+    description:
+      "유퀴즈온더블럭 출연 · 2026 한국대중음악상 올해의 음악인 · 싱어송라이터 한로로의 팬사이트. 신보 '애증' 발매 — 공연 일정, 갤러리, 팬 커뮤니티",
     images: [
       {
         url: "/assets/한로로프로필사진.jpg",
@@ -133,6 +142,30 @@ export default function RootLayout({
     ],
   };
 
+  const tvAppearanceSchema = {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    name: "한로로 유퀴즈온더블럭 출연",
+    description:
+      "싱어송라이터 한로로가 tvN 유퀴즈온더블럭에 출연 '성시경의 고막남친' 한로로",
+    startDate: "2026-04-08",
+    eventStatus: "https://schema.org/EventScheduled",
+    eventAttendanceMode: "https://schema.org/MixedEventAttendanceMode",
+    location: {
+      "@type": "Place",
+      name: "tvN 유퀴즈온더블럭",
+    },
+    performer: {
+      "@type": "MusicGroup",
+      name: "한로로",
+      alternateName: "HANRORO",
+    },
+    organizer: {
+      "@type": "Organization",
+      name: "tvN",
+    },
+  };
+
   return (
     <html lang="ko">
       <head>
@@ -149,6 +182,7 @@ export default function RootLayout({
         <StructuredData data={organizationSchema} />
         <StructuredData data={websiteSchema} />
         <StructuredData data={musicGroupSchema} />
+        <StructuredData data={tvAppearanceSchema} />
         <link
           rel="alternate"
           type="application/rss+xml"
@@ -171,7 +205,10 @@ export default function RootLayout({
               <LoadingProvider>
                 <Header />
                 <main
-                  style={{ minHeight: "calc(100vh - 200px)", paddingTop: "70px" }}
+                  style={{
+                    minHeight: "calc(100vh - 200px)",
+                    paddingTop: "70px",
+                  }}
                 >
                   {children}
                 </main>

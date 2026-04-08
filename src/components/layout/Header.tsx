@@ -72,19 +72,22 @@ const Header = () => {
         </MobileAuthSection>
 
         <NavLink href="/gallery" onClick={() => setMenuOpen(false)}>
-          Gallery
+          갤러리
         </NavLink>
         <NavLink href="/board" onClick={() => setMenuOpen(false)}>
-          Board
+          게시판
         </NavLink>
         <NavLink href="/schedule" onClick={() => setMenuOpen(false)}>
-          Schedule
+          일정
         </NavLink>
         <NavLink href="/setlist" onClick={() => setMenuOpen(false)}>
-          Setlist
+          셋리스트
+        </NavLink>
+        <NavLink href="/fanchant" onClick={() => setMenuOpen(false)}>
+          응원법
         </NavLink>
         <NavLink href="/profile" onClick={() => setMenuOpen(false)}>
-          About
+          프로필
         </NavLink>
       </Nav>
 
