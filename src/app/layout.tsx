@@ -6,7 +6,6 @@ import { LoadingProvider } from "@/components/providers/LoadingProvider";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import StructuredData from "@/components/seo/StructuredData";
-import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
 import NaverAnalytics from "@/components/analytics/NaverAnalytics";
 import GoogleTagManager from "@/components/analytics/GoogleTagManager";
 import "./globals.css";
@@ -204,7 +203,6 @@ export default function RootLayout({
       </head>
       <body>
         <GoogleTagManager />
-        <GoogleAnalytics />
         <NaverAnalytics />
         <StyledComponentsRegistry>
           <QueryProvider>
