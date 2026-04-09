@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/db/mongoose";
 import Board from "@/lib/db/models/Board";
 
-const BASE_URL = "https://hanroro-fansite.vercel.app";
+const BASE_URL = "https://www.hanroro.co.kr";
 
 export async function GET() {
   await connectDB();

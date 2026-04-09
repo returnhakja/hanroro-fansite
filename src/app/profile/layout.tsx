@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: '프로필 | 한로로 팬사이트',
     description: '싱어송라이터 한로로의 프로필, 디스코그래피, 활동 내역을 확인하세요.',
-    url: 'https://hanroro-fansite.vercel.app/profile',
+    url: 'https://www.hanroro.co.kr/profile',
     type: 'profile',
     images: [
       {
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     ],
   },
   alternates: {
-    canonical: 'https://hanroro-fansite.vercel.app/profile',
+    canonical: 'https://www.hanroro.co.kr/profile',
   },
 };
 
@@ -31,8 +31,8 @@ const personSchema = {
   alternateName: 'HANRORO',
   description: '감성적인 음악으로 많은 팬들의 사랑을 받는 싱어송라이터',
   genre: ['인디팝', '발라드', 'K-POP'],
-  url: 'https://hanroro-fansite.vercel.app/profile',
-  image: 'https://hanroro-fansite.vercel.app/assets/한로로프로필사진.jpg',
+  url: 'https://www.hanroro.co.kr/profile',
+  image: 'https://www.hanroro.co.kr/assets/한로로프로필사진.jpg',
   sameAs: [
     'https://www.youtube.com/channel/UCrDa_5OU-rhvXqWlPx5hgKQ',
     'https://www.instagram.com/hanr0r0/',
@@ -49,13 +49,13 @@ const breadcrumbSchema = {
       '@type': 'ListItem',
       position: 1,
       name: '홈',
-      item: 'https://hanroro-fansite.vercel.app',
+      item: 'https://www.hanroro.co.kr',
     },
     {
       '@type': 'ListItem',
       position: 2,
       name: '프로필',
-      item: 'https://hanroro-fansite.vercel.app/profile',
+      item: 'https://www.hanroro.co.kr/profile',
     },
   ],
 };

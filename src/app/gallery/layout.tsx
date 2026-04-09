@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: '갤러리 | 한로로 팬사이트',
     description: '한로로 팬들이 공유한 아름다운 이미지들을 감상하세요.',
-    url: 'https://hanroro-fansite.vercel.app/gallery',
+    url: 'https://www.hanroro.co.kr/gallery',
     type: 'website',
     images: [
       {
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     ],
   },
   alternates: {
-    canonical: 'https://hanroro-fansite.vercel.app/gallery',
+    canonical: 'https://www.hanroro.co.kr/gallery',
   },
 };
 
@@ -29,7 +29,7 @@ const gallerySchema = {
   '@type': 'CollectionPage',
   name: '한로로 팬 갤러리',
   description: '한로로 팬들이 공유한 공연 사진 및 팬 이미지 모음',
-  url: 'https://hanroro-fansite.vercel.app/gallery',
+  url: 'https://www.hanroro.co.kr/gallery',
   inLanguage: 'ko-KR',
   about: {
     '@type': 'MusicGroup',
@@ -43,13 +43,13 @@ const gallerySchema = {
         '@type': 'ListItem',
         position: 1,
         name: '홈',
-        item: 'https://hanroro-fansite.vercel.app',
+        item: 'https://www.hanroro.co.kr',
       },
       {
         '@type': 'ListItem',
         position: 2,
         name: '갤러리',
-        item: 'https://hanroro-fansite.vercel.app/gallery',
+        item: 'https://www.hanroro.co.kr/gallery',
       },
     ],
   },

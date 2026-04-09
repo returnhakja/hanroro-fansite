@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: '셋리스트 | 한로로 팬사이트',
     description: '한로로 공연 셋리스트 모음. 각 공연에서 불렀던 노래 목록을 확인하세요.',
-    url: 'https://hanroro-fansite.vercel.app/setlist',
+    url: 'https://www.hanroro.co.kr/setlist',
     type: 'website',
     images: [
       {
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     ],
   },
   alternates: {
-    canonical: 'https://hanroro-fansite.vercel.app/setlist',
+    canonical: 'https://www.hanroro.co.kr/setlist',
   },
 };
 
@@ -32,13 +32,13 @@ const breadcrumbSchema = {
       '@type': 'ListItem',
       position: 1,
       name: '홈',
-      item: 'https://hanroro-fansite.vercel.app',
+      item: 'https://www.hanroro.co.kr',
     },
     {
       '@type': 'ListItem',
       position: 2,
       name: '셋리스트',
-      item: 'https://hanroro-fansite.vercel.app/setlist',
+      item: 'https://www.hanroro.co.kr/setlist',
     },
   ],
 };
@@ -48,7 +48,7 @@ const setlistPageSchema = {
   '@type': 'WebPage',
   name: '한로로 공연 셋리스트',
   description: '한로로 공연 셋리스트 모음',
-  url: 'https://hanroro-fansite.vercel.app/setlist',
+  url: 'https://www.hanroro.co.kr/setlist',
   inLanguage: 'ko-KR',
   about: {
     '@type': 'MusicGroup',

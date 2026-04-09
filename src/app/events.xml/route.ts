@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/db/mongoose";
 import Event from "@/lib/db/models/Event";
 
-const BASE_URL = "https://hanroro-fansite.vercel.app";
+const BASE_URL = "https://www.hanroro.co.kr";
 
 const EVENT_TYPE_LABEL: Record<string, string> = {
   concert: "콘서트",

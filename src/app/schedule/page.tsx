@@ -5,7 +5,7 @@ import Event from "@/lib/db/models/Event";
 import StructuredData from "@/components/seo/StructuredData";
 import SchedulePageClient from "./SchedulePageClient";
 
-const BASE_URL = "https://hanroro-fansite.vercel.app";
+const BASE_URL = "https://www.hanroro.co.kr";
 
 const getEventById = cache(async (id: string) => {
   await connectDB();

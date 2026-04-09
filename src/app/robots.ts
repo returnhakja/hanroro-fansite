@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/api/', '/upload/', '/admin/'],
       },
     ],
-    sitemap: 'https://hanroro-fansite.vercel.app/sitemap.xml',
+    sitemap: 'https://www.hanroro.co.kr/sitemap.xml',
   };
 }

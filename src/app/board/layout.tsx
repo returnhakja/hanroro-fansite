@@ -8,11 +8,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: '게시판 | 한로로 팬사이트',
     description: '한로로 팬들의 소통 공간. 공연 후기, 팬 활동, 정보 공유 등 다양한 이야기를 나눠보세요.',
-    url: 'https://hanroro-fansite.vercel.app/board',
+    url: 'https://www.hanroro.co.kr/board',
     type: 'website',
   },
   alternates: {
-    canonical: 'https://hanroro-fansite.vercel.app/board',
+    canonical: 'https://www.hanroro.co.kr/board',
   },
 };
 
@@ -21,12 +21,12 @@ const forumSchema = {
   '@type': 'DiscussionForum',
   name: '한로로 팬 게시판',
   description: '한로로 팬들의 소통 공간. 공연 후기, 팬 활동, 정보 공유 등 다양한 이야기를 나눠보세요.',
-  url: 'https://hanroro-fansite.vercel.app/board',
+  url: 'https://www.hanroro.co.kr/board',
   inLanguage: 'ko-KR',
   isPartOf: {
     '@type': 'WebSite',
     name: '한로로 팬사이트',
-    url: 'https://hanroro-fansite.vercel.app',
+    url: 'https://www.hanroro.co.kr',
   },
 };
 

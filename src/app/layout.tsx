@@ -11,7 +11,7 @@ import NaverAnalytics from "@/components/analytics/NaverAnalytics";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://hanroro-fansite.vercel.app"),
+  metadataBase: new URL("https://www.hanroro.co.kr"),
   title: {
     default: "한로로 팬사이트 - HANRORO FANSITE",
     template: "%s | 한로로 팬사이트",
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "ko_KR",
-    url: "https://hanroro-fansite.vercel.app",
+    url: "https://www.hanroro.co.kr",
     siteName: "한로로 팬사이트",
     title: "한로로 팬사이트 - HANRORO Fansite",
     description:
@@ -98,8 +98,8 @@ export default function RootLayout({
     "@type": "Organization",
     name: "한로로 팬사이트",
     alternateName: "HANRORO Fansite",
-    url: "https://hanroro-fansite.vercel.app",
-    logo: "https://hanroro-fansite.vercel.app/assets/한로로프로필사진.jpg",
+    url: "https://www.hanroro.co.kr",
+    logo: "https://www.hanroro.co.kr/assets/한로로프로필사진.jpg",
     description: "싱어송라이터 한로로의 팬사이트 - 갤러리, 공연 일정, 커뮤니티",
     sameAs: [
       // 여기에 한로로의 공식 SNS 링크를 추가할 수 있습니다
@@ -116,7 +116,7 @@ export default function RootLayout({
     "@type": "WebSite",
     name: "HANRORO Fansite",
     alternateName: "한로로 팬사이트",
-    url: "https://hanroro-fansite.vercel.app",
+    url: "https://www.hanroro.co.kr",
     description: "싱어송라이터 한로로의 팬사이트 - 갤러리, 공연 일정, 커뮤니티",
     inLanguage: "ko-KR",
     potentialAction: {
@@ -124,7 +124,7 @@ export default function RootLayout({
       target: {
         "@type": "EntryPoint",
         urlTemplate:
-          "https://hanroro-fansite.vercel.app/board?search={search_term_string}",
+          "https://www.hanroro.co.kr/board?search={search_term_string}",
       },
       "query-input": "required name=search_term_string",
     },
@@ -137,8 +137,8 @@ export default function RootLayout({
     alternateName: "HANRORO",
     description: "감성적인 음악으로 많은 팬들의 사랑을 받는 싱어송라이터",
     genre: ["인디팝", "발라드", "K-POP"],
-    url: "https://hanroro-fansite.vercel.app/profile",
-    image: "https://hanroro-fansite.vercel.app/assets/한로로프로필사진.jpg",
+    url: "https://www.hanroro.co.kr/profile",
+    image: "https://www.hanroro.co.kr/assets/한로로프로필사진.jpg",
     sameAs: [
       "https://www.youtube.com/channel/UCrDa_5OU-rhvXqWlPx5hgKQ",
       "https://www.instagram.com/hanr0r0/",
@@ -192,13 +192,13 @@ export default function RootLayout({
           rel="alternate"
           type="application/rss+xml"
           title="한로로 팬사이트 - 커뮤니티"
-          href="https://hanroro-fansite.vercel.app/feed.xml"
+          href="https://www.hanroro.co.kr/feed.xml"
         />
         <link
           rel="alternate"
           type="application/rss+xml"
           title="한로로 팬사이트 - 일정"
-          href="https://hanroro-fansite.vercel.app/events.xml"
+          href="https://www.hanroro.co.kr/events.xml"
         />
       </head>
       <body>

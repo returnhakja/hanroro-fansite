@@ -33,11 +33,11 @@ export async function generateMetadata({
       openGraph: {
         title: `${title} | 한로로 팬사이트`,
         description,
-        url: `https://hanroro-fansite.vercel.app/board/${id}`,
+        url: `https://www.hanroro.co.kr/board/${id}`,
         type: "article",
       },
       alternates: {
-        canonical: `https://hanroro-fansite.vercel.app/board/${id}`,
+        canonical: `https://www.hanroro.co.kr/board/${id}`,
       },
     };
   } catch {
@@ -68,7 +68,7 @@ export default async function BoardDetailPage({
         "@type": "DiscussionForumPosting",
         headline: title,
         text: plainText,
-        url: `https://hanroro-fansite.vercel.app/board/${id}`,
+        url: `https://www.hanroro.co.kr/board/${id}`,
         datePublished: (post.createdAt as Date).toISOString(),
         author: {
           "@type": "Person",
@@ -89,7 +89,7 @@ export default async function BoardDetailPage({
         isPartOf: {
           "@type": "DiscussionForum",
           name: "한로로 팬 게시판",
-          url: "https://hanroro-fansite.vercel.app/board",
+          url: "https://www.hanroro.co.kr/board",
         },
       };
 
@@ -101,19 +101,19 @@ export default async function BoardDetailPage({
             "@type": "ListItem",
             position: 1,
             name: "홈",
-            item: "https://hanroro-fansite.vercel.app",
+            item: "https://www.hanroro.co.kr",
           },
           {
             "@type": "ListItem",
             position: 2,
             name: "게시판",
-            item: "https://hanroro-fansite.vercel.app/board",
+            item: "https://www.hanroro.co.kr/board",
           },
           {
             "@type": "ListItem",
             position: 3,
             name: title,
-            item: `https://hanroro-fansite.vercel.app/board/${id}`,
+            item: `https://www.hanroro.co.kr/board/${id}`,
           },
         ],
       };

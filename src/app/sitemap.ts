@@ -4,7 +4,7 @@ import Board from "@/lib/db/models/Board";
 import Event from "@/lib/db/models/Event";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://hanroro-fansite.vercel.app";
+  const baseUrl = "https://www.hanroro.co.kr";
 
   // 정적 페이지
   const staticRoutes: MetadataRoute.Sitemap = [

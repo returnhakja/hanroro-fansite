@@ -14,13 +14,13 @@ const breadcrumbSchema = {
       "@type": "ListItem",
       position: 1,
       name: "홈",
-      item: "https://hanroro-fansite.vercel.app",
+      item: "https://www.hanroro.co.kr",
     },
     {
       "@type": "ListItem",
       position: 2,
       name: "게시판",
-      item: "https://hanroro-fansite.vercel.app/board",
+      item: "https://www.hanroro.co.kr/board",
     },
   ],
 };
