@@ -67,6 +67,11 @@ export const metadata: Metadata = {
     description: "싱어송라이터 한로로의 팬사이트 - 갤러리, 공연 일정, 커뮤니티",
     images: ["/assets/한로로프로필사진.jpg"],
   },
+  icons: {
+    icon: "/assets/프로필.jpg",
+    shortcut: "/assets/프로필.jpg",
+    apple: "/assets/프로필.jpg",
+  },
   robots: {
     index: true,
     follow: true,

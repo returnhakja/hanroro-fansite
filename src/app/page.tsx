@@ -167,6 +167,7 @@ const Home = () => {
       month: "long",
       day: "numeric",
     });
+    
   };
 
   return (

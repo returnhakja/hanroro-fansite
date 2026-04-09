@@ -4,9 +4,9 @@ export const artistData = {
   differentName: "한지수, HANRORO",
   company: "authentic",
   debutDate: "2022년 3월 14일",
-  genre: "인디, 락",
-  bio: "팬들에게 사랑받는 아티스트",
-  imageUrl: "/assets/한로로프로필사진.jpg",
+  genre: "모던 록록",
+  bio: "청춘의 감성과 경험을 깊이 있게 담아내는 서정적이고 시적인 가사, 그리고 호소력 짙은 보컬",
+  imageUrl: "/assets/애증프로필.jpg",
   albums: [
     {
       id: "15",
