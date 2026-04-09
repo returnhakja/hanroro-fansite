@@ -182,7 +182,7 @@ export default function RootLayout({
         />
         <meta
           name="naver-site-verification"
-          content="9e1a2cd75f7c82d56d3a60a3b7d1c3ddf56ae2d1"
+          content="228f113d2db5fd82017fb9036bddd68e5ebaaa48"
         />
         <StructuredData data={organizationSchema} />
         <StructuredData data={websiteSchema} />
