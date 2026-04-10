@@ -211,11 +211,13 @@ export default async function SchedulePage({
         const posterUrl = event.posterUrl as string | undefined;
         const eventType = event.type as string;
 
+        const startDate = buildStartDate(date, time);
         eventSchema = {
           "@context": "https://schema.org",
           "@type": getSchemaEventType(eventType),
           name: title,
-          startDate: buildStartDate(date, time),
+          startDate,
+          endDate: startDate,
           description: buildDescription({
             title,
             type: eventType,
@@ -226,17 +228,25 @@ export default async function SchedulePage({
           url: `${BASE_URL}/schedule?event=${eventId}`,
           eventStatus: "https://schema.org/EventScheduled",
           eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
-          ...(place && {
-            location: {
-              "@type": "Place",
-              name: place,
-              address: {
-                "@type": "PostalAddress",
-                addressLocality: "서울",
-                addressCountry: "KR",
-              },
+          image: posterUrl
+            ? [posterUrl]
+            : [`${BASE_URL}/assets/한로로프로필사진.jpg`],
+          location: {
+            "@type": "Place",
+            name: place ?? "미정",
+            address: {
+              "@type": "PostalAddress",
+              addressLocality: place ? "서울" : "미정",
+              addressCountry: "KR",
             },
-          }),
+          },
+          offers: {
+            "@type": "Offer",
+            url: `${BASE_URL}/schedule?event=${eventId}`,
+            availability: "https://schema.org/InStock",
+            price: "0",
+            priceCurrency: "KRW",
+          },
           performer: {
             "@type": "MusicGroup",
             name: "한로로",
@@ -252,7 +262,6 @@ export default async function SchedulePage({
             name: "한로로 팬사이트",
             url: BASE_URL,
           },
-          ...(posterUrl && { image: [posterUrl] }),
         };
 
         breadcrumbSchema = {
@@ -301,31 +310,58 @@ export default async function SchedulePage({
           description: "한로로의 다가오는 공연, 팬미팅, 방송 일정",
           url: `${BASE_URL}/schedule`,
           numberOfItems: events.length,
-          itemListElement: events.map((event, index) => ({
-            "@type": "ListItem",
-            position: index + 1,
-            item: {
-              "@type": getSchemaEventType(event.type as string),
-              name: event.title,
-              startDate: buildStartDate(
-                event.date as Date,
-                event.time as string | undefined,
-              ),
-              url: `${BASE_URL}/schedule?event=${(event._id as { toString(): string }).toString()}`,
-              eventStatus: "https://schema.org/EventScheduled",
-              eventAttendanceMode:
-                "https://schema.org/OfflineEventAttendanceMode",
-              ...(event.place && {
-                location: { "@type": "Place", name: event.place },
-              }),
-              performer: {
-                "@type": "MusicGroup",
-                name: "한로로",
-                alternateName: "HANRORO",
+          itemListElement: events.map((event, index) => {
+            const eventId = (
+              event._id as { toString(): string }
+            ).toString();
+            const eventStartDate = buildStartDate(
+              event.date as Date,
+              event.time as string | undefined,
+            );
+            return {
+              "@type": "ListItem",
+              position: index + 1,
+              item: {
+                "@type": getSchemaEventType(event.type as string),
+                name: event.title,
+                startDate: eventStartDate,
+                endDate: eventStartDate,
+                url: `${BASE_URL}/schedule?event=${eventId}`,
+                eventStatus: "https://schema.org/EventScheduled",
+                eventAttendanceMode:
+                  "https://schema.org/OfflineEventAttendanceMode",
+                image: event.posterUrl
+                  ? [event.posterUrl]
+                  : [`${BASE_URL}/assets/한로로프로필사진.jpg`],
+                location: {
+                  "@type": "Place",
+                  name: event.place ?? "미정",
+                  address: {
+                    "@type": "PostalAddress",
+                    addressLocality: event.place ? "서울" : "미정",
+                    addressCountry: "KR",
+                  },
+                },
+                offers: {
+                  "@type": "Offer",
+                  url: `${BASE_URL}/schedule?event=${eventId}`,
+                  availability: "https://schema.org/InStock",
+                  price: "0",
+                  priceCurrency: "KRW",
+                },
+                performer: {
+                  "@type": "MusicGroup",
+                  name: "한로로",
+                  alternateName: "HANRORO",
+                },
+                organizer: {
+                  "@type": "Organization",
+                  name: "한로로 팬사이트",
+                  url: BASE_URL,
+                },
               },
-              ...(event.posterUrl && { image: [event.posterUrl] }),
-            },
-          })),
+            };
+          }),
         };
       }
     } catch {}
