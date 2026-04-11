@@ -154,11 +154,25 @@ export default function RootLayout({
     description:
       "싱어송라이터 한로로가 tvN 유퀴즈온더블럭에 출연 '성시경의 고막남친' 한로로",
     startDate: "2026-04-08",
+    endDate: "2026-04-08",
     eventStatus: "https://schema.org/EventScheduled",
     eventAttendanceMode: "https://schema.org/MixedEventAttendanceMode",
+    image: ["https://www.hanroro.co.kr/assets/한로로프로필사진.jpg"],
     location: {
       "@type": "Place",
       name: "tvN 유퀴즈온더블럭",
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: "서울",
+        addressCountry: "KR",
+      },
+    },
+    offers: {
+      "@type": "Offer",
+      url: "https://www.hanroro.co.kr",
+      availability: "https://schema.org/InStock",
+      price: "0",
+      priceCurrency: "KRW",
     },
     performer: {
       "@type": "MusicGroup",
@@ -168,6 +182,7 @@ export default function RootLayout({
     organizer: {
       "@type": "Organization",
       name: "tvN",
+      url: "https://www.tving.com",
     },
   };
 

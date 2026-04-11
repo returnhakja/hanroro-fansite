@@ -81,6 +81,12 @@ export default function AdminLayout({
             📝 게시글 관리
           </NavItem>
           <NavItem
+            href="/admin/inquiries"
+            $active={pathname.startsWith('/admin/inquiries')}
+          >
+            ✉️ 비밀 문의
+          </NavItem>
+          <NavItem
             href="/admin/fanchants"
             $active={pathname.startsWith('/admin/fanchants')}
           >
