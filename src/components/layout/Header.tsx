@@ -2,14 +2,19 @@
 
 import styled from "styled-components";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { theme } from "@/styles/theme";
 
 const Header = () => {
+  const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { data: session, status } = useSession();
+
+  /* 홈 히어로가 헤더 뒤로 올라오므로(음수 마진), 상단에서도 대비가 나오게 배경을 켬 */
+  const useSolidBar = scrolled || pathname === "/";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -27,7 +32,7 @@ const Header = () => {
   }, [menuOpen]);
 
   return (
-    <HeaderContainer $scrolled={scrolled}>
+    <HeaderContainer $solidBar={useSolidBar}>
       <LogoLink href="/">HANRORO</LogoLink>
 
       <Hamburger onClick={() => setMenuOpen(true)}>
@@ -83,6 +88,9 @@ const Header = () => {
         <NavLink href="/setlist" onClick={() => setMenuOpen(false)}>
           셋리스트
         </NavLink>
+        <NavLink href="/chronicle" onClick={() => setMenuOpen(false)}>
+          연대기
+        </NavLink>
         <NavLink href="/fanchant" onClick={() => setMenuOpen(false)}>
           응원법
         </NavLink>
@@ -112,7 +120,7 @@ const Header = () => {
   );
 };
 
-const HeaderContainer = styled.header<{ $scrolled: boolean }>`
+const HeaderContainer = styled.header<{ $solidBar: boolean }>`
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -122,11 +130,13 @@ const HeaderContainer = styled.header<{ $scrolled: boolean }>`
   left: 0;
   right: 0;
   z-index: 100;
-  background-color: ${({ $scrolled }) =>
-    $scrolled ? "rgba(250, 247, 242, 0.95)" : "transparent"};
-  border-bottom: ${({ $scrolled }) =>
-    $scrolled ? `1px solid ${theme.colors.border}` : "1px solid transparent"};
-  backdrop-filter: ${({ $scrolled }) => ($scrolled ? "blur(12px)" : "none")};
+  background-color: ${({ $solidBar }) =>
+    $solidBar ? "rgba(250, 247, 242, 0.92)" : "transparent"};
+  border-bottom: ${({ $solidBar }) =>
+    $solidBar ? `1px solid ${theme.colors.border}` : "1px solid transparent"};
+  backdrop-filter: ${({ $solidBar }) => ($solidBar ? "blur(12px)" : "none")};
+  -webkit-backdrop-filter: ${({ $solidBar }) =>
+    $solidBar ? "blur(12px)" : "none"};
   transition:
     background-color 0.4s ease,
     border-bottom 0.4s ease,

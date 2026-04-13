@@ -92,6 +92,12 @@ export default function AdminLayout({
           >
             🎶 응원법 관리
           </NavItem>
+          <NavItem
+            href="/admin/chronicle"
+            $active={pathname.startsWith('/admin/chronicle')}
+          >
+            📖 연대기 관리
+          </NavItem>
         </Nav>
         <LogoutButton onClick={handleLogout}>로그아웃</LogoutButton>
       </Sidebar>

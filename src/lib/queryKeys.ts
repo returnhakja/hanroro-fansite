@@ -33,4 +33,8 @@ export const queryKeys = {
     all: ['fanchants'] as const,
     admin: ['admin', 'fanchants'] as const,
   },
+  activities: {
+    all: ['activities'] as const,
+    admin: ['admin', 'activities'] as const,
+  },
 } as const;
