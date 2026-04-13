@@ -71,7 +71,7 @@ export const artistData = {
     },
     {
       id: "9",
-      title: "먹이사실",
+      title: "먹이사슬",
       releaseDate: "2024-04-30",
       coverUrl: "/assets/먹이사슬.jpg",
       tracks: [],
