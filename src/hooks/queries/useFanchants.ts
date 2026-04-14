@@ -1,30 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/queryKeys';
 import type { ILyricLine, ILyricSegment } from '@/lib/db/models/Fanchant';
-export type { ILyricLine, ILyricSegment };
-
-// ─── 타입 ───────────────────────────────────────────────────────
-export interface Fanchant {
-  _id: string;
-  songTitle: string;
-  album: string;
-  albumImageUrl?: string;
-  order: number;
-  lyrics: ILyricLine[];
-}
-
-export interface FanchantFormData {
-  songTitle: string;
-  album: string;
-  albumImageUrl?: string;
-  order: number;
-  lyricsRaw: string;
-}
-
-function getAuthHeader(): Record<string, string> {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
+import { getAuthHeader } from '@/lib/auth/authHeader';
+import type { Fanchant, FanchantFormData } from '@/types/api/fanchant';
+export type { ILyricLine, ILyricSegment, Fanchant, FanchantFormData };
 
 // ─── 공개 훅 ─────────────────────────────────────────────────────
 export function useFanchants() {

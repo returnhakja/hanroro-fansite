@@ -56,7 +56,7 @@ export default function RichTextEditor({
       const pathname = `board/${timestamp}-${sanitized}`;
       const blob = await upload(pathname, file, {
         access: "public",
-        handleUploadUrl: "/api/board/upload",
+        handleUploadUrl: "/api/upload?type=board",
       });
       return blob.url;
     } catch {

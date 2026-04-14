@@ -1,27 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/queryKeys';
-
-export interface AdminPost {
-  _id: string;
-  title: string;
-  content: string;
-  author: string;
-  views: number;
-  likes: number;
-  createdAt: string;
-  imageUrls: string[];
-}
-
-export interface AdminBoardStats {
-  totalPosts: number;
-  totalViews: number;
-  totalLikes: number;
-}
-
-function getAuthHeader(): Record<string, string> {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
+import { getAuthHeader } from '@/lib/auth/authHeader';
+import type { AdminPost, AdminBoardStats } from '@/types/api/board';
+export type { AdminPost, AdminBoardStats };
 
 export function useAdminBoard(page: number, searchQuery: string) {
   return useQuery({
@@ -55,7 +36,7 @@ export function useAdminDeletePost() {
       if (!res.ok) throw new Error('게시글 삭제 실패');
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'board'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.adminBoard.all });
     },
   });
 }

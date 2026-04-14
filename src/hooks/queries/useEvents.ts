@@ -1,31 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/queryKeys';
-
-// ─── 타입 ───────────────────────────────────────────────────────
-export interface Event {
-  _id: string;
-  title: string;
-  date: string;
-  time?: string;
-  place?: string;
-  posterUrl?: string;
-  type: 'concert' | 'award' | 'broadcast' | 'other' | 'festival' | 'fanmeeting';
-  isPinned: boolean;
-}
-
-export interface EventFormData {
-  title: string;
-  date: string;
-  time: string;
-  place: string;
-  posterUrl: string;
-  type: Event['type'];
-}
-
-function getAuthHeader(): Record<string, string> {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
+import { getAuthHeader } from '@/lib/auth/authHeader';
+import type { Event, EventFormData } from '@/types/api/event';
+export type { Event, EventFormData };
 
 // ─── 쿼리 훅 ────────────────────────────────────────────────────
 export function useUpcomingEvents() {

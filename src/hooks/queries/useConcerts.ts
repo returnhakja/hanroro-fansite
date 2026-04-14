@@ -1,41 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/queryKeys';
-
-// ─── 타입 ───────────────────────────────────────────────────────
-export interface Song {
-  title: string;
-  albumImageUrl?: string;
-  order: number;
-}
-
-export interface SetList {
-  _id: string;
-  concertId?: string;
-  day: number;
-  date: string;
-  songs: Song[];
-}
-
-export interface Concert {
-  _id: string;
-  title: string;
-  venue: string;
-  startDate: string;
-  endDate: string;
-  posterUrl?: string;
-  isActive: boolean;
-  setlists?: SetList[];
-}
-
-export interface ActiveSetlistData {
-  concert: Concert | null;
-  setlists: SetList[];
-}
-
-function getAuthHeader(): Record<string, string> {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
+import { getAuthHeader } from '@/lib/auth/authHeader';
+import type { Song, SetList, Concert, ActiveSetlistData } from '@/types/api/concert';
+export type { Song, SetList, Concert, ActiveSetlistData };
 
 // ─── 쿼리 훅 ────────────────────────────────────────────────────
 // 공개: 공연 + 셋리스트 목록

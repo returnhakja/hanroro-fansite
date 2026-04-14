@@ -1,31 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/queryKeys';
-
-// ─── 타입 ───────────────────────────────────────────────────────
-export interface BoardPost {
-  _id: string;
-  title: string;
-  content: string;
-  author: string;
-  userId?: string;
-  createdAt: string;
-  views: number;
-  likes: number;
-  likedBy?: string[];
-  imageUrls?: string[];
-}
-
-export interface Comment {
-  _id: string;
-  boardId: string;
-  content: string;
-  author: string;
-  userId?: string;
-  parentId: string | null;
-  depth: number;
-  createdAt: string;
-  deleted: boolean;
-}
+import type { BoardPost, Comment } from '@/types/api/board';
+export type { BoardPost, Comment };
 
 // ─── 쿼리 훅 ────────────────────────────────────────────────────
 export function useBoardList(initialData?: BoardPost[]) {

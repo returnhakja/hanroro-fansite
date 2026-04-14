@@ -27,6 +27,7 @@ export const queryKeys = {
     random: ['images', 'random'] as const,
   },
   adminBoard: {
+    all: ['admin', 'board'] as const,
     list: (page: number, search: string) => ['admin', 'board', page, search] as const,
   },
   fanchants: {
@@ -36,5 +37,10 @@ export const queryKeys = {
   activities: {
     all: ['activities'] as const,
     admin: ['admin', 'activities'] as const,
+  },
+  inquiries: {
+    all: ['inquiries'] as const,
+    detail: (id: string) => ['inquiries', id] as const,
+    admin: ['admin', 'inquiries'] as const,
   },
 } as const;

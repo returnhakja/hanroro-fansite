@@ -6,40 +6,16 @@ import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import styled from "styled-components";
 import { theme } from "@/styles/theme";
-import {
-  INQUIRY_CATEGORY_LABELS,
-  type InquiryCategory,
-} from "@/lib/constants/inquiry";
-
-type ReplyItem = {
-  _id: string;
-  author: string;
-  content: string;
-  createdAt: string;
-};
-
-type Detail = {
-  _id: string;
-  author: string;
-  category: InquiryCategory;
-  title: string;
-  content: string;
-  readByAdmin: boolean;
-  replyCount: number;
-  createdAt: string;
-  replies: ReplyItem[];
-};
-
-function formatDate(iso: string) {
-  return iso.slice(0, 10);
-}
+import { INQUIRY_CATEGORY_LABELS } from "@/lib/constants/inquiry";
+import { formatDateShort } from "@/lib/utils/time";
+import type { InquiryDetail, InquiryReply } from "@/types/api/inquiry";
 
 export default function InquiryDetailClient() {
   const params = useParams();
   const router = useRouter();
   const id = typeof params.id === "string" ? params.id : "";
   const { status } = useSession();
-  const [data, setData] = useState<Detail | null>(null);
+  const [data, setData] = useState<InquiryDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -118,7 +94,7 @@ export default function InquiryDetailClient() {
       <PageTitle>{data.title}</PageTitle>
       <Meta>
         <span>작성자: {data.author}</span>
-        <span>{formatDate(data.createdAt)}</span>
+        <span>{formatDateShort(data.createdAt)}</span>
       </Meta>
       <SectionLabel>문의 내용</SectionLabel>
       <ContentBlock>
@@ -137,7 +113,7 @@ export default function InquiryDetailClient() {
           {data.replies.map((r) => (
             <ReplyItemCard key={r._id}>
               <ReplyMeta>
-                {r.author} · {formatDate(r.createdAt)}
+                {r.author} · {formatDateShort(r.createdAt)}
               </ReplyMeta>
               {r.content.split("\n").map((line, j) => (
                 <p key={j}>{line || "\u00a0"}</p>

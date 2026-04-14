@@ -10,19 +10,8 @@ import {
   INQUIRY_CATEGORY_LABELS,
   type InquiryCategory,
 } from "@/lib/constants/inquiry";
-
-type ListItem = {
-  _id: string;
-  title: string;
-  category: InquiryCategory;
-  readByAdmin: boolean;
-  replyCount: number;
-  createdAt: string;
-};
-
-function formatDate(iso: string) {
-  return iso.slice(0, 10);
-}
+import { formatDateShort } from "@/lib/utils/time";
+import type { InquirySummary } from "@/types/api/inquiry";
 
 export default function ContactPageClient() {
   const { data: session, status } = useSession();
@@ -31,7 +20,7 @@ export default function ContactPageClient() {
   const [content, setContent] = useState("");
   const [author, setAuthor] = useState("");
   const [honeypot, setHoneypot] = useState("");
-  const [list, setList] = useState<ListItem[]>([]);
+  const [list, setList] = useState<InquirySummary[]>([]);
   const [loadingList, setLoadingList] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -213,7 +202,7 @@ export default function ContactPageClient() {
                 <RowTitle>{item.title}</RowTitle>
                 <RowMeta>
                   <span>{INQUIRY_CATEGORY_LABELS[item.category]}</span>
-                  <span>{formatDate(item.createdAt)}</span>
+                  <span>{formatDateShort(item.createdAt)}</span>
                   {item.replyCount > 0 ? (
                     <Badge $variant="reply">답변 {item.replyCount}</Badge>
                   ) : item.readByAdmin ? (

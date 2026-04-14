@@ -1,17 +1,8 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { upload } from '@vercel/blob/client';
 import { queryKeys } from '@/lib/queryKeys';
-
-// ─── 타입 ───────────────────────────────────────────────────────
-export interface GalleryImage {
-  _id: string;
-  title: string;
-  filename?: string;
-  imageUrl: string;
-  userId?: string | null;
-  createdAt: string;
-  type: 'image' | 'video';
-}
+import type { GalleryImage, UploadMediaParams } from '@/types/api/gallery';
+export type { GalleryImage, UploadMediaParams };
 
 // ─── 쿼리 훅 ────────────────────────────────────────────────────
 export function useImages(type?: 'image' | 'video') {
@@ -29,12 +20,6 @@ export function useImages(type?: 'image' | 'video') {
 }
 
 // ─── 업로드 (클라이언트 직접 업로드) ────────────────────────────
-export interface UploadMediaParams {
-  file: File;
-  title: string;
-  onProgress?: (percentage: number) => void;
-}
-
 export function useUploadMedia() {
   const queryClient = useQueryClient();
 
@@ -84,7 +69,7 @@ export function useDeleteImage() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`/api/image/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/images/${id}`, { method: 'DELETE' });
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error || '삭제에 실패했습니다');

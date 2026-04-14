@@ -2,38 +2,13 @@
 
 import { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
-import {
-  INQUIRY_CATEGORY_LABELS,
-  type InquiryCategory,
-} from "@/lib/constants/inquiry";
-
-type InquiryRow = {
-  _id: string;
-  userId: string;
-  author: string;
-  category: InquiryCategory;
-  title: string;
-  content: string;
-  readByAdmin: boolean;
-  replyCount: number;
-  createdAt: string;
-};
-
-type AdminReply = {
-  _id: string;
-  content: string;
-  adminEmail: string;
-  createdAt: string;
-};
-
-type ModalDetail = {
-  inquiry: InquiryRow;
-  replies: AdminReply[];
-};
-
-function formatDate(iso: string) {
-  return iso.slice(0, 10);
-}
+import { INQUIRY_CATEGORY_LABELS } from "@/lib/constants/inquiry";
+import { formatDateShort } from "@/lib/utils/time";
+import type {
+  AdminInquiryRow as InquiryRow,
+  AdminInquiryReply as AdminReply,
+  AdminInquiryModalDetail as ModalDetail,
+} from "@/types/api/inquiry";
 
 export default function AdminInquiriesPage() {
   const [rows, setRows] = useState<InquiryRow[]>([]);
@@ -222,7 +197,7 @@ export default function AdminInquiriesPage() {
                   )}
                 </Td>
                 <Td>{row.author}</Td>
-                <Td>{formatDate(row.createdAt)}</Td>
+                <Td>{formatDateShort(row.createdAt)}</Td>
                 <Td>
                   <ActionGroup>
                     <MiniButton type="button" onClick={() => setSelected(row)}>
@@ -272,7 +247,7 @@ export default function AdminInquiriesPage() {
             </ModalHeader>
             <ModalMeta>
               {INQUIRY_CATEGORY_LABELS[selected.category]} · {selected.author} ·{" "}
-              {formatDate(selected.createdAt)} · userId: {selected.userId}
+              {formatDateShort(selected.createdAt)} · userId: {selected.userId}
             </ModalMeta>
             <ModalBody>
               {modalLoading ? (
@@ -297,7 +272,7 @@ export default function AdminInquiriesPage() {
                     modalDetail.replies.map((r) => (
                       <ReplyCard key={r._id}>
                         <ReplyCardMeta>
-                          {formatDate(r.createdAt)} · {r.adminEmail}
+                          {formatDateShort(r.createdAt)} · {r.adminEmail}
                         </ReplyCardMeta>
                         {r.content.split("\n").map((line, j) => (
                           <p key={j}>{line || "\u00a0"}</p>

@@ -1,33 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/queryKeys';
-import type { ActivityType } from '@/lib/db/models/Activity';
+import { getAuthHeader } from '@/lib/auth/authHeader';
+import type { Activity, ActivityFormData } from '@/types/api/activity';
+export type { Activity, ActivityFormData };
 
-// ─── 타입 ───────────────────────────────────────────────────────
-export interface Activity {
-  _id: string;
-  year: number;
-  month: number;
-  type: ActivityType;
-  title: string;
-  description?: string;
-  imageUrl?: string;
-  link?: string;
-}
-
-export interface ActivityFormData {
-  year: number;
-  month: number;
-  type: ActivityType;
-  title: string;
-  description: string;
-  imageUrl: string;
-  link: string;
-}
-
-function getAuthHeader(): Record<string, string> {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
 
 // ─── 공개 쿼리 훅 ────────────────────────────────────────────────
 export function useActivities() {

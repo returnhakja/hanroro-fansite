@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useReducedMotion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import EventCalendar from "@/components/EventCalendar";
+import EventCalendar from "@/components/ui/EventCalendar";
 import {
   Container,
   UpcomingSection,

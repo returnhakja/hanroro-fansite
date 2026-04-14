@@ -1,3 +1,23 @@
+/**
+ * ISO 날짜 문자열을 YYYY-MM-DD 형식으로 반환
+ * @example formatDateShort('2026-04-14T12:00:00Z') → '2026-04-14'
+ */
+export function formatDateShort(iso: string): string {
+  return iso.slice(0, 10);
+}
+
+/**
+ * ISO 날짜 문자열을 한국어 장문 형식으로 반환
+ * @example formatDateLong('2026-04-14') → '2026년 4월 14일'
+ */
+export function formatDateLong(iso: string): string {
+  return new Date(iso).toLocaleDateString('ko-KR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+}
+
 export function formatRelativeTime(date: Date | string): string {
   const now = new Date();
   const then = new Date(date);
