@@ -2,12 +2,14 @@ import { Metadata } from 'next';
 import StructuredData from '@/components/seo/StructuredData';
 
 export const metadata: Metadata = {
-  title: '프로필',
-  description: '싱어송라이터 한로로의 프로필, 디스코그래피, 활동 내역을 확인하세요.',
-  keywords: ['한로로', 'HANRORO', '프로필', '디스코그래피', '앨범', '싱어송라이터'],
+  title: '한로로 프로필 | 공식 팬사이트 – 일정·셋리스트',
+  description:
+    '싱어송라이터 한로로의 소개와 디스코그래피. 다가오는 공연 일정, 셋리스트, 팬 갤러리·게시판까지 한로로 팬사이트에서 함께 확인해 보세요.',
+  keywords: ['한로로', 'HANRORO', '프로필', '디스코그래피', '앨범', '싱어송라이터', '일정', '셋리스트'],
   openGraph: {
-    title: '프로필 | 한로로 팬사이트',
-    description: '싱어송라이터 한로로의 프로필, 디스코그래피, 활동 내역을 확인하세요.',
+    title: '한로로 프로필 | 공식 팬사이트 – 일정·셋리스트',
+    description:
+      '한로로 소개·앨범 정보와 함께, 공연 일정·셋리스트·갤러리로 바로 이어집니다.',
     url: 'https://www.hanroro.co.kr/profile',
     type: 'profile',
     images: [
@@ -29,7 +31,8 @@ const personSchema = {
   '@type': 'MusicGroup',
   name: '한로로',
   alternateName: 'HANRORO',
-  description: '감성적인 음악으로 많은 팬들의 사랑을 받는 싱어송라이터',
+  description:
+    '싱어송라이터 한로로. 공식 팬사이트에서 프로필·일정·셋리스트·갤러리를 확인할 수 있습니다.',
   genre: ['인디팝', '발라드', 'K-POP'],
   url: 'https://www.hanroro.co.kr/profile',
   image: 'https://www.hanroro.co.kr/assets/한로로프로필사진.jpg',

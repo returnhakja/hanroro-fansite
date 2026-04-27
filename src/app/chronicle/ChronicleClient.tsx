@@ -59,7 +59,7 @@ export default function ChronicleClient() {
       if (!map.has(a.month)) map.set(a.month, []);
       map.get(a.month)!.push(a);
     });
-    return Array.from(map.entries()).sort(([a], [b]) => a - b);
+    return Array.from(map.entries()).sort(([a], [b]) => b - a);
   }, [activities, activeYear]);
 
   return (

@@ -9,17 +9,8 @@ import Modal from "react-modal";
 import styled from "styled-components";
 import { theme } from "@/styles/theme";
 import { useUpcomingEvents } from "@/hooks/queries/useEvents";
-
-interface Event {
-  _id: string;
-  title: string;
-  date: string;
-  time?: string;
-  place?: string;
-  posterUrl?: string;
-  type: string;
-  isPinned: boolean;
-}
+import type { Event } from "@/types/api/event";
+import { EventTicketOutlets } from "@/components/ui/EventTicketOutlets";
 
 const CalendarWrapper = styled.div`
   width: 100%;
@@ -262,6 +253,11 @@ const EventCalendar = () => {
                   </span>
                 </EventDetail>
               </EventDetails>
+
+              <EventTicketOutlets
+                outlets={selectedEvent.ticketOutlets}
+                idPrefix={selectedEvent._id}
+              />
 
               {selectedEvent.posterUrl && (
                 <EventPoster

@@ -64,7 +64,7 @@ export const artistData = {
     },
     {
       id: "10",
-      title: "생존밥",
+      title: "생존법",
       releaseDate: "2024-05-16",
       coverUrl: "/assets/생존법.jpg",
       tracks: [],

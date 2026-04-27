@@ -88,7 +88,7 @@ function buildDescription(event: {
 const defaultMetadata: Metadata = {
   title: "일정",
   description:
-    "한로로의 다가오는 공연, 팬미팅, 방송 일정을 확인하세요. D-day 카운트다운과 전체 캘린더를 제공합니다.",
+    "한로로의 다가오는 공연, 팬미팅, 방송 일정을 확인하세요. D-day와 캘린더로 일정을 보고, 셋리스트·포토 갤러리로 이어서 즐겨 보세요.",
   keywords: [
     "한로로",
     "HANRORO",

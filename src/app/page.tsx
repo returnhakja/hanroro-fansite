@@ -1,8 +1,7 @@
 "use client";
 
 import { Container } from "./_sections/common.styles";
-import HeroSection from "./_sections/HeroSection";
-import NewReleaseSection from "./_sections/NewReleaseSection";
+import HomeHeroQuick from "./_sections/HomeHeroQuick";
 import BoardPreviewSection from "./_sections/BoardPreviewSection";
 import GalleryPreviewSection from "./_sections/GalleryPreviewSection";
 import SchedulePreviewSection from "./_sections/SchedulePreviewSection";
@@ -12,8 +11,8 @@ import VideoSection from "./_sections/VideoSection";
 export default function Home() {
   return (
     <Container>
-      <HeroSection />
-      <NewReleaseSection />
+      <HomeHeroQuick />
+      {/* <NewReleaseSection /> */}
       <BoardPreviewSection />
       <GalleryPreviewSection />
       <SchedulePreviewSection />

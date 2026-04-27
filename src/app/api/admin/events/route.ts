@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/db/mongoose';
 import Event from '@/lib/db/models/Event';
 import { requireAuth } from '@/lib/auth/middleware';
+import {
+  normalizeTicketOutlets,
+  ensureSinglePrimary,
+} from '@/lib/events/normalizeTicketOutlets';
 
 // GET /api/admin/events - 모든 일정 목록
 async function handleGet(req: NextRequest) {
@@ -25,6 +29,9 @@ async function handlePost(req: NextRequest) {
   try {
     const body = await req.json();
     const { title, date, time, place, posterUrl, type } = body;
+    const ticketOutlets = ensureSinglePrimary(
+      normalizeTicketOutlets(body.ticketOutlets)
+    );
 
     if (!title || !date) {
       return NextResponse.json(
@@ -42,6 +49,7 @@ async function handlePost(req: NextRequest) {
       place,
       posterUrl,
       type: type || 'other',
+      ticketOutlets: ticketOutlets.length > 0 ? ticketOutlets : [],
     });
 
     return NextResponse.json({ event }, { status: 201 });

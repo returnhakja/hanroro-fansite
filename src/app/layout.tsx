@@ -8,6 +8,7 @@ import Footer from "@/components/layout/Footer";
 import StructuredData from "@/components/seo/StructuredData";
 import NaverAnalytics from "@/components/analytics/NaverAnalytics";
 import GoogleTagManager from "@/components/analytics/GoogleTagManager";
+import ScrollToTop from "@/components/ui/ScrollToTop";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -102,12 +103,10 @@ export default function RootLayout({
     logo: "https://www.hanroro.co.kr/assets/한로로프로필사진.jpg",
     description: "싱어송라이터 한로로의 팬사이트 - 갤러리, 공연 일정, 커뮤니티",
     sameAs: [
-      // 여기에 한로로의 공식 SNS 링크를 추가할 수 있습니다
       "https://www.youtube.com/channel/UCrDa_5OU-rhvXqWlPx5hgKQ",
       "https://www.instagram.com/hanr0r0/",
       "https://artist.mnetplus.world/main/stg/hanroro",
       "https://blog.naver.com/hanr0r0",
-      // 'https://www.instagram.com/hanroro',
     ],
   };
 
@@ -217,6 +216,7 @@ export default function RootLayout({
         />
       </head>
       <body>
+        <ScrollToTop />
         <GoogleTagManager />
         <NaverAnalytics />
         <StyledComponentsRegistry>

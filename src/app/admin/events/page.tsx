@@ -11,19 +11,45 @@ import {
   type Event,
   type EventFormData,
 } from '@/hooks/queries/useEvents';
+import type { TicketOutlet } from '@/types/api/event';
+
+function emptyTicketOutlet(): TicketOutlet {
+  return {
+    label: '',
+    url: '',
+    isPrimary: false,
+    note: '',
+    opensAt: '',
+  };
+}
+
+function normalizeFormTicketOutlets(outlets: TicketOutlet[]): TicketOutlet[] {
+  return outlets
+    .filter((o) => o.label.trim() && o.url.trim())
+    .map((o) => ({
+      label: o.label.trim(),
+      url: o.url.trim(),
+      isPrimary: o.isPrimary === true,
+      ...(o.note?.trim() ? { note: o.note.trim() } : {}),
+      ...(o.opensAt?.trim() ? { opensAt: o.opensAt.trim() } : {}),
+    }));
+}
+
+const emptyFormState = (): EventFormData => ({
+  title: '',
+  date: '',
+  time: '',
+  place: '',
+  posterUrl: '',
+  type: 'other',
+  ticketOutlets: [],
+});
 
 export default function AdminEventsPage() {
   const { data: events = [], isLoading } = useAdminEvents();
   const [showModal, setShowModal] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
-  const [formData, setFormData] = useState<EventFormData>({
-    title: '',
-    date: '',
-    time: '',
-    place: '',
-    posterUrl: '',
-    type: 'other',
-  });
+  const [formData, setFormData] = useState<EventFormData>(() => emptyFormState());
 
   const createEvent = useCreateEvent();
   const updateEvent = useUpdateEvent();
@@ -33,10 +59,14 @@ export default function AdminEventsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const payload: EventFormData = {
+        ...formData,
+        ticketOutlets: normalizeFormTicketOutlets(formData.ticketOutlets),
+      };
       if (editingEvent) {
-        await updateEvent.mutateAsync({ id: editingEvent._id, formData });
+        await updateEvent.mutateAsync({ id: editingEvent._id, formData: payload });
       } else {
-        await createEvent.mutateAsync(formData);
+        await createEvent.mutateAsync(payload);
       }
       handleCloseModal();
     } catch (err: unknown) {
@@ -71,17 +101,20 @@ export default function AdminEventsPage() {
         place: event.place || '',
         posterUrl: event.posterUrl || '',
         type: event.type,
+        ticketOutlets:
+          event.ticketOutlets && event.ticketOutlets.length > 0
+            ? event.ticketOutlets.map((o) => ({
+                label: o.label,
+                url: o.url,
+                isPrimary: o.isPrimary === true,
+                note: o.note ?? '',
+                opensAt: o.opensAt ?? '',
+              }))
+            : [],
       });
     } else {
       setEditingEvent(null);
-      setFormData({
-        title: '',
-        date: '',
-        time: '',
-        place: '',
-        posterUrl: '',
-        type: 'other',
-      });
+      setFormData(emptyFormState());
     }
     setShowModal(true);
   };
@@ -89,19 +122,13 @@ export default function AdminEventsPage() {
   const handleCloseModal = () => {
     setShowModal(false);
     setEditingEvent(null);
-    setFormData({
-      title: '',
-      date: '',
-      time: '',
-      place: '',
-      posterUrl: '',
-      type: 'other',
-    });
+    setFormData(emptyFormState());
   };
 
   const getTypeLabel = (type: string) => {
     const types: Record<string, string> = {
       concert: '공연',
+      fanmeeting: '팬미팅',
       award: '시상식',
       broadcast: '방송',
       festival : '페스티벌',
@@ -236,6 +263,7 @@ export default function AdminEventsPage() {
                   }
                 >
                   <option value="concert">공연</option>
+                  <option value="fanmeeting">팬미팅</option>
                   <option value="festival">페스티벌</option>
                   <option value="award">시상식</option>
                   <option value="broadcast">방송</option>
@@ -253,6 +281,119 @@ export default function AdminEventsPage() {
                   }
                   placeholder="https://..."
                 />
+              </FormGroup>
+
+              <FormGroup>
+                <OutletSectionHeader>
+                  <Label $inline>예매처</Label>
+                  <AddOutletButton
+                    type="button"
+                    onClick={() =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        ticketOutlets: [...prev.ticketOutlets, emptyTicketOutlet()],
+                      }))
+                    }
+                  >
+                    + 예매처 추가
+                  </AddOutletButton>
+                </OutletSectionHeader>
+                <OutletHint>
+                  표시 이름·URL을 모두 입력한 행만 저장됩니다. 대표 예매처는 하나만 지정할 수 있습니다.
+                </OutletHint>
+                {formData.ticketOutlets.map((row, idx) => (
+                  <OutletRow key={`outlet-${idx}`}>
+                    <Input
+                      type="text"
+                      value={row.label}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          ticketOutlets: prev.ticketOutlets.map((o, i) =>
+                            i === idx ? { ...o, label: e.target.value } : o
+                          ),
+                        }))
+                      }
+                      placeholder="예매처 이름 (예: 인터파크)"
+                      aria-label={`예매처 ${idx + 1} 이름`}
+                    />
+                    <Input
+                      type="url"
+                      value={row.url}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          ticketOutlets: prev.ticketOutlets.map((o, i) =>
+                            i === idx ? { ...o, url: e.target.value } : o
+                          ),
+                        }))
+                      }
+                      placeholder="https://..."
+                      aria-label={`예매처 ${idx + 1} URL`}
+                    />
+                    <OutletFieldRow>
+                      <Input
+                        type="text"
+                        value={row.opensAt ?? ''}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            ticketOutlets: prev.ticketOutlets.map((o, i) =>
+                              i === idx ? { ...o, opensAt: e.target.value } : o
+                            ),
+                          }))
+                        }
+                        placeholder="오픈 안내 (선택)"
+                        aria-label={`예매처 ${idx + 1} 오픈 안내`}
+                      />
+                      <Input
+                        type="text"
+                        value={row.note ?? ''}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            ticketOutlets: prev.ticketOutlets.map((o, i) =>
+                              i === idx ? { ...o, note: e.target.value } : o
+                            ),
+                          }))
+                        }
+                        placeholder="비고 (선택)"
+                        aria-label={`예매처 ${idx + 1} 비고`}
+                      />
+                    </OutletFieldRow>
+                    <OutletRowFooter>
+                      <PrimaryLabel>
+                        <input
+                          type="checkbox"
+                          checked={!!row.isPrimary}
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            setFormData((prev) => ({
+                              ...prev,
+                              ticketOutlets: prev.ticketOutlets.map((o, i) => {
+                                if (i === idx) return { ...o, isPrimary: checked };
+                                if (checked) return { ...o, isPrimary: false };
+                                return o;
+                              }),
+                            }));
+                          }}
+                        />
+                        대표 예매처
+                      </PrimaryLabel>
+                      <RemoveOutletButton
+                        type="button"
+                        onClick={() =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            ticketOutlets: prev.ticketOutlets.filter((_, i) => i !== idx),
+                          }))
+                        }
+                      >
+                        삭제
+                      </RemoveOutletButton>
+                    </OutletRowFooter>
+                  </OutletRow>
+                ))}
               </FormGroup>
 
               <FormActions>
@@ -348,6 +489,7 @@ const TypeBadge = styled.span<{ $type: string }>`
   background: ${(props) => {
     const colors: Record<string, string> = {
       concert: '#e3f2fd',
+      fanmeeting: '#fff8e1',
       award: '#fff3e0',
       broadcast: '#f3e5f5',
       festival: '#fff9c4',
@@ -358,6 +500,7 @@ const TypeBadge = styled.span<{ $type: string }>`
   color: ${(props) => {
     const colors: Record<string, string> = {
       concert: '#1976d2',
+      fanmeeting: '#f9a825',
       award: '#f57c00',
       broadcast: '#7b1fa2',
       festival: '#f57f17',
@@ -428,7 +571,7 @@ const ModalContent = styled.div`
   background: white;
   border-radius: 12px;
   width: 90%;
-  max-width: 600px;
+  max-width: 640px;
   max-height: 90vh;
   overflow-y: auto;
 `;
@@ -474,11 +617,101 @@ const FormRow = styled.div`
   gap: 1rem;
 `;
 
-const Label = styled.label`
+const Label = styled.label<{ $inline?: boolean }>`
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: ${(p) => (p.$inline ? '0' : '0.5rem')};
   color: #2c3e50;
   font-weight: 500;
+`;
+
+const OutletSectionHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+`;
+
+const AddOutletButton = styled.button`
+  padding: 0.4rem 0.85rem;
+  background: #f8f9fa;
+  color: #495057;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:hover {
+    background: #e9ecef;
+  }
+`;
+
+const OutletHint = styled.p`
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin: 0 0 1rem;
+  line-height: 1.45;
+`;
+
+const OutletRow = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  background: #fcfcfd;
+`;
+
+const OutletFieldRow = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+
+  @media (max-width: 520px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const OutletRowFooter = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+`;
+
+const PrimaryLabel = styled.label`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  color: #495057;
+  cursor: pointer;
+
+  input {
+    width: 1rem;
+    height: 1rem;
+    accent-color: #8b7355;
+  }
+`;
+
+const RemoveOutletButton = styled.button`
+  padding: 0.35rem 0.75rem;
+  background: transparent;
+  color: #c75b5b;
+  border: 1px solid #f1c4c4;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+
+  &:hover {
+    background: #fff5f5;
+  }
 `;
 
 const Input = styled.input`

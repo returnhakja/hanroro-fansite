@@ -1,13 +1,31 @@
 import mongoose, { Document, Schema, Model } from 'mongoose';
 
+const ticketOutletSchema = new Schema(
+  {
+    label: { type: String, required: true },
+    url: { type: String, required: true },
+    isPrimary: { type: Boolean, default: false },
+    note: { type: String },
+    opensAt: { type: String },
+  },
+  { _id: false }
+);
+
 export interface IEvent extends Document {
   title: string;
   date: Date;
   time?: string;
   place?: string;
   posterUrl?: string;
-  type: 'concert' | 'award' | 'broadcast' | 'other' | 'festival';
+  type: 'concert' | 'award' | 'broadcast' | 'other' | 'festival' | 'fanmeeting';
   isPinned: boolean;
+  ticketOutlets?: {
+    label: string;
+    url: string;
+    isPrimary?: boolean;
+    note?: string;
+    opensAt?: string;
+  }[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -33,8 +51,12 @@ const eventSchema = new Schema<IEvent>(
     },
     type: {
       type: String,
-      enum: ['concert', 'award', 'broadcast', 'other', 'festival'],
+      enum: ['concert', 'award', 'broadcast', 'other', 'festival', 'fanmeeting'],
       default: 'other',
+    },
+    ticketOutlets: {
+      type: [ticketOutletSchema],
+      default: undefined,
     },
     isPinned: {
       type: Boolean,

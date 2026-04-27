@@ -27,38 +27,6 @@ const Footer = () => {
           </FooterColumn>
 
           <FooterColumn>
-            <FooterColumnTitle>Social</FooterColumnTitle>
-            <FooterExternalLink
-              href="https://www.youtube.com/channel/UCrDa_5OU-rhvXqWlPx5hgKQ"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              YouTube
-            </FooterExternalLink>
-            <FooterExternalLink
-              href="https://www.instagram.com/hanr0r0/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Instagram
-            </FooterExternalLink>
-            <FooterExternalLink
-              href="https://artist.mnetplus.world/main/stg/hanroro"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Plus Chat
-            </FooterExternalLink>
-            <FooterExternalLink
-              href="https://blog.naver.com/hanr0r0"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Naver Blog
-            </FooterExternalLink>
-          </FooterColumn>
-
-          <FooterColumn>
             <FooterColumnTitle>Legal</FooterColumnTitle>
             <FooterLink href="/privacy-policy">개인정보처리방침</FooterLink>
             <FooterLink href="/terms-of-service">서비스 이용약관</FooterLink>
@@ -113,7 +81,7 @@ const FooterDesc = styled.p`
 
 const FooterGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 2rem;
   margin-bottom: 3rem;
 

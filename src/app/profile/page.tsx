@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import Link from 'next/link';
 import styled, { keyframes } from 'styled-components';
 import { artistData } from '@/data/artistData';
 import { theme } from '@/styles/theme';
@@ -53,6 +54,17 @@ export default function ProfilePage() {
         <HeroText>ABOUT</HeroText>
       </HeroBanner>
 
+      <ProfileHubBand>
+        <ProfileHubInner>
+          <ProfileHubLinks aria-label="팬사이트 주요 메뉴">
+            <ProfileHubLink href="/schedule">일정</ProfileHubLink>
+            <ProfileHubLink href="/setlist">셋리스트</ProfileHubLink>
+            <ProfileHubLink href="/gallery">갤러리</ProfileHubLink>
+            <ProfileHubLink href="/board">게시판</ProfileHubLink>
+          </ProfileHubLinks>
+        </ProfileHubInner>
+      </ProfileHubBand>
+
       <ContentArea>
         <ProfileSection>
           <ProfileLayout>
@@ -79,6 +91,13 @@ export default function ProfilePage() {
               </InfoGrid>
 
               <Bio>{artistData.bio}</Bio>
+
+              <SocialLinks>
+                <SocialLink href="https://www.youtube.com/channel/UCrDa_5OU-rhvXqWlPx5hgKQ" target="_blank" rel="noopener noreferrer">YouTube</SocialLink>
+                <SocialLink href="https://www.instagram.com/hanr0r0/" target="_blank" rel="noopener noreferrer">Instagram</SocialLink>
+                <SocialLink href="https://artist.mnetplus.world/main/stg/hanroro" target="_blank" rel="noopener noreferrer">Plus Chat</SocialLink>
+                <SocialLink href="https://blog.naver.com/hanr0r0" target="_blank" rel="noopener noreferrer">Naver Blog</SocialLink>
+              </SocialLinks>
             </ProfileInfo>
           </ProfileLayout>
         </ProfileSection>
@@ -312,6 +331,35 @@ const InfoValue = styled.span`
   color: ${theme.colors.textPrimary};
 `;
 
+const SocialLinks = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 2rem;
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    justify-content: center;
+  }
+`;
+
+const SocialLink = styled.a`
+  padding: 0.55rem 1.1rem;
+  border-radius: ${theme.borderRadius.full};
+  border: 1px solid ${theme.colors.border};
+  background: ${theme.colors.surface};
+  color: ${theme.colors.textSecondary};
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all ${theme.transitions.fast};
+
+  &:hover {
+    background: ${theme.colors.primary};
+    border-color: ${theme.colors.primary};
+    color: ${theme.colors.textLight};
+  }
+`;
+
 const Bio = styled.p`
   font-family: ${theme.typography.fontBody};
   font-size: ${theme.typography.bodyLarge.fontSize};
@@ -529,4 +577,55 @@ const TrackTitle = styled.span`
 const TrackDuration = styled.span`
   font-size: ${theme.typography.small.fontSize};
   color: ${theme.colors.textTertiary};
+`;
+
+/* ─── 프로필 허브 (일정·SERP 연계) ─── */
+
+const ProfileHubBand = styled.div`
+  background: ${theme.colors.surfaceAlt};
+  border-bottom: 1px solid ${theme.colors.border};
+`;
+
+const ProfileHubInner = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem 2rem 1.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 1.25rem;
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    padding: 1.25rem 1.25rem 1.5rem;
+    flex-direction: column;
+  }
+`;
+
+const ProfileHubLinks = styled.nav`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    width: 100%;
+  }
+`;
+
+const ProfileHubLink = styled(Link)`
+  padding: 0.65rem 1.1rem;
+  border-radius: ${theme.borderRadius.full};
+  border: 1px solid ${theme.colors.border};
+  background: ${theme.colors.surface};
+  color: ${theme.colors.textPrimary};
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background ${theme.transitions.fast}, border-color ${theme.transitions.fast};
+
+  &:hover {
+    background: ${theme.colors.surfaceWarm};
+    border-color: ${theme.colors.primaryLight};
+    color: ${theme.colors.primary};
+  }
 `;
