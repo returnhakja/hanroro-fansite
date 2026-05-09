@@ -55,8 +55,7 @@ import {
 } from "./Schedule.styles";
 import { useUpcomingEvents } from "@/hooks/queries/useEvents";
 import { useConcerts } from "@/hooks/queries/useConcerts";
-
-const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
+import { formatDateWithWeekday } from "@/lib/utils/time";
 
 // ─── 인라인 아이콘 (의존성 추가 없이 lucide 스타일) ─────────────────
 const IconCalendar = () => (
@@ -223,15 +222,6 @@ const SchedulePageClient = () => {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    const weekday = WEEKDAYS[date.getDay()];
-    return `${year}.${String(month).padStart(2, "0")}.${String(day).padStart(2, "0")} (${weekday})`;
-  };
-
   const openEventDetail = (id: string) => {
     router.push(`/schedule?event=${id}`, { scroll: false });
   };
@@ -284,7 +274,7 @@ const SchedulePageClient = () => {
                       <EventDetail>
                         <IconCalendar />
                         <span>
-                          {formatDate(event.date)}
+                          {formatDateWithWeekday(event.date)}
                           {event.time ? ` ${event.time}` : ""}
                         </span>
                       </EventDetail>
@@ -318,7 +308,7 @@ const SchedulePageClient = () => {
                   {featuredDday === 0 ? "D-DAY" : `D-${featuredDday}`}
                 </DdayHeadline>
                 <DdayEventTitle>{featured.title}</DdayEventTitle>
-                <DdayEventMeta>{formatDate(featured.date)}</DdayEventMeta>
+                <DdayEventMeta>{formatDateWithWeekday(featured.date)}</DdayEventMeta>
               </DdayCountdown>
             ) : (
               <DdayCountdown>
@@ -341,7 +331,7 @@ const SchedulePageClient = () => {
                     >
                       <MiniEventInfo>
                         <MiniEventTitle>{event.title}</MiniEventTitle>
-                        <MiniEventDate>{formatDate(event.date)}</MiniEventDate>
+                        <MiniEventDate>{formatDateWithWeekday(event.date)}</MiniEventDate>
                       </MiniEventInfo>
                       {d !== null && (
                         <MiniDday $isToday={d === 0}>
@@ -391,7 +381,7 @@ const SchedulePageClient = () => {
                     <PastConcertTitle>{concert.title}</PastConcertTitle>
                     <PastConcertDate>
                       <IconCalendar />
-                      {formatDate(concert.endDate)}
+                      {formatDateWithWeekday(concert.endDate)}
                     </PastConcertDate>
                   </PastConcertContent>
                 </PastConcertCard>

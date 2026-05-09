@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db/mongoose";
 import Event from "@/lib/db/models/Event";
+import { formatDateLong } from "@/lib/utils/time";
 
 const BASE_URL = "https://www.hanroro.co.kr";
 
@@ -21,11 +22,7 @@ export async function GET() {
     .map((event) => {
       const id = (event._id as { toString(): string }).toString();
       const pubDate = new Date(event.createdAt).toUTCString();
-      const eventDate = new Date(event.date).toLocaleDateString("ko-KR", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
+      const eventDate = formatDateLong(String(event.date));
       const typeLabel = EVENT_TYPE_LABEL[event.type] ?? "기타";
 
       const title = event.title

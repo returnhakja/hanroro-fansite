@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUpcomingEvents } from "@/hooks/queries/useEvents";
+import { formatDateWithWeekday } from "@/lib/utils/time";
 import { HomeHeroQuickRoot } from "./HomeHeroQuick.styles";
 import {
   HeroSection,
@@ -28,8 +29,6 @@ import {
   QuickTileTitle,
   QuickTileSub,
 } from "@/app/schedule/Schedule.styles";
-
-const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 
 const IconCalendar = () => (
   <svg
@@ -149,15 +148,6 @@ export default function HomeHeroQuick() {
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    const weekday = WEEKDAYS[date.getDay()];
-    return `${year}.${String(month).padStart(2, "0")}.${String(day).padStart(2, "0")} (${weekday})`;
-  };
-
   const featuredDday =
     featured && mounted ? calcDaysUntil(featured.date) : null;
 
@@ -206,7 +196,7 @@ export default function HomeHeroQuick() {
                   </span>
                 )}
                 <span>
-                  <IconCalendar /> {formatDate(featured.date)}
+                  <IconCalendar /> {formatDateWithWeekday(featured.date)}
                   {featured.time ? ` ${featured.time}` : ""}
                 </span>
               </FeaturedMeta>

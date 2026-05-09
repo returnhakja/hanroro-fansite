@@ -24,6 +24,7 @@ import {
   NoSetlistMessage,
 } from './Setlist.styles';
 import { useConcerts } from '@/hooks/queries/useConcerts';
+import { formatDateLong } from '@/lib/utils/time';
 
 function SetlistContent() {
   const prefersReducedMotion = useReducedMotion();
@@ -47,14 +48,6 @@ function SetlistContent() {
       }, 300);
     }
   }, [targetConcertId, loading]);
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    return `${year}년 ${month}월 ${day}일`;
-  };
 
   const handleTabChange = (concertId: string, tabIndex: number) => {
     setActiveTabs(prev => ({
@@ -87,7 +80,7 @@ function SetlistContent() {
                 <ConcertInfo>
                   <span>{concert.venue}</span>
                   <span>
-                    {formatDate(concert.startDate)} ~ {formatDate(concert.endDate)}
+                    {formatDateLong(concert.startDate)} ~ {formatDateLong(concert.endDate)}
                   </span>
                 </ConcertInfo>
               </ConcertHeader>
