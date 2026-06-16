@@ -11,6 +11,7 @@ import { theme } from "@/styles/theme";
 import { useUpcomingEvents } from "@/hooks/queries/useEvents";
 import type { Event } from "@/types/api/event";
 import { EventTicketOutlets } from "@/components/ui/EventTicketOutlets";
+import KakaoShareButton from "@/components/ui/KakaoShareButton";
 
 const CalendarWrapper = styled.div`
   width: 100%;
@@ -144,6 +145,9 @@ const modalStyles = {
 
 const EventCalendar = () => {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  // react-calendar는 new Date()(오늘) 기준으로 렌더돼 SSR/클라 시각 차이로
+  // 하이드레이션 불일치가 발생 → 마운트 후 클라이언트에서만 렌더
+  const [mounted, setMounted] = useState(false);
   const { data } = useUpcomingEvents();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -151,6 +155,7 @@ const EventCalendar = () => {
   // Modal 접근성 설정
   useEffect(() => {
     Modal.setAppElement("body");
+    setMounted(true);
   }, []);
 
   const events = data ?? [];
@@ -195,21 +200,23 @@ const EventCalendar = () => {
 
   return (
     <CalendarWrapper>
-      <Calendar
-        tileClassName={({ date }) =>
-          events.some(
-            (e) => new Date(e.date).toDateString() === date.toDateString(),
-          )
-            ? "highlight has-event"
-            : "no-event"
-        }
-        onClickDay={(value) => {
-          const event = events.find(
-            (e) => new Date(e.date).toDateString() === value.toDateString(),
-          );
-          if (event) handleEventSelect(event);
-        }}
-      />
+      {mounted && (
+        <Calendar
+          tileClassName={({ date }) =>
+            events.some(
+              (e) => new Date(e.date).toDateString() === date.toDateString(),
+            )
+              ? "highlight has-event"
+              : "no-event"
+          }
+          onClickDay={(value) => {
+            const event = events.find(
+              (e) => new Date(e.date).toDateString() === value.toDateString(),
+            );
+            if (event) handleEventSelect(event);
+          }}
+        />
+      )}
 
       <Modal
         isOpen={!!selectedEvent}
@@ -265,6 +272,30 @@ const EventCalendar = () => {
                   alt={selectedEvent.title}
                 />
               )}
+
+              <div style={{ marginTop: theme.spacing.gap.lg }}>
+                <KakaoShareButton
+                  block
+                  size="lg"
+                  label="카카오톡 공유"
+                  title={`[한로로] ${selectedEvent.title}`}
+                  description={[
+                    new Date(selectedEvent.date).toLocaleDateString("ko-KR", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                      weekday: "short",
+                    }),
+                    selectedEvent.place,
+                    selectedEvent.time,
+                  ]
+                    .filter(Boolean)
+                    .join("\n")}
+                  imageUrl={selectedEvent.posterUrl}
+                  path={`/schedule?event=${selectedEvent._id}`}
+                  buttonTitle="일정 보기"
+                />
+              </div>
             </>
           )}
         </ModalContent>

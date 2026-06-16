@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { Suspense, useState, useEffect, useRef } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { useReducedMotion } from 'framer-motion';
+import { Suspense, useState, useEffect, useRef } from "react";
+import { useSearchParams } from "next/navigation";
+import { useReducedMotion } from "framer-motion";
 import {
   Container,
   PageTitle,
@@ -13,6 +13,7 @@ import {
   ConcertTitle,
   ConcertInfo,
   ActiveBadge,
+  HeaderShareSlot,
   ConcertBody,
   TabWrapper,
   TabButton,
@@ -22,15 +23,16 @@ import {
   AlbumThumb,
   EmptyMessage,
   NoSetlistMessage,
-} from './Setlist.styles';
-import { useConcerts } from '@/hooks/queries/useConcerts';
-import { formatDateLong } from '@/lib/utils/time';
+} from "./Setlist.styles";
+import { useConcerts } from "@/hooks/queries/useConcerts";
+import { formatDateLong } from "@/lib/utils/time";
+import KakaoShareButton from "@/components/ui/KakaoShareButton";
 
 function SetlistContent() {
   const prefersReducedMotion = useReducedMotion();
   const [shouldReduceMotion, setShouldReduceMotion] = useState(false);
   const searchParams = useSearchParams();
-  const targetConcertId = searchParams.get('concertId');
+  const targetConcertId = searchParams.get("concertId");
   const { data: concerts = [], isLoading: loading } = useConcerts();
   const [activeTabs, setActiveTabs] = useState<{ [key: string]: number }>({});
   const cardRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
@@ -44,13 +46,13 @@ function SetlistContent() {
     const el = cardRefs.current[targetConcertId];
     if (el) {
       setTimeout(() => {
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
       }, 300);
     }
   }, [targetConcertId, loading]);
 
   const handleTabChange = (concertId: string, tabIndex: number) => {
-    setActiveTabs(prev => ({
+    setActiveTabs((prev) => ({
       ...prev,
       [concertId]: tabIndex,
     }));
@@ -68,19 +70,42 @@ function SetlistContent() {
           {concerts.map((concert, index) => (
             <ConcertCard
               key={concert._id}
-              ref={(el: HTMLDivElement | null) => { cardRefs.current[concert._id] = el; }}
+              ref={(el: HTMLDivElement | null) => {
+                cardRefs.current[concert._id] = el;
+              }}
               $highlighted={concert._id === targetConcertId}
               initial={shouldReduceMotion ? {} : { opacity: 0, y: 20 }}
               animate={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
             >
               <ConcertHeader $posterUrl={concert.posterUrl}>
+                <HeaderShareSlot>
+                  <KakaoShareButton
+                    title={`[한로로] ${concert.title} 셋리스트`}
+                    description={[
+                      concert.endDate && concert.endDate !== concert.startDate
+                        ? `${formatDateLong(concert.startDate)} ~ ${formatDateLong(concert.endDate)}`
+                        : formatDateLong(concert.startDate),
+                      concert.venue,
+                    ]
+                      .filter(Boolean)
+                      .join("\n")}
+                    imageUrl={
+                      concert.posterUrl
+                        ? `/api/concerts/${concert._id}/poster`
+                        : undefined
+                    }
+                    path={`/setlist?concertId=${concert._id}`}
+                    buttonTitle="셋리스트 보기"
+                  />
+                </HeaderShareSlot>
                 {concert.isActive && <ActiveBadge>현재 공연</ActiveBadge>}
                 <ConcertTitle>{concert.title}</ConcertTitle>
                 <ConcertInfo>
                   <span>{concert.venue}</span>
                   <span>
-                    {formatDateLong(concert.startDate)} ~ {formatDateLong(concert.endDate)}
+                    {formatDateLong(concert.startDate)} ~{" "}
+                    {formatDateLong(concert.endDate)}
                   </span>
                 </ConcertInfo>
               </ConcertHeader>
@@ -103,13 +128,20 @@ function SetlistContent() {
                     )}
 
                     <SetlistCard>
-                      {(concert.setlists ?? [])[activeTabs[concert._id] ?? 0]?.songs
+                      {(concert.setlists ?? [])[
+                        activeTabs[concert._id] ?? 0
+                      ]?.songs
                         .sort((a, b) => a.order - b.order)
                         .map((song, idx) => (
                           <SetListItem key={idx}>
-                            <SongOrder>{String(song.order).padStart(2, '0')}</SongOrder>
+                            <SongOrder>
+                              {String(song.order).padStart(2, "0")}
+                            </SongOrder>
                             {song.albumImageUrl && (
-                              <AlbumThumb src={song.albumImageUrl} alt={song.title} />
+                              <AlbumThumb
+                                src={song.albumImageUrl}
+                                alt={song.title}
+                              />
                             )}
                             <span>{song.title}</span>
                           </SetListItem>
@@ -117,7 +149,9 @@ function SetlistContent() {
                     </SetlistCard>
                   </>
                 ) : (
-                  <NoSetlistMessage>등록된 셋리스트가 없습니다</NoSetlistMessage>
+                  <NoSetlistMessage>
+                    등록된 셋리스트가 없습니다
+                  </NoSetlistMessage>
                 )}
               </ConcertBody>
             </ConcertCard>
@@ -128,7 +162,7 @@ function SetlistContent() {
       )}
     </Container>
   );
-};
+}
 
 export default function SetlistPage() {
   return (

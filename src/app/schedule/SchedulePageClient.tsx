@@ -15,6 +15,7 @@ import {
   EventPoster,
   DdayBadge,
   EventContent,
+  EventTypeRow,
   EventType,
   EventTitle,
   EventDetails,
@@ -56,6 +57,7 @@ import {
 import { useUpcomingEvents } from "@/hooks/queries/useEvents";
 import { useConcerts } from "@/hooks/queries/useConcerts";
 import { formatDateWithWeekday } from "@/lib/utils/time";
+import KakaoShareButton from "@/components/ui/KakaoShareButton";
 
 // ─── 인라인 아이콘 (의존성 추가 없이 lucide 스타일) ─────────────────
 const IconCalendar = () => (
@@ -260,9 +262,24 @@ const SchedulePageClient = () => {
                     )}
                   </EventPoster>
                   <EventContent>
-                    <EventType type={event.type}>
-                      {getEventTypeLabel(event.type)}
-                    </EventType>
+                    <EventTypeRow>
+                      <EventType type={event.type}>
+                        {getEventTypeLabel(event.type)}
+                      </EventType>
+                      <KakaoShareButton
+                        title={`[한로로] ${event.title}`}
+                        description={[
+                          formatDateWithWeekday(event.date),
+                          event.place,
+                          event.time,
+                        ]
+                          .filter(Boolean)
+                          .join("\n")}
+                        imageUrl={event.posterUrl}
+                        path={`/schedule?event=${event._id}`}
+                        buttonTitle="일정 보기"
+                      />
+                    </EventTypeRow>
                     <EventTitle>{event.title}</EventTitle>
                     <EventDetails>
                       {event.place && (

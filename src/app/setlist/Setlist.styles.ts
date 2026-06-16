@@ -138,6 +138,18 @@ export const ActiveBadge = styled.span`
   }
 `;
 
+export const HeaderShareSlot = styled.div`
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  z-index: 2;
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    top: 1rem;
+    left: 1rem;
+  }
+`;
+
 export const ConcertBody = styled.div`
   padding: 2rem;
 

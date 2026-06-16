@@ -431,6 +431,14 @@ export const DdayBadge = styled.div<{ $isToday?: boolean }>`
   box-shadow: ${theme.shadows.sm};
 `;
 
+export const EventTypeRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.6rem;
+`;
+
 export const EventContent = styled.div`
   padding: 1.25rem;
 
@@ -445,7 +453,6 @@ export const EventType = styled.span<{ type: string }>`
   border-radius: ${theme.borderRadius.sm};
   font-size: 0.75rem;
   font-weight: 600;
-  margin-bottom: 0.6rem;
   background: ${(props) => {
     switch (props.type) {
       case 'concert':
