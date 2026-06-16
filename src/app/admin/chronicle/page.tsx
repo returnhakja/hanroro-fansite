@@ -44,6 +44,12 @@ export default function AdminChroniclePage() {
   const [showModal, setShowModal] = useState(false);
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
   const [formData, setFormData] = useState<ActivityFormData>(EMPTY_FORM);
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
+
+  const years = [...new Set(activities.map((a) => a.year))].sort((a, b) => b - a);
+  const filteredActivities = selectedYear
+    ? activities.filter((a) => a.year === selectedYear)
+    : activities;
 
   const createActivity = useCreateActivity();
   const updateActivity = useUpdateActivity();
@@ -108,6 +114,21 @@ export default function AdminChroniclePage() {
         <AddButton onClick={() => handleOpenModal()}>+ 활동 추가</AddButton>
       </Header>
 
+      <YearTabs>
+        <YearTab $active={selectedYear === null} onClick={() => setSelectedYear(null)}>
+          전체 ({activities.length})
+        </YearTab>
+        {years.map((year) => (
+          <YearTab
+            key={year}
+            $active={selectedYear === year}
+            onClick={() => setSelectedYear(year)}
+          >
+            {year}년 ({activities.filter((a) => a.year === year).length})
+          </YearTab>
+        ))}
+      </YearTabs>
+
       <Table>
         <thead>
           <tr>
@@ -120,7 +141,7 @@ export default function AdminChroniclePage() {
           </tr>
         </thead>
         <tbody>
-          {activities.map((activity) => (
+          {filteredActivities.map((activity) => (
             <tr key={activity._id}>
               <Td>{activity.year}</Td>
               <Td>{activity.month}월</Td>
@@ -148,8 +169,10 @@ export default function AdminChroniclePage() {
         </tbody>
       </Table>
 
-      {activities.length === 0 && (
-        <EmptyMessage>등록된 활동이 없습니다</EmptyMessage>
+      {filteredActivities.length === 0 && (
+        <EmptyMessage>
+          {selectedYear ? `${selectedYear}년 활동이 없습니다` : '등록된 활동이 없습니다'}
+        </EmptyMessage>
       )}
 
       {showModal && (
@@ -304,6 +327,30 @@ const AddButton = styled.button`
 
   &:hover {
     background: #6b5740;
+  }
+`;
+
+const YearTabs = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+`;
+
+const YearTab = styled.button<{ $active: boolean }>`
+  padding: 0.5rem 1.25rem;
+  border-radius: 20px;
+  border: 2px solid ${({ $active }) => ($active ? '#8b7355' : '#e9ecef')};
+  background: ${({ $active }) => ($active ? '#8b7355' : 'white')};
+  color: ${({ $active }) => ($active ? 'white' : '#495057')};
+  font-weight: ${({ $active }) => ($active ? '600' : '400')};
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:hover {
+    border-color: #8b7355;
+    color: ${({ $active }) => ($active ? 'white' : '#8b7355')};
   }
 `;
 

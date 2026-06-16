@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     template: "%s | 한로로 팬사이트",
   },
   description:
-    "유퀴즈온더블럭 출연 · 2026 한국대중음악상 올해의 음악인 · 싱어송라이터 한로로의 팬사이트. 신보 '애증' 발매 — 공연 일정, 갤러리, 팬 커뮤니티",
+    "MBC 라디오스타 출연 · 2026 한국대중음악상 올해의 음악인 · 싱어송라이터 한로로의 팬사이트. 신보 '애증' 발매 — 공연 일정, 갤러리, 팬 커뮤니티",
   applicationName: "한로로 팬사이트",
   keywords: [
     "한로로",
@@ -34,13 +34,13 @@ export const metadata: Metadata = {
     "한국대중음악상",
     "꼰대희",
     "꼰대희 한로로",
-    "유퀴즈",
+    "라디오스타",
+    "MBC 라디오스타",
+    "한로로 라디오스타",
+    "라디오스타 스프링 페스티벌",
     "유퀴즈온더블럭",
     "한로로 유퀴즈",
     "성시경의 고막남친",
-    "고막남친",
-    "성시경",
-    "유퀴즈 한로로",
   ],
   authors: [{ name: "HANRORO Fansite Team" }],
   creator: "HANRORO Fansite",
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     siteName: "한로로 팬사이트",
     title: "한로로 팬사이트 - HANRORO Fansite",
     description:
-      "유퀴즈온더블럭 출연 · 2026 한국대중음악상 올해의 음악인 · 싱어송라이터 한로로의 팬사이트. 신보 '애증' 발매 — 공연 일정, 갤러리, 팬 커뮤니티",
+      "MBC 라디오스타 출연 · 2026 한국대중음악상 올해의 음악인 · 싱어송라이터 한로로의 팬사이트. 신보 '애증' 발매 — 공연 일정, 갤러리, 팬 커뮤니티",
     images: [
       {
         url: "/assets/한로로프로필사진.jpg",
@@ -149,17 +149,17 @@ export default function RootLayout({
   const tvAppearanceSchema = {
     "@context": "https://schema.org",
     "@type": "Event",
-    name: "한로로 유퀴즈온더블럭 출연",
+    name: "한로로 MBC 라디오스타 출연 - 라디오스타 스프링 페스티벌",
     description:
-      "싱어송라이터 한로로가 tvN 유퀴즈온더블럭에 출연 '성시경의 고막남친' 한로로",
-    startDate: "2026-04-08",
-    endDate: "2026-04-08",
+      "한로로가 MBC '라디오스타 스프링 페스티벌' 특집에 김창완, 최정훈, 로이킴과 함께 출연. 첫 지상파 예능 출연으로 동시간대 시청률 1위 기록. 한국대중음악상 올해의 음악인 최연소 수상 비하인드 공개.",
+    startDate: "2026-05-20",
+    endDate: "2026-05-20",
     eventStatus: "https://schema.org/EventScheduled",
     eventAttendanceMode: "https://schema.org/MixedEventAttendanceMode",
     image: ["https://www.hanroro.co.kr/assets/한로로프로필사진.jpg"],
     location: {
       "@type": "Place",
-      name: "tvN 유퀴즈온더블럭",
+      name: "MBC 라디오스타",
       address: {
         "@type": "PostalAddress",
         addressLocality: "서울",
@@ -180,8 +180,8 @@ export default function RootLayout({
     },
     organizer: {
       "@type": "Organization",
-      name: "tvN",
-      url: "https://www.tving.com",
+      name: "MBC",
+      url: "https://www.mbc.co.kr",
     },
   };
 

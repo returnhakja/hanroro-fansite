@@ -16,6 +16,7 @@ import {
   type SetList,
   type Song,
 } from '@/hooks/queries/useConcerts';
+import { artistData, findAlbumBySongTitle } from '@/data/artistData';
 
 export default function AdminConcertsPage() {
   const { data: concerts = [], isLoading } = useAdminConcerts();
@@ -199,6 +200,12 @@ export default function AdminConcertsPage() {
   const handleSongChange = (index: number, field: keyof Song, value: string) => {
     const newSongs = [...setlistForm.songs];
     newSongs[index] = { ...newSongs[index], [field]: value };
+    if (field === 'title') {
+      const matched = findAlbumBySongTitle(value);
+      if (matched) {
+        newSongs[index] = { ...newSongs[index], albumImageUrl: matched.coverUrl };
+      }
+    }
     setSetlistForm({ ...setlistForm, songs: newSongs });
   };
 
@@ -446,14 +453,27 @@ export default function AdminConcertsPage() {
                       }
                       required
                     />
-                    <Input
-                      type="url"
-                      placeholder="앨범 이미지 URL (선택)"
-                      value={song.albumImageUrl || ''}
-                      onChange={(e) =>
-                        handleSongChange(index, 'albumImageUrl', e.target.value)
-                      }
-                    />
+                    <AlbumSelectorWrapper>
+                      {song.albumImageUrl && (
+                        <AlbumThumb
+                          src={song.albumImageUrl}
+                          alt="앨범 커버"
+                        />
+                      )}
+                      <AlbumSelect
+                        value={song.albumImageUrl || ''}
+                        onChange={(e) =>
+                          handleSongChange(index, 'albumImageUrl', e.target.value)
+                        }
+                      >
+                        <option value="">앨범 없음</option>
+                        {artistData.albums.map((album) => (
+                          <option key={album.id} value={album.coverUrl}>
+                            {album.title}
+                          </option>
+                        ))}
+                      </AlbumSelect>
+                    </AlbumSelectorWrapper>
                     <RemoveSongButton
                       type="button"
                       onClick={() => handleRemoveSong(index)}
@@ -804,6 +824,36 @@ const SongInputNumber = styled.div`
   justify-content: center;
   font-weight: 600;
   font-size: 0.9rem;
+`;
+
+const AlbumSelectorWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+const AlbumThumb = styled.img`
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid #ddd;
+`;
+
+const AlbumSelect = styled.select`
+  flex: 1;
+  padding: 0.75rem 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background: white;
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
+    border-color: #8b7355;
+  }
 `;
 
 const RemoveSongButton = styled.button`

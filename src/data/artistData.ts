@@ -141,3 +141,15 @@ export const artistData = {
     },
   ],
 };
+
+export const findAlbumBySongTitle = (songTitle: string) => {
+  const normalized = songTitle.trim().toLowerCase();
+  if (!normalized) return null;
+  return (
+    artistData.albums.find(
+      (album) =>
+        album.tracks.length > 0 &&
+        album.tracks.some((track) => track.title.toLowerCase() === normalized)
+    ) ?? null
+  );
+};
