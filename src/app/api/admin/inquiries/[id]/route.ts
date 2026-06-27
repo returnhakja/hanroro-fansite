@@ -7,7 +7,7 @@ import { requireAuth, AuthenticatedRequest } from '@/lib/auth/middleware';
 
 async function handleGet(
   _req: AuthenticatedRequest,
-  context?: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     if (!context?.params) {
@@ -60,7 +60,7 @@ async function handleGet(
 
 async function handlePatch(
   req: AuthenticatedRequest,
-  context?: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     if (!context?.params) {

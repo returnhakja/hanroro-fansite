@@ -9,7 +9,7 @@ const REPLY_MAX = 3000;
 
 async function handlePost(
   req: AuthenticatedRequest,
-  context?: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     if (!context?.params) {

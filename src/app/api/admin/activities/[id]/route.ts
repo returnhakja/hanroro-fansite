@@ -6,7 +6,7 @@ import { requireAuth } from '@/lib/auth/middleware';
 // PUT /api/admin/activities/[id] - 활동 수정
 async function handlePut(
   req: NextRequest,
-  context?: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     if (!context?.params) {
@@ -59,7 +59,7 @@ async function handlePut(
 // DELETE /api/admin/activities/[id] - 활동 삭제
 async function handleDelete(
   req: NextRequest,
-  context?: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     if (!context?.params) {

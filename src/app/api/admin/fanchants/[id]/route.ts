@@ -7,7 +7,7 @@ import { parseLyrics } from '@/lib/utils/parseLyrics';
 // PUT /api/admin/fanchants/[id] - 응원법 수정
 async function handlePut(
   req: NextRequest,
-  context?: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     if (!context?.params) {
@@ -57,7 +57,7 @@ async function handlePut(
 // DELETE /api/admin/fanchants/[id] - 응원법 삭제
 async function handleDelete(
   req: NextRequest,
-  context?: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     if (!context?.params) {

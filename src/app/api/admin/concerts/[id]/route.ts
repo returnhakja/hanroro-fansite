@@ -7,7 +7,7 @@ import { requireAuth } from '@/lib/auth/middleware';
 // GET /api/admin/concerts/[id] - 공연 조회
 async function handleGet(
   req: NextRequest,
-  context?: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     if (!context?.params) {
@@ -36,7 +36,7 @@ async function handleGet(
 // PUT /api/admin/concerts/[id] - 공연 수정
 async function handlePut(
   req: NextRequest,
-  context?: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     if (!context?.params) {
@@ -84,7 +84,7 @@ async function handlePut(
 // DELETE /api/admin/concerts/[id] - 공연 삭제
 async function handleDelete(
   req: NextRequest,
-  context?: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     if (!context?.params) {

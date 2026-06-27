@@ -6,7 +6,7 @@ import { requireAuth } from '@/lib/auth/middleware';
 // PATCH /api/admin/concerts/[id]/activate - 공연 활성화
 async function handlePatch(
   req: NextRequest,
-  context?: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     if (!context?.params) {

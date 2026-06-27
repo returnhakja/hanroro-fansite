@@ -6,7 +6,7 @@ import { requireAuth } from '@/lib/auth/middleware';
 // GET /api/admin/setlists/[id] - 셋리스트 조회
 async function handleGet(
   req: NextRequest,
-  context?: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     if (!context?.params) {
@@ -38,7 +38,7 @@ async function handleGet(
 // PUT /api/admin/setlists/[id] - 셋리스트 수정
 async function handlePut(
   req: NextRequest,
-  context?: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     if (!context?.params) {
@@ -87,7 +87,7 @@ async function handlePut(
 // DELETE /api/admin/setlists/[id] - 셋리스트 삭제
 async function handleDelete(
   req: NextRequest,
-  context?: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     if (!context?.params) {

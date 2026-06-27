@@ -6,7 +6,7 @@ import { requireAuth } from '@/lib/auth/middleware';
 // PATCH /api/admin/events/[id]/pin - 일정 고정/해제
 async function handlePatch(
   req: NextRequest,
-  context?: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     if (!context?.params) {

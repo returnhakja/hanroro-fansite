@@ -24,12 +24,12 @@ export interface AuthenticatedRequest extends NextRequest {
 export function requireAuth<T = Record<string, string>>(
   handler: (
     req: AuthenticatedRequest,
-    context?: { params: Promise<T> }
+    context: { params: Promise<T> }
   ) => Promise<NextResponse>
 ) {
   return async (
     req: NextRequest,
-    context?: { params: Promise<T> }
+    context: { params: Promise<T> }
   ) => {
     // Authorization 헤더 확인
     const authHeader = req.headers.get('Authorization');

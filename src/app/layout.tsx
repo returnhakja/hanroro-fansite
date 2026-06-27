@@ -9,6 +9,7 @@ import StructuredData from "@/components/seo/StructuredData";
 import NaverAnalytics from "@/components/analytics/NaverAnalytics";
 import GoogleTagManager from "@/components/analytics/GoogleTagManager";
 import ScrollToTop from "@/components/ui/ScrollToTop";
+import RegisterSW from "@/components/pwa/RegisterSW";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -242,6 +243,7 @@ export default function RootLayout({
         />
       </head>
       <body>
+        <RegisterSW />
         <ScrollToTop />
         <GoogleTagManager />
         <NaverAnalytics />
