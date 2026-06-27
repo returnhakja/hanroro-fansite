@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import StyledComponentsRegistry from "@/components/providers/StyledComponentsRegistry";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import AuthProvider from "@/components/providers/AuthProvider";
@@ -68,10 +68,30 @@ export const metadata: Metadata = {
     description: "싱어송라이터 한로로의 팬사이트 - 갤러리, 공연 일정, 커뮤니티",
     images: ["/assets/한로로프로필사진.jpg"],
   },
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "한로로 팬사이트",
+  },
   icons: {
-    icon: "/assets/프로필.jpg",
-    shortcut: "/assets/프로필.jpg",
-    apple: "/assets/프로필.jpg",
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/icon0.svg", type: "image/svg+xml" },
+      { url: "/icon1.png", type: "image/png", sizes: "96x96" },
+      {
+        url: "/web-app-manifest-192x192.png",
+        type: "image/png",
+        sizes: "192x192",
+      },
+      {
+        url: "/web-app-manifest-512x512.png",
+        type: "image/png",
+        sizes: "512x512",
+      },
+    ],
+    shortcut: "/favicon.ico",
+    apple: "/apple-icon.png",
   },
   robots: {
     index: true,
@@ -87,6 +107,12 @@ export const metadata: Metadata = {
   verification: {
     google: "gUst9xCDKHE1N5UtmTKyMhuS-FXMy9ANeAttMgyGt88",
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#8B7355",
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({
