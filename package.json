@@ -37,7 +37,8 @@
     "react-slick": "^0.31.0",
     "serwist": "^9.5.11",
     "slick-carousel": "^1.8.1",
-    "styled-components": "^6.3.8"
+    "styled-components": "^6.3.8",
+    "web-push": "^3.6.7"
   },
   "scripts": {
     "dev": "next dev",
@@ -54,6 +55,7 @@
     "@types/node": "^25.1.0",
     "@types/react-modal": "^3.16.3",
     "@types/react-slick": "^0.23.13",
+    "@types/web-push": "^3.6.4",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }

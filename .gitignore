@@ -23,6 +23,14 @@ out/
 next-env.d.ts
 tsconfig.tsbuildinfo
 
+# Serwist / Service Worker 빌드 산출물 (pnpm build 시 자동 생성)
+public/sw.js
+public/sw.js.map
+public/swe-worker-*.js
+
+# npm 산출물 (이 프로젝트는 pnpm 사용)
+package-lock.json
+
 # Legacy files (CRA & Render)
 server-legacy/
 src/pages-legacy/

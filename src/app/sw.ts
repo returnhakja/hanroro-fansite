@@ -102,3 +102,49 @@ const serwist = new Serwist({
 });
 
 serwist.addEventListeners();
+
+// 푸시 알림 수신
+self.addEventListener("push", (event) => {
+  let data: {
+    title?: string;
+    body?: string;
+    url?: string;
+    icon?: string;
+  } = {};
+
+  try {
+    data = event.data?.json() ?? {};
+  } catch {
+    data = { body: event.data?.text() };
+  }
+
+  const title = data.title ?? "한로로 팬사이트";
+  const options: NotificationOptions = {
+    body: data.body ?? "",
+    icon: data.icon ?? "/web-app-manifest-192x192.png",
+    badge: "/web-app-manifest-192x192.png",
+    data: { url: data.url ?? "/" },
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+// 알림 클릭 시 해당 페이지로 이동(이미 열려 있으면 포커스)
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const targetUrl = event.notification.data?.url ?? "/";
+
+  event.waitUntil(
+    self.clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then((clientList) => {
+        for (const client of clientList) {
+          const clientUrl = new URL(client.url);
+          if (clientUrl.pathname === targetUrl && "focus" in client) {
+            return client.focus();
+          }
+        }
+        return self.clients.openWindow(targetUrl);
+      })
+  );
+});

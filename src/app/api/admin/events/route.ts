@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/db/mongoose';
 import Event from '@/lib/db/models/Event';
 import { requireAuth } from '@/lib/auth/middleware';
+import { trySendPushToAll } from '@/lib/push/sendPush';
 import {
   normalizeTicketOutlets,
   ensureSinglePrimary,
@@ -50,6 +51,13 @@ async function handlePost(req: NextRequest) {
       posterUrl,
       type: type || 'other',
       ticketOutlets: ticketOutlets.length > 0 ? ticketOutlets : [],
+    });
+
+    // 새 일정 등록 알림 자동 발송 (실패해도 등록은 정상 처리)
+    await trySendPushToAll({
+      title: '새 일정이 등록되었어요',
+      body: event.title,
+      url: '/schedule',
     });
 
     return NextResponse.json({ event }, { status: 201 });

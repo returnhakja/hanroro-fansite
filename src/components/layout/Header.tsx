@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { theme } from "@/styles/theme";
+import PushToggleButton from "@/components/pwa/PushToggleButton";
 
 const Header = () => {
   const pathname = usePathname();
@@ -47,6 +48,7 @@ const Header = () => {
         <CloseButton onClick={() => setMenuOpen(false)}>&times;</CloseButton>
 
         <MobileAuthSection>
+          <PushToggleButton />
           {status === "loading" ? null : session ? (
             <>
               <MobileUserLink href="/mypage" onClick={() => setMenuOpen(false)}>
@@ -100,6 +102,7 @@ const Header = () => {
       </Nav>
 
       <DesktopAuthSection>
+        <PushToggleButton />
         {status === "loading" ? null : session ? (
           <>
             <DesktopUserLink href="/mypage">

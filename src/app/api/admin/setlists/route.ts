@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/db/mongoose';
 import SetList from '@/lib/db/models/SetList';
+import Concert from '@/lib/db/models/Concert';
 import { requireAuth } from '@/lib/auth/middleware';
+import { trySendPushToAll } from '@/lib/push/sendPush';
 
 // GET /api/admin/setlists?concertId=xxx - 특정 공연의 셋리스트 목록
 async function handleGet(req: NextRequest) {
@@ -50,6 +52,16 @@ async function handlePost(req: NextRequest) {
       day,
       date: new Date(date),
       songs: songs || [],
+    });
+
+    // 셋리스트 등록 알림 자동 발송 (실패해도 등록은 정상 처리)
+    const concert = await Concert.findById(concertId).select('title');
+    await trySendPushToAll({
+      title: '셋리스트가 공개되었어요',
+      body: concert?.title
+        ? `${concert.title} 셋리스트를 확인해보세요`
+        : '새 셋리스트를 확인해보세요',
+      url: '/setlist',
     });
 
     return NextResponse.json({ setlist }, { status: 201 });
