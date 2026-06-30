@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import styled from 'styled-components';
 import Link from 'next/link';
+import { useScrollLock } from '@/hooks/useScrollLock';
 
 export default function AdminLayout({
   children,
@@ -14,6 +15,15 @@ export default function AdminLayout({
   const pathname = usePathname();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // 드로어 열림 시 배경 스크롤 잠금
+  useScrollLock(drawerOpen);
+
+  // 페이지 이동 시 모바일 드로어 닫기
+  useEffect(() => {
+    setDrawerOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     // 로그인 페이지는 체크 안 함
@@ -56,7 +66,19 @@ export default function AdminLayout({
 
   return (
     <Container>
-      <Sidebar>
+      <MobileBar>
+        <MenuButton
+          onClick={() => setDrawerOpen(true)}
+          aria-label="메뉴 열기"
+        >
+          ☰
+        </MenuButton>
+        <MobileLogo>HANRORO Admin</MobileLogo>
+      </MobileBar>
+
+      <Overlay $open={drawerOpen} onClick={() => setDrawerOpen(false)} />
+
+      <Sidebar $open={drawerOpen}>
         <Logo>HANRORO Admin</Logo>
         <Nav>
           <NavItem href="/admin" $active={pathname === '/admin'}>
@@ -106,12 +128,65 @@ export default function AdminLayout({
   );
 }
 
+const MOBILE = '768px';
+
 const Container = styled.div`
   display: flex;
   min-height: 100vh;
+
+  @media (max-width: ${MOBILE}) {
+    flex-direction: column;
+  }
 `;
 
-const Sidebar = styled.aside`
+const MobileBar = styled.div`
+  display: none;
+
+  @media (max-width: ${MOBILE}) {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    height: 56px;
+    padding: 0 1rem;
+    background: #2c3e50;
+    color: white;
+  }
+`;
+
+const MenuButton = styled.button`
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+`;
+
+const MobileLogo = styled.span`
+  font-size: 1.1rem;
+  font-weight: 700;
+`;
+
+const Overlay = styled.div<{ $open: boolean }>`
+  display: none;
+
+  @media (max-width: ${MOBILE}) {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    background: rgba(0, 0, 0, 0.5);
+    opacity: ${(props) => (props.$open ? 1 : 0)};
+    visibility: ${(props) => (props.$open ? 'visible' : 'hidden')};
+    transition: opacity 0.25s ease;
+  }
+`;
+
+const Sidebar = styled.aside<{ $open: boolean }>`
   width: 260px;
   background: #2c3e50;
   color: white;
@@ -119,6 +194,20 @@ const Sidebar = styled.aside`
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+
+  @media (max-width: ${MOBILE}) {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 50;
+    min-height: 100vh;
+    overflow-y: auto;
+    transform: translateX(${(props) => (props.$open ? '0' : '-100%')});
+    transition: transform 0.25s ease;
+    box-shadow: ${(props) =>
+      props.$open ? '2px 0 12px rgba(0, 0, 0, 0.3)' : 'none'};
+  }
 `;
 
 const Logo = styled.h1`
@@ -171,6 +260,11 @@ const Main = styled.main`
   padding: 2rem;
   background: #ecf0f1;
   min-height: 100vh;
+
+  @media (max-width: ${MOBILE}) {
+    padding: 1.25rem 1rem;
+    min-height: calc(100vh - 56px);
+  }
 `;
 
 const LoadingScreen = styled.div`

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import {
   useAdminFanchants,
   useCreateFanchant,
@@ -13,6 +13,7 @@ import {
 import { parseLyrics, unparseLyrics } from '@/lib/utils/parseLyrics';
 import type { ILyricLine } from '@/lib/db/models/Fanchant';
 import type { LyricType } from '@/lib/db/models/Fanchant';
+import { useScrollLock } from '@/hooks/useScrollLock';
 
 const EMPTY_FORM: FanchantFormData = {
   songTitle: '',
@@ -31,6 +32,8 @@ export default function AdminFanchantsPage() {
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<Fanchant | null>(null);
   const [form, setForm] = useState<FanchantFormData>(EMPTY_FORM);
+
+  useScrollLock(showModal);
 
   const openCreate = () => {
     setEditing(null);
@@ -107,8 +110,8 @@ export default function AdminFanchantsPage() {
           <tbody>
             {fanchants.map(f => (
               <tr key={f._id}>
-                <Td style={{ textAlign: 'center' }}>{f.order}</Td>
-                <Td>
+                <Td data-label="순서" style={{ textAlign: 'center' }}>{f.order}</Td>
+                <Td $full>
                   <SongRow>
                     {f.albumImageUrl && (
                       <img
@@ -122,9 +125,9 @@ export default function AdminFanchantsPage() {
                     {f.songTitle}
                   </SongRow>
                 </Td>
-                <Td>{f.album}</Td>
-                <Td style={{ textAlign: 'center' }}>{f.lyrics.length}줄</Td>
-                <Td>
+                <Td data-label="앨범">{f.album}</Td>
+                <Td data-label="가사 수" style={{ textAlign: 'center' }}>{f.lyrics.length}줄</Td>
+                <Td $full>
                   <ActionRow>
                     <EditBtn onClick={() => openEdit(f)}>수정</EditBtn>
                     <DeleteBtn onClick={() => handleDelete(f._id)}>삭제</DeleteBtn>
@@ -253,6 +256,10 @@ const Container = styled.div`
   max-width: 1100px;
   margin: 0 auto;
   padding: 2rem 1.5rem;
+
+  @media (max-width: 768px) {
+    padding: 0;
+  }
 `;
 
 const PageHeader = styled.div`
@@ -260,10 +267,16 @@ const PageHeader = styled.div`
   align-items: center;
   justify-content: space-between;
   margin-bottom: 2rem;
+  gap: 1rem;
 
   h1 {
     font-size: 1.5rem;
     font-weight: 600;
+  }
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    align-items: stretch;
   }
 `;
 
@@ -289,6 +302,28 @@ const SongTable = styled.table`
   width: 100%;
   border-collapse: collapse;
   font-size: 0.9rem;
+
+  @media (max-width: 768px) {
+    thead {
+      display: none;
+    }
+
+    tbody,
+    tr,
+    td {
+      display: block;
+    }
+
+    tr {
+      background: #fff;
+      border: 1px solid #f0ebe2;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(44, 36, 24, 0.08);
+      margin-bottom: 1rem;
+      padding: 0.25rem 0;
+      overflow: hidden;
+    }
+  }
 `;
 
 const Th = styled.th`
@@ -300,10 +335,39 @@ const Th = styled.th`
   white-space: nowrap;
 `;
 
-const Td = styled.td`
+const Td = styled.td<{ $full?: boolean }>`
   padding: 0.625rem 0.75rem;
   border-bottom: 1px solid #f0ebe2;
   vertical-align: middle;
+
+  @media (max-width: 768px) {
+    border-bottom: none;
+
+    ${(props) =>
+      props.$full
+        ? css`
+            padding: 0.625rem 0.875rem;
+
+            &:not(:last-child) {
+              border-bottom: 1px solid #f0ebe2;
+            }
+          `
+        : css`
+            display: flex !important;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.4rem 0.875rem;
+            text-align: right !important;
+
+            &::before {
+              content: attr(data-label);
+              font-weight: 600;
+              color: #6b5740;
+              flex-shrink: 0;
+            }
+          `}
+  }
 `;
 
 const SongRow = styled.div`

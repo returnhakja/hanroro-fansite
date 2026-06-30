@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import Link from 'next/link';
 import { useAdminBoard, useAdminDeletePost } from '@/hooks/queries/useAdminBoard';
 
@@ -91,7 +91,7 @@ export default function BoardManagePage() {
             <tbody>
               {posts.map((post) => (
                 <tr key={post._id}>
-                  <Td>
+                  <Td $full>
                     <PostTitle
                       href={`/board/${post._id}`}
                       target="_blank"
@@ -107,11 +107,13 @@ export default function BoardManagePage() {
                       {post.content.length > 50 && '...'}
                     </ContentPreview>
                   </Td>
-                  <Td>{post.author}</Td>
-                  <Td>{post.views}</Td>
-                  <Td>{post.likes}</Td>
-                  <Td>{new Date(post.createdAt).toLocaleDateString('ko-KR')}</Td>
-                  <Td>
+                  <Td data-label="작성자">{post.author}</Td>
+                  <Td data-label="조회수">{post.views}</Td>
+                  <Td data-label="좋아요">{post.likes}</Td>
+                  <Td data-label="작성일">
+                    {new Date(post.createdAt).toLocaleDateString('ko-KR')}
+                  </Td>
+                  <Td data-label="관리">
                     <ActionButton onClick={() => handleDelete(post._id)}>
                       삭제
                     </ActionButton>
@@ -167,11 +169,19 @@ const Title = styled.h1`
   margin-bottom: 0.5rem;
   color: #2c3e50;
   font-weight: 700;
+
+  @media (max-width: 768px) {
+    font-size: 1.875rem;
+  }
 `;
 
 const Subtitle = styled.p`
   color: #7f8c8d;
   font-size: 1.1rem;
+
+  @media (max-width: 768px) {
+    font-size: 1rem;
+  }
 `;
 
 const StatsGrid = styled.div`
@@ -179,6 +189,10 @@ const StatsGrid = styled.div`
   grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
   margin-bottom: 2rem;
+
+  @media (max-width: 768px) {
+    gap: 0.75rem;
+  }
 `;
 
 const StatCard = styled.div`
@@ -187,11 +201,20 @@ const StatCard = styled.div`
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   text-align: center;
+
+  @media (max-width: 768px) {
+    padding: 1rem 0.5rem;
+  }
 `;
 
 const StatIcon = styled.div`
   font-size: 2.5rem;
   margin-bottom: 0.75rem;
+
+  @media (max-width: 768px) {
+    font-size: 1.75rem;
+    margin-bottom: 0.4rem;
+  }
 `;
 
 const StatNumber = styled.div`
@@ -199,12 +222,20 @@ const StatNumber = styled.div`
   font-weight: bold;
   color: #8b7355;
   margin-bottom: 0.5rem;
+
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+  }
 `;
 
 const StatLabel = styled.div`
   font-size: 1rem;
   color: #7f8c8d;
   font-weight: 500;
+
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+  }
 `;
 
 const SearchForm = styled.form`
@@ -235,9 +266,14 @@ const SearchButton = styled.button`
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;
+  white-space: nowrap;
 
   &:hover {
     background: #6d5942;
+  }
+
+  @media (max-width: 768px) {
+    padding: 0.875rem 1.25rem;
   }
 `;
 
@@ -248,6 +284,31 @@ const Table = styled.table`
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   border-collapse: collapse;
+
+  @media (max-width: 768px) {
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+
+    thead {
+      display: none;
+    }
+
+    tbody,
+    tr,
+    td {
+      display: block;
+    }
+
+    tr {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      margin-bottom: 1rem;
+      padding: 0.25rem 0;
+      overflow: hidden;
+    }
+  }
 `;
 
 const Th = styled.th`
@@ -259,10 +320,35 @@ const Th = styled.th`
   border-bottom: 2px solid #e9ecef;
 `;
 
-const Td = styled.td`
+const Td = styled.td<{ $full?: boolean }>`
   padding: 1rem;
   border-bottom: 1px solid #e9ecef;
   color: #495057;
+
+  @media (max-width: 768px) {
+    ${(props) =>
+      props.$full
+        ? css`
+            padding: 0.875rem 1rem;
+            border-bottom: 1px solid #e9ecef;
+          `
+        : css`
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.5rem 1rem;
+            border-bottom: none;
+            text-align: right;
+
+            &::before {
+              content: attr(data-label);
+              font-weight: 600;
+              color: #2c3e50;
+              flex-shrink: 0;
+            }
+          `}
+  }
 `;
 
 const PostTitle = styled(Link)`

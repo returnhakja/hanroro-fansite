@@ -82,6 +82,7 @@ const Container = styled.div`
   align-items: center;
   justify-content: center;
   min-height: 100vh;
+  padding: 1.25rem;
   background: linear-gradient(135deg, #8B7355 0%, #6B5740 100%);
 `;
 
@@ -92,6 +93,10 @@ const LoginBox = styled.div`
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
   width: 100%;
   max-width: 420px;
+
+  @media (max-width: 480px) {
+    padding: 2rem 1.5rem;
+  }
 `;
 
 const Title = styled.h1`

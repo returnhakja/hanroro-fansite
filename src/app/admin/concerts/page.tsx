@@ -17,6 +17,7 @@ import {
   type Song,
 } from '@/hooks/queries/useConcerts';
 import { artistData, findAlbumBySongTitle } from '@/data/artistData';
+import { useScrollLock } from '@/hooks/useScrollLock';
 
 export default function AdminConcertsPage() {
   const { data: concerts = [], isLoading } = useAdminConcerts();
@@ -39,6 +40,8 @@ export default function AdminConcertsPage() {
     date: '',
     songs: [] as Song[],
   });
+
+  useScrollLock(showConcertModal || showSetlistModal);
 
   // concerts 로드 완료 후 첫 번째 공연 자동 선택
   useEffect(() => {
@@ -513,12 +516,22 @@ const Header = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
+  gap: 1rem;
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
 `;
 
 const Title = styled.h1`
   font-size: 2rem;
   color: #2c3e50;
   font-weight: 700;
+
+  @media (max-width: 768px) {
+    font-size: 1.625rem;
+  }
 `;
 
 const AddButton = styled.button`
@@ -540,6 +553,11 @@ const Content = styled.div`
   display: grid;
   grid-template-columns: 350px 1fr;
   gap: 2rem;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
 `;
 
 const Sidebar = styled.div`
@@ -549,6 +567,10 @@ const Sidebar = styled.div`
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   max-height: calc(100vh - 250px);
   overflow-y: auto;
+
+  @media (max-width: 900px) {
+    max-height: none;
+  }
 `;
 
 const SidebarTitle = styled.h2`
@@ -783,6 +805,10 @@ const FormRow = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
+
+  @media (max-width: 420px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 const Label = styled.label`
@@ -811,6 +837,28 @@ const SongInputRow = styled.div`
   gap: 0.5rem;
   margin-bottom: 0.75rem;
   align-items: center;
+
+  @media (max-width: 560px) {
+    grid-template-columns: 32px 1fr auto;
+    grid-template-areas:
+      'num title remove'
+      'num album remove';
+    gap: 0.4rem 0.5rem;
+
+    & > *:nth-child(1) {
+      grid-area: num;
+    }
+    & > *:nth-child(2) {
+      grid-area: title;
+    }
+    & > *:nth-child(3) {
+      grid-area: album;
+    }
+    & > *:nth-child(4) {
+      grid-area: remove;
+      height: 100%;
+    }
+  }
 `;
 
 const SongInputNumber = styled.div`

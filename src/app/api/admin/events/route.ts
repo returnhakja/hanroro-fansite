@@ -54,10 +54,20 @@ async function handlePost(req: NextRequest) {
     });
 
     // 새 일정 등록 알림 자동 발송 (실패해도 등록은 정상 처리)
+    const dateLabel = event.date.toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      weekday: 'short',
+      timeZone: 'Asia/Seoul',
+    });
+    const detail = [dateLabel, event.time, event.place]
+      .filter(Boolean)
+      .join(' · ');
     await trySendPushToAll({
-      title: '새 일정이 등록되었어요',
-      body: event.title,
-      url: '/schedule',
+      title: `새 일정 ${event.title}이 등록 되었어요`,
+      body: detail,
+      url: `/schedule?event=${event._id}`,
     });
 
     return NextResponse.json({ event }, { status: 201 });

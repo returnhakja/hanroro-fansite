@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import {
   useAdminActivities,
   useCreateActivity,
@@ -10,6 +10,7 @@ import {
   type Activity,
   type ActivityFormData,
 } from '@/hooks/queries/useActivities';
+import { useScrollLock } from '@/hooks/useScrollLock';
 
 const CURRENT_YEAR = new Date().getFullYear();
 
@@ -45,6 +46,8 @@ export default function AdminChroniclePage() {
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
   const [formData, setFormData] = useState<ActivityFormData>(EMPTY_FORM);
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
+
+  useScrollLock(showModal);
 
   const years = [...new Set(activities.map((a) => a.year))].sort((a, b) => b - a);
   const filteredActivities = selectedYear
@@ -143,22 +146,22 @@ export default function AdminChroniclePage() {
         <tbody>
           {filteredActivities.map((activity) => (
             <tr key={activity._id}>
-              <Td>{activity.year}</Td>
-              <Td>{activity.month}월</Td>
-              <Td>
+              <Td data-label="연도">{activity.year}</Td>
+              <Td data-label="월">{activity.month}월</Td>
+              <Td data-label="유형">
                 <TypeBadge $type={activity.type}>
                   {TYPE_LABEL[activity.type] ?? activity.type}
                 </TypeBadge>
               </Td>
-              <Td>{activity.title}</Td>
-              <Td>
+              <Td $full>{activity.title}</Td>
+              <Td data-label="이미지">
                 {activity.imageUrl ? (
                   <Thumb src={activity.imageUrl} alt={activity.title} />
                 ) : (
                   <NoImage>없음</NoImage>
                 )}
               </Td>
-              <Td>
+              <Td $full>
                 <ActionButtons>
                   <EditButton onClick={() => handleOpenModal(activity)}>수정</EditButton>
                   <DeleteButton onClick={() => handleDelete(activity._id)}>삭제</DeleteButton>
@@ -307,12 +310,22 @@ const Header = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
+  gap: 1rem;
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
 `;
 
 const Title = styled.h1`
   font-size: 2rem;
   color: #2c3e50;
   font-weight: 700;
+
+  @media (max-width: 768px) {
+    font-size: 1.625rem;
+  }
 `;
 
 const AddButton = styled.button`
@@ -360,6 +373,31 @@ const Table = styled.table`
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+  @media (max-width: 768px) {
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+
+    thead {
+      display: none;
+    }
+
+    tbody,
+    tr,
+    td {
+      display: block;
+    }
+
+    tr {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      margin-bottom: 1rem;
+      padding: 0.25rem 0;
+      overflow: hidden;
+    }
+  }
 `;
 
 const Th = styled.th`
@@ -371,11 +409,41 @@ const Th = styled.th`
   border-bottom: 2px solid #e9ecef;
 `;
 
-const Td = styled.td`
+const Td = styled.td<{ $full?: boolean }>`
   padding: 1rem;
   border-bottom: 1px solid #e9ecef;
   color: #495057;
   vertical-align: middle;
+
+  @media (max-width: 768px) {
+    ${(props) =>
+      props.$full
+        ? css`
+            padding: 0.875rem 1rem;
+            font-weight: 600;
+            color: #2c3e50;
+
+            &:not(:last-child) {
+              border-bottom: 1px solid #e9ecef;
+            }
+          `
+        : css`
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.5rem 1rem;
+            border-bottom: none;
+            text-align: right;
+
+            &::before {
+              content: attr(data-label);
+              font-weight: 600;
+              color: #2c3e50;
+              flex-shrink: 0;
+            }
+          `}
+  }
 `;
 
 const TypeBadge = styled.span<{ $type: string }>`
@@ -519,6 +587,10 @@ const FormRow = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
+
+  @media (max-width: 420px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 const Label = styled.label`

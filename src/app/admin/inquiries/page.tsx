@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import { INQUIRY_CATEGORY_LABELS } from "@/lib/constants/inquiry";
 import { formatDateShort } from "@/lib/utils/time";
 import type {
@@ -9,6 +9,7 @@ import type {
   AdminInquiryReply as AdminReply,
   AdminInquiryModalDetail as ModalDetail,
 } from "@/types/api/inquiry";
+import { useScrollLock } from "@/hooks/useScrollLock";
 
 export default function AdminInquiriesPage() {
   const [rows, setRows] = useState<InquiryRow[]>([]);
@@ -19,6 +20,8 @@ export default function AdminInquiriesPage() {
   const [replyText, setReplyText] = useState("");
   const [replySending, setReplySending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useScrollLock(!!selected);
 
   const fetchList = useCallback(async () => {
     setError(null);
@@ -178,27 +181,27 @@ export default function AdminInquiriesPage() {
           <tbody>
             {rows.map((row) => (
               <tr key={row._id}>
-                <Td>
+                <Td data-label="상태">
                   {row.readByAdmin ? (
                     <StatusOk>확인</StatusOk>
                   ) : (
                     <StatusNew>신규</StatusNew>
                   )}
                 </Td>
-                <Td>{INQUIRY_CATEGORY_LABELS[row.category]}</Td>
-                <Td>
+                <Td data-label="유형">{INQUIRY_CATEGORY_LABELS[row.category]}</Td>
+                <Td $full>
                   <TitleCell>{row.title}</TitleCell>
                 </Td>
-                <Td>
+                <Td data-label="답변">
                   {row.replyCount > 0 ? (
                     <ReplyCountBadge>{row.replyCount}</ReplyCountBadge>
                   ) : (
                     <span style={{ color: "#bdc3c7" }}>—</span>
                   )}
                 </Td>
-                <Td>{row.author}</Td>
-                <Td>{formatDateShort(row.createdAt)}</Td>
-                <Td>
+                <Td data-label="작성자">{row.author}</Td>
+                <Td data-label="일자">{formatDateShort(row.createdAt)}</Td>
+                <Td $full>
                   <ActionGroup>
                     <MiniButton type="button" onClick={() => setSelected(row)}>
                       내용 보기
@@ -342,6 +345,10 @@ const Title = styled.h1`
   font-weight: 700;
   color: #2c3e50;
   margin: 0 0 0.5rem 0;
+
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+  }
 `;
 
 const Subtitle = styled.p`
@@ -373,6 +380,31 @@ const Table = styled.table`
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+
+  @media (max-width: 768px) {
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+
+    thead {
+      display: none;
+    }
+
+    tbody,
+    tr,
+    td {
+      display: block;
+    }
+
+    tr {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      margin-bottom: 1rem;
+      padding: 0.25rem 0;
+      overflow: hidden;
+    }
+  }
 `;
 
 const Th = styled.th`
@@ -384,12 +416,41 @@ const Th = styled.th`
   font-size: 0.85rem;
 `;
 
-const Td = styled.td`
+const Td = styled.td<{ $full?: boolean }>`
   padding: 0.875rem 1rem;
   border-top: 1px solid #ecf0f1;
   vertical-align: middle;
   font-size: 0.9rem;
   color: #2c3e50;
+
+  @media (max-width: 768px) {
+    border-top: none;
+
+    ${(props) =>
+      props.$full
+        ? css`
+            padding: 0.75rem 1rem;
+
+            &:not(:last-child) {
+              border-bottom: 1px solid #ecf0f1;
+            }
+          `
+        : css`
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.5rem 1rem;
+            text-align: right;
+
+            &::before {
+              content: attr(data-label);
+              font-weight: 600;
+              color: #7f8c8d;
+              flex-shrink: 0;
+            }
+          `}
+  }
 `;
 
 const TitleCell = styled.div`
@@ -398,6 +459,11 @@ const TitleCell = styled.div`
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+
+  @media (max-width: 768px) {
+    max-width: none;
+    white-space: normal;
+  }
 `;
 
 const StatusNew = styled.span`

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import {
   useAdminEvents,
   useCreateEvent,
@@ -12,6 +12,7 @@ import {
   type EventFormData,
 } from '@/hooks/queries/useEvents';
 import type { TicketOutlet } from '@/types/api/event';
+import { useScrollLock } from '@/hooks/useScrollLock';
 
 function emptyTicketOutlet(): TicketOutlet {
   return {
@@ -50,6 +51,8 @@ export default function AdminEventsPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [formData, setFormData] = useState<EventFormData>(() => emptyFormState());
+
+  useScrollLock(showModal);
 
   const createEvent = useCreateEvent();
   const updateEvent = useUpdateEvent();
@@ -163,7 +166,7 @@ export default function AdminEventsPage() {
         <tbody>
           {events.map((event) => (
             <tr key={event._id}>
-              <Td>
+              <Td data-label="고정">
                 <PinButton
                   onClick={() => handleTogglePin(event)}
                   $pinned={event.isPinned}
@@ -171,14 +174,18 @@ export default function AdminEventsPage() {
                   {event.isPinned ? '📌' : '○'}
                 </PinButton>
               </Td>
-              <Td>{event.title}</Td>
-              <Td>{new Date(event.date).toLocaleDateString('ko-KR')}</Td>
-              <Td>{event.time || '-'}</Td>
-              <Td>{event.place || '-'}</Td>
-              <Td>
+              <Td $full>
+                <EventTitleText>{event.title}</EventTitleText>
+              </Td>
+              <Td data-label="날짜">
+                {new Date(event.date).toLocaleDateString('ko-KR')}
+              </Td>
+              <Td data-label="시간">{event.time || '-'}</Td>
+              <Td data-label="장소">{event.place || '-'}</Td>
+              <Td data-label="유형">
                 <TypeBadge $type={event.type}>{getTypeLabel(event.type)}</TypeBadge>
               </Td>
-              <Td>
+              <Td data-label="관리">
                 <ActionButtons>
                   <EditButton onClick={() => handleOpenModal(event)}>수정</EditButton>
                   <DeleteButton onClick={() => handleDelete(event._id)}>
@@ -421,12 +428,22 @@ const Header = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
+  gap: 1rem;
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
 `;
 
 const Title = styled.h1`
   font-size: 2rem;
   color: #2c3e50;
   font-weight: 700;
+
+  @media (max-width: 768px) {
+    font-size: 1.625rem;
+  }
 `;
 
 const AddButton = styled.button`
@@ -450,6 +467,31 @@ const Table = styled.table`
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+  @media (max-width: 768px) {
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+
+    thead {
+      display: none;
+    }
+
+    tbody,
+    tr,
+    td {
+      display: block;
+    }
+
+    tr {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      margin-bottom: 1rem;
+      padding: 0.25rem 0;
+      overflow: hidden;
+    }
+  }
 `;
 
 const Th = styled.th`
@@ -461,10 +503,40 @@ const Th = styled.th`
   border-bottom: 2px solid #e9ecef;
 `;
 
-const Td = styled.td`
+const Td = styled.td<{ $full?: boolean }>`
   padding: 1rem;
   border-bottom: 1px solid #e9ecef;
   color: #495057;
+
+  @media (max-width: 768px) {
+    ${(props) =>
+      props.$full
+        ? css`
+            padding: 0.875rem 1rem;
+            border-bottom: 1px solid #e9ecef;
+          `
+        : css`
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.5rem 1rem;
+            border-bottom: none;
+            text-align: right;
+
+            &::before {
+              content: attr(data-label);
+              font-weight: 600;
+              color: #2c3e50;
+              flex-shrink: 0;
+            }
+          `}
+  }
+`;
+
+const EventTitleText = styled.span`
+  font-weight: 600;
+  color: #2c3e50;
 `;
 
 const PinButton = styled.button<{ $pinned: boolean }>`
@@ -615,6 +687,10 @@ const FormRow = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
+
+  @media (max-width: 420px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 const Label = styled.label<{ $inline?: boolean }>`

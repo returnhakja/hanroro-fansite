@@ -12,6 +12,7 @@ import { useUpcomingEvents } from "@/hooks/queries/useEvents";
 import type { Event } from "@/types/api/event";
 import { EventTicketOutlets } from "@/components/ui/EventTicketOutlets";
 import KakaoShareButton from "@/components/ui/KakaoShareButton";
+import { useScrollLock } from "@/hooks/useScrollLock";
 
 const CalendarWrapper = styled.div`
   width: 100%;
@@ -151,6 +152,8 @@ const EventCalendar = () => {
   const { data } = useUpcomingEvents();
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  useScrollLock(!!selectedEvent);
 
   // Modal 접근성 설정
   useEffect(() => {

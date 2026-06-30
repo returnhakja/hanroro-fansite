@@ -106,12 +106,21 @@ const Title = styled.h1`
   margin-bottom: 0.5rem;
   color: #2c3e50;
   font-weight: 700;
+
+  @media (max-width: 768px) {
+    font-size: 1.875rem;
+  }
 `;
 
 const Subtitle = styled.p`
   color: #7f8c8d;
   margin-bottom: 2.5rem;
   font-size: 1.1rem;
+
+  @media (max-width: 768px) {
+    margin-bottom: 1.75rem;
+    font-size: 1rem;
+  }
 `;
 
 const Grid = styled.div`
@@ -132,6 +141,10 @@ const StatCard = styled.div`
   &:hover {
     transform: translateY(-4px);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  }
+
+  @media (max-width: 768px) {
+    padding: 1.5rem;
   }
 `;
 
@@ -158,6 +171,10 @@ const WelcomeBox = styled.div`
   padding: 2.5rem;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+  }
 `;
 
 const WelcomeTitle = styled.h2`

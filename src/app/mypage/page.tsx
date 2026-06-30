@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSession, signIn, signOut } from 'next-auth/react';
 import styled from 'styled-components';
 import { theme } from '@/styles/theme';
+import { useScrollLock } from '@/hooks/useScrollLock';
 
 export default function MyPage() {
   const { data: session, status, update } = useSession();
@@ -14,6 +15,8 @@ export default function MyPage() {
   const [error, setError] = useState('');
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [withdrawing, setWithdrawing] = useState(false);
+
+  useScrollLock(showWithdrawModal);
 
   useEffect(() => {
     if (status === 'loading') return;

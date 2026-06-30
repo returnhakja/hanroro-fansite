@@ -9,6 +9,7 @@ import { CloseButton } from '@/components/ui/CloseButton';
 import Spinner from '@/components/ui/Spinner';
 import { theme } from '@/styles/theme';
 import { useImages, useUploadMedia, useDeleteImage, type GalleryImage } from '@/hooks/queries/useGallery';
+import { useScrollLock } from '@/hooks/useScrollLock';
 
 type MediaTab = 'image' | 'video';
 
@@ -33,6 +34,8 @@ function GalleryContent() {
   const [preview, setPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+
+  useScrollLock(!!selectedItem || uploadModalOpen);
 
   useEffect(() => {
     Modal.setAppElement('body');
