@@ -14,7 +14,7 @@ const nextConfig = {
     styledComponents: true,
   },
   turbopack: {},
-  serverExternalPackages: ['isomorphic-dompurify', 'jsdom'],
+  serverExternalPackages: ['sanitize-html'],
   images: {
     remotePatterns: [
       {

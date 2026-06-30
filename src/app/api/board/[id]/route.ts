@@ -25,7 +25,10 @@ export async function GET(
     post.views += 1;
     await post.save();
 
-    return NextResponse.json(post);
+    // 응답 시 본문 sanitize (기존 게시글 포함 XSS 방어)
+    const obj = post.toObject();
+    obj.content = sanitizeHtml(obj.content);
+    return NextResponse.json(obj);
   } catch (error) {
     console.error('게시글 조회 오류:', error);
     return NextResponse.json(
