@@ -6,7 +6,6 @@ import { INQUIRY_CATEGORY_LABELS } from "@/lib/constants/inquiry";
 import { formatDateShort } from "@/lib/utils/time";
 import type {
   AdminInquiryRow as InquiryRow,
-  AdminInquiryReply as AdminReply,
   AdminInquiryModalDetail as ModalDetail,
 } from "@/types/api/inquiry";
 import { useScrollLock } from "@/hooks/useScrollLock";

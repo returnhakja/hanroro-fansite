@@ -40,10 +40,32 @@ export default function AdminLayout({
       return;
     }
 
-    // 토큰 유효성은 일단 localStorage 존재 여부만 체크
-    // (추후 verify API 추가 시 검증 가능)
-    setIsAuthenticated(true);
-    setLoading(false);
+    // 서버에 실제 토큰 유효성 검증 (만료·위조 토큰 차단)
+    let cancelled = false;
+    setLoading(true);
+    fetch('/api/admin/auth/verify', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => {
+        if (cancelled) return;
+        if (!res.ok) {
+          // 만료·위조 토큰 → 제거 후 로그인으로
+          localStorage.removeItem('adminToken');
+          router.push('/admin/login');
+          return;
+        }
+        setIsAuthenticated(true);
+        setLoading(false);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setIsAuthenticated(true); // 네트워크 오류 시 일단 진입 허용 (API가 다시 막음)
+        setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [pathname, router]);
 
   const handleLogout = () => {

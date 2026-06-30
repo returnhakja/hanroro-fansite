@@ -1,34 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { verifyToken } from '@/lib/auth/jwt';
+import { NextResponse } from 'next/server';
+import { requireAuth, type AuthenticatedRequest } from '@/lib/auth/middleware';
 import connectDB from '@/lib/db/mongoose';
 import Board from '@/lib/db/models/Board';
 import Comment from '@/lib/db/models/Comment';
 
 // 관리자용 게시글 삭제 (JWT 인증 필요)
-export async function DELETE(
-  request: NextRequest,
+async function handleDelete(
+  _request: AuthenticatedRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // JWT 토큰 검증
-    const authHeader = request.headers.get('Authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json(
-        { error: '인증이 필요합니다' },
-        { status: 401 }
-      );
-    }
-
-    const token = authHeader.substring(7);
-    const decoded = verifyToken(token);
-
-    if (!decoded) {
-      return NextResponse.json(
-        { error: '유효하지 않은 토큰입니다' },
-        { status: 401 }
-      );
-    }
-
     await connectDB();
     const { id } = await params;
 
@@ -58,3 +39,5 @@ export async function DELETE(
     );
   }
 }
+
+export const DELETE = requireAuth(handleDelete);

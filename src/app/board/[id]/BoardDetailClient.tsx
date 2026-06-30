@@ -14,6 +14,7 @@ import {
   useDeletePost,
 } from "@/hooks/queries/useBoard";
 import { theme } from "@/styles/theme";
+import { sanitizeHtml } from "@/lib/utils/sanitize";
 
 const RichTextEditor = dynamic(
   () => import("@/components/features/board/RichTextEditor"),
@@ -154,9 +155,11 @@ export default function BoardDetailClient({
       ) : (
         <Content
           dangerouslySetInnerHTML={{
-            __html: isHtmlContent(post.content)
-              ? post.content
-              : post.content.replace(/\n/g, "<br>"),
+            __html: sanitizeHtml(
+              isHtmlContent(post.content)
+                ? post.content
+                : post.content.replace(/\n/g, "<br>"),
+            ),
           }}
         />
       )}

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth/auth';
 import connectDB from '@/lib/db/mongoose';
 import Board from '@/lib/db/models/Board';
+import { sanitizeHtml } from '@/lib/utils/sanitize';
 
 // 게시글 목록 조회
 export async function GET() {
@@ -43,7 +44,7 @@ export async function POST(request: NextRequest) {
     await connectDB();
     const newPost = await Board.create({
       title,
-      content,
+      content: sanitizeHtml(content),
       author,
       userId: session.user.id || null,
       imageUrls: imageUrls || [],

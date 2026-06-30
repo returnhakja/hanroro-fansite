@@ -36,7 +36,6 @@ import {
 } from './Fanchant.styles';
 
 const FONT_SIZES: FontSize[] = ['sm', 'md', 'lg'];
-const FONT_LABELS = { sm: 'A−', md: 'A', lg: 'A+' };
 
 export default function FanchantPageClient() {
   const { data: fanchants = [], isLoading } = useFanchants();

@@ -8,7 +8,7 @@ import styled from "styled-components";
 import { theme } from "@/styles/theme";
 import { INQUIRY_CATEGORY_LABELS } from "@/lib/constants/inquiry";
 import { formatDateShort } from "@/lib/utils/time";
-import type { InquiryDetail, InquiryReply } from "@/types/api/inquiry";
+import type { InquiryDetail } from "@/types/api/inquiry";
 
 export default function InquiryDetailClient() {
   const params = useParams();

@@ -1,33 +1,4 @@
-import { put, del } from '@vercel/blob';
-
-/**
- * Vercel Blob에 파일 업로드
- * @param file - 업로드할 파일
- * @param folder - 저장할 폴더 (예: 'gallery')
- * @returns 업로드된 파일의 공개 URL
- */
-export async function uploadToBlob(
-  file: File,
-  folder: string = 'gallery'
-): Promise<string> {
-  try {
-    // 파일명 생성: folder/timestamp-filename
-    const timestamp = Date.now();
-    const sanitizedFilename = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-    const filename = `${folder}/${timestamp}-${sanitizedFilename}`;
-
-    // Vercel Blob에 업로드
-    const blob = await put(filename, file, {
-      access: 'public',
-      addRandomSuffix: false,
-    });
-
-    return blob.url;
-  } catch (error) {
-    console.error('Vercel Blob upload error:', error);
-    throw new Error('Failed to upload file to Vercel Blob');
-  }
-}
+import { del } from '@vercel/blob';
 
 /**
  * Vercel Blob에서 파일 삭제

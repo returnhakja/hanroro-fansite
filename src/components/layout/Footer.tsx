@@ -122,17 +122,6 @@ const FooterLink = styled(Link)`
   }
 `;
 
-const FooterExternalLink = styled.a`
-  text-decoration: none;
-  color: ${theme.colors.secondaryLight};
-  font-size: 0.875rem;
-  transition: color ${theme.transitions.fast};
-
-  &:hover {
-    color: ${theme.colors.textLight};
-  }
-`;
-
 const FooterDivider = styled.hr`
   border: none;
   border-top: 1px solid rgba(229, 221, 208, 0.15);

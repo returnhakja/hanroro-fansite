@@ -8,6 +8,8 @@ export interface IAdmin extends Document {
   role: 'super' | 'manager';
   createdAt: Date;
   lastLogin?: Date;
+  failedLoginAttempts: number;
+  lockUntil?: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
@@ -39,6 +41,12 @@ const adminSchema = new Schema<IAdmin>({
     default: Date.now,
   },
   lastLogin: Date,
+  // 무차별 대입 방어용 계정 잠금
+  failedLoginAttempts: {
+    type: Number,
+    default: 0,
+  },
+  lockUntil: Date,
 });
 
 // 비밀번호 해싱 미들웨어

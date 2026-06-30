@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth/auth';
 import connectDB from '@/lib/db/mongoose';
 import Board from '@/lib/db/models/Board';
+import { sanitizeHtml } from '@/lib/utils/sanitize';
 
 // 게시글 상세 조회 (조회수 증가)
 export async function GET(
@@ -84,7 +85,7 @@ export async function PUT(
     }
 
     post.title = title.trim();
-    post.content = content.trim();
+    post.content = sanitizeHtml(content.trim());
     await post.save();
 
     return NextResponse.json(post);

@@ -22,12 +22,18 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         }
 
         const baseOptions = {
+          // 명시적 허용 목록: SVG(스크립트 내장 XSS)와 octet-stream(임의 파일) 제외
           allowedContentTypes: [
-            'image/*',
-            'video/*',
-            'application/octet-stream',
+            'image/jpeg',
+            'image/png',
+            'image/webp',
+            'image/gif',
+            'image/avif',
+            'video/mp4',
+            'video/webm',
+            'video/quicktime',
           ],
-          maximumSizeInBytes: 500 * 1024 * 1024, // 500MB
+          maximumSizeInBytes: 200 * 1024 * 1024, // 200MB
         };
 
         if (type === 'board') {
