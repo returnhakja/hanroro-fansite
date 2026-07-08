@@ -9,6 +9,13 @@ export const artistData = {
   imageUrl: "/assets/애증프로필.jpg",
   albums: [
     {
+      id: "16",
+      title: "너와 나",
+      releaseDate: "2026-07-08",
+      coverUrl: "/assets/너와 나.jpg",
+      tracks: [],
+    },
+    {
       id: "15",
       title: "애증",
       releaseDate: "2026-04-02",
@@ -149,7 +156,7 @@ export const findAlbumBySongTitle = (songTitle: string) => {
     artistData.albums.find(
       (album) =>
         album.tracks.length > 0 &&
-        album.tracks.some((track) => track.title.toLowerCase() === normalized)
+        album.tracks.some((track) => track.title.toLowerCase() === normalized),
     ) ?? null
   );
 };
