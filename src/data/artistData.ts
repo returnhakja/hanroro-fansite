@@ -12,7 +12,7 @@ export const artistData = {
       id: "16",
       title: "너와 나",
       releaseDate: "2026-07-08",
-      coverUrl: "/assets/너와 나.jpg",
+      coverUrl: "/assets/너와나.jpg",
       tracks: [],
     },
     {
