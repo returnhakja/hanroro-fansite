@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth/auth';
 import connectDB from '@/lib/db/mongoose';
 import Image from '@/lib/db/models/Image';
 import { deleteFromBlob, isVercelBlobUrl } from '@/lib/storage/vercel-blob';
+import { deleteFromR2, isR2Url } from '@/lib/storage/r2';
 
 // 이미지/동영상 삭제 (업로드한 본인만 가능)
 export async function DELETE(
@@ -38,13 +39,15 @@ export async function DELETE(
 
     await Image.findByIdAndDelete(id);
 
-    // Vercel Blob에서도 삭제
-    if (isVercelBlobUrl(image.imageUrl)) {
-      try {
+    // 스토리지에서도 삭제 (R2 신규 / Vercel Blob 레거시)
+    try {
+      if (isR2Url(image.imageUrl)) {
+        await deleteFromR2(image.imageUrl);
+      } else if (isVercelBlobUrl(image.imageUrl)) {
         await deleteFromBlob(image.imageUrl);
-      } catch (err) {
-        console.error('Blob 파일 삭제 실패:', err);
       }
+    } catch (err) {
+      console.error('스토리지 파일 삭제 실패:', err);
     }
 
     return NextResponse.json({ message: '삭제 완료' });

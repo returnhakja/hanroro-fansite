@@ -1,64 +1,73 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { handleUpload, type HandleUploadBody } from '@vercel/blob/client';
 import { auth } from '@/lib/auth/auth';
+import { createPresignedUploadUrl } from '@/lib/storage/r2';
 
 /**
- * 통합 업로드 엔드포인트
- * - ?type=gallery (기본): 갤러리 이미지/동영상 업로드 - tokenPayload에 userId/title/mediaType 포함
- * - ?type=board: 게시판 에디터 미디어 업로드 - tokenPayload 없음, 갤러리 DB에 저장하지 않음
+ * 통합 업로드 엔드포인트 (Cloudflare R2 presigned URL 발급)
+ * - ?type=gallery (기본): 갤러리 이미지/동영상 → gallery/ 접두사
+ * - ?type=board            : 게시판 에디터 미디어 → board/ 접두사
+ *
+ * 요청: { filename: string, contentType: string }
+ * 응답: { uploadUrl: string, publicUrl: string }
+ *   → 클라이언트가 uploadUrl 로 PUT(파일) 후, publicUrl 을 저장/사용
  */
+
+// SVG(스크립트 내장 XSS)와 octet-stream(임의 파일)은 제외
+const ALLOWED_CONTENT_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+  'image/avif',
+  'video/mp4',
+  'video/webm',
+  'video/quicktime',
+];
+
 export async function POST(request: NextRequest): Promise<NextResponse> {
-  const type = request.nextUrl.searchParams.get('type') ?? 'gallery';
-  const body = (await request.json()) as HandleUploadBody;
-
   try {
-    const jsonResponse = await handleUpload({
-      body,
-      request,
-      onBeforeGenerateToken: async (_pathname, clientPayload) => {
-        const session = await auth();
-        if (!session?.user?.id) {
-          throw new Error('로그인이 필요합니다');
-        }
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: '로그인이 필요합니다' },
+        { status: 401 }
+      );
+    }
 
-        const baseOptions = {
-          // 명시적 허용 목록: SVG(스크립트 내장 XSS)와 octet-stream(임의 파일) 제외
-          allowedContentTypes: [
-            'image/jpeg',
-            'image/png',
-            'image/webp',
-            'image/gif',
-            'image/avif',
-            'video/mp4',
-            'video/webm',
-            'video/quicktime',
-          ],
-          maximumSizeInBytes: 200 * 1024 * 1024, // 200MB
-        };
+    const type = request.nextUrl.searchParams.get('type') ?? 'gallery';
+    const prefix = type === 'board' ? 'board' : 'gallery';
 
-        if (type === 'board') {
-          return baseOptions;
-        }
+    const { filename, contentType } = (await request.json()) as {
+      filename?: string;
+      contentType?: string;
+    };
 
-        // gallery
-        const payload = clientPayload ? JSON.parse(clientPayload) : {};
-        return {
-          ...baseOptions,
-          tokenPayload: JSON.stringify({
-            userId: session.user.id,
-            title: payload.title || '',
-            mediaType: payload.mediaType || 'image',
-          }),
-        };
-      },
-      onUploadCompleted: async () => {
-        // 갤러리 DB 저장은 클라이언트에서 /api/images POST로 처리
-        // 게시판 미디어는 갤러리 DB에 저장하지 않음
-      },
-    });
+    if (!filename || !contentType) {
+      return NextResponse.json(
+        { error: 'filename과 contentType이 필요합니다' },
+        { status: 400 }
+      );
+    }
 
-    return NextResponse.json(jsonResponse);
+    if (!ALLOWED_CONTENT_TYPES.includes(contentType)) {
+      return NextResponse.json(
+        { error: '허용되지 않은 파일 형식입니다' },
+        { status: 400 }
+      );
+    }
+
+    // 경로 조작 방지: 파일명 정규화 후 서버에서 접두사/타임스탬프 부여
+    const sanitized = filename.replace(/[^a-zA-Z0-9.-]/g, '_');
+    const key = `${prefix}/${Date.now()}-${sanitized}`;
+
+    const { uploadUrl, publicUrl } = await createPresignedUploadUrl(
+      key,
+      contentType
+    );
+
+    return NextResponse.json({ uploadUrl, publicUrl });
   } catch (error) {
+    console.error('업로드 URL 발급 오류:', error);
     return NextResponse.json(
       { error: (error as Error).message },
       { status: 400 }

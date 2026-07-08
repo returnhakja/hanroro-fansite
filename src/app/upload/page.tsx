@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import styled from 'styled-components';
 import { theme } from '@/styles/theme';
 import Spinner from '@/components/ui/Spinner';
+import { uploadToR2 } from '@/lib/storage/uploadClient';
 
 export default function UploadPage() {
   const router = useRouter();
@@ -36,24 +37,31 @@ export default function UploadPage() {
     setLoading(true);
 
     try {
-      const formData = new FormData();
-      formData.append('title', title);
-      formData.append('image', file);
+      // R2에 직접 업로드 후 갤러리 DB에 저장
+      const mediaType = file.type.startsWith('video/') ? 'video' : 'image';
+      const publicUrl = await uploadToR2(file, { type: 'gallery' });
 
-      const response = await fetch('/api/upload', {
+      const response = await fetch('/api/images', {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title,
+          imageUrl: publicUrl,
+          filename: publicUrl.split('/').pop(),
+          type: mediaType,
+        }),
       });
 
       if (response.ok) {
         alert('업로드 성공!');
         router.push('/gallery');
       } else {
-        throw new Error('Upload failed');
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || 'Upload failed');
       }
     } catch (error) {
       console.error('업로드 오류:', error);
-      alert('업로드에 실패했습니다');
+      alert(error instanceof Error ? error.message : '업로드에 실패했습니다');
     } finally {
       setLoading(false);
     }

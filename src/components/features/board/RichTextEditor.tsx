@@ -7,7 +7,7 @@ import Placeholder from "@tiptap/extension-placeholder";
 import { useEffect, useRef, useCallback } from "react";
 import styled from "styled-components";
 import { theme } from "@/styles/theme";
-import { upload } from "@vercel/blob/client";
+import { uploadToR2 } from "@/lib/storage/uploadClient";
 
 interface RichTextEditorProps {
   value: string;
@@ -48,17 +48,10 @@ export default function RichTextEditor({
   const videoInputRef = useRef<HTMLInputElement>(null);
   const isUpdatingRef = useRef(false);
 
-  // 공통 업로드 함수 (Vercel Blob 클라이언트 직접 업로드)
+  // 공통 업로드 함수 (R2 presigned PUT 직접 업로드)
   const uploadFile = useCallback(async (file: File): Promise<string | null> => {
     try {
-      const timestamp = Date.now();
-      const sanitized = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
-      const pathname = `board/${timestamp}-${sanitized}`;
-      const blob = await upload(pathname, file, {
-        access: "public",
-        handleUploadUrl: "/api/upload?type=board",
-      });
-      return blob.url;
+      return await uploadToR2(file, { type: "board" });
     } catch {
       return null;
     }

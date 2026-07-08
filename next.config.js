@@ -8,6 +8,16 @@ const withSerwist = withSerwistInit({
   disable: process.env.NODE_ENV === "development",
 });
 
+// R2 공개 도메인 (환경변수에서 호스트명 추출)
+let r2Hostname = null;
+try {
+  if (process.env.R2_PUBLIC_URL) {
+    r2Hostname = new URL(process.env.R2_PUBLIC_URL).hostname;
+  }
+} catch {
+  // R2_PUBLIC_URL 미설정/형식 오류 시 무시
+}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   compiler: {
@@ -17,6 +27,9 @@ const nextConfig = {
   serverExternalPackages: ['sanitize-html'],
   images: {
     remotePatterns: [
+      ...(r2Hostname
+        ? [{ protocol: "https", hostname: r2Hostname, pathname: "/**" }]
+        : []),
       {
         protocol: "https",
         hostname: "*.public.blob.vercel-storage.com",

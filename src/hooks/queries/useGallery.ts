@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { upload } from '@vercel/blob/client';
+import { uploadToR2 } from '@/lib/storage/uploadClient';
 import { queryKeys } from '@/lib/queryKeys';
 import type { GalleryImage, UploadMediaParams } from '@/types/api/gallery';
 export type { GalleryImage, UploadMediaParams };
@@ -25,28 +25,21 @@ export function useUploadMedia() {
 
   const uploadMedia = async ({ file, title, onProgress }: UploadMediaParams) => {
     const mediaType = file.type.startsWith('video/') ? 'video' : 'image';
-    const timestamp = Date.now();
-    const sanitized = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-    const pathname = `gallery/${timestamp}-${sanitized}`;
 
-    // 1단계: Vercel Blob에 직접 업로드
-    const blob = await upload(pathname, file, {
-      access: 'public',
-      handleUploadUrl: '/api/upload',
-      clientPayload: JSON.stringify({ title, mediaType }),
-      onUploadProgress: ({ percentage }) => {
-        onProgress?.(percentage);
-      },
+    // 1단계: R2에 직접 업로드 (presigned PUT)
+    const publicUrl = await uploadToR2(file, {
+      type: 'gallery',
+      onProgress,
     });
 
-    // 2단계: 클라이언트에서 직접 DB 저장 (onUploadCompleted 콜백 의존 제거)
+    // 2단계: 클라이언트에서 직접 DB 저장
     const res = await fetch('/api/images', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         title,
-        imageUrl: blob.url,
-        filename: pathname,
+        imageUrl: publicUrl,
+        filename: publicUrl.split('/').pop(),
         type: mediaType,
       }),
     });
@@ -56,7 +49,7 @@ export function useUploadMedia() {
     }
 
     await queryClient.invalidateQueries({ queryKey: queryKeys.images.all });
-    return blob;
+    return { url: publicUrl };
   };
 
   return { uploadMedia };
