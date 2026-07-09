@@ -2,6 +2,7 @@ import {
   S3Client,
   DeleteObjectCommand,
   PutObjectCommand,
+  GetObjectCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
@@ -85,6 +86,29 @@ export async function uploadBufferToR2(
     })
   );
   return getPublicUrl(key);
+}
+
+/**
+ * 다운로드용 presigned GET URL 발급 (Content-Disposition: attachment)
+ * 브라우저가 이 URL로 R2에 직접 접속해 파일을 받으므로 Vercel/서버 트래픽을
+ * 거치지 않는다(R2 egress 무료). CORS도 무관(top-level 이동).
+ * @param key             버킷 내 객체 경로
+ * @param downloadName    저장될 파일명 (attachment filename)
+ * @param expiresIn       만료(초), 기본 5분
+ */
+export async function createPresignedDownloadUrl(
+  key: string,
+  downloadName: string,
+  expiresIn = 300
+): Promise<string> {
+  const command = new GetObjectCommand({
+    Bucket: R2_BUCKET,
+    Key: key,
+    ResponseContentDisposition: `attachment; filename*=UTF-8''${encodeURIComponent(
+      downloadName
+    )}`,
+  });
+  return getSignedUrl(getR2Client(), command, { expiresIn });
 }
 
 /** URL이 R2 공개 URL인지 확인 */

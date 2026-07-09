@@ -90,22 +90,15 @@ function GalleryContent() {
     setPreview(null);
   };
 
-  const handleDownload = async (url: string, title: string) => {
-    try {
-      const response = await fetch(url);
-      const blob = await response.blob();
-      const objectUrl = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = objectUrl;
-      const ext = url.split('.').pop()?.split('?')[0] || 'mp4';
-      a.download = `${title}.${ext}`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(objectUrl);
-      document.body.removeChild(a);
-    } catch {
-      alert('다운로드에 실패했습니다');
-    }
+  const handleDownload = (url: string, title: string) => {
+    // r2.dev 공개 URL은 CORS가 적용되지 않아 브라우저 fetch 다운로드가 막힌다.
+    // 서버 프록시(/api/download)가 Content-Disposition: attachment 로 내려준다.
+    const proxyUrl = `/api/download?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(title)}`;
+    const a = document.createElement('a');
+    a.href = proxyUrl;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   };
 
   const isVideoFile = (file: File | null) => file?.type.startsWith('video/') ?? false;
