@@ -447,6 +447,48 @@ export const EventContent = styled.div`
   }
 `;
 
+export const EventActions = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+`;
+
+export const CalendarAddButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid ${theme.colors.border};
+  border-radius: ${theme.borderRadius.full};
+  background: transparent;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: ${theme.colors.textSecondary};
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background ${theme.transitions.fast}, color ${theme.transitions.fast},
+    border-color ${theme.transitions.fast};
+
+  &:hover {
+    background: ${theme.colors.primary};
+    border-color: ${theme.colors.primary};
+    color: ${theme.colors.textLight};
+  }
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* 모바일에서는 아이콘만 노출해 공간 절약 */
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    span {
+      display: none;
+    }
+    padding: 0.35rem;
+  }
+`;
+
 export const EventType = styled.span<{ type: string }>`
   display: inline-block;
   padding: 0.3rem 0.75rem;

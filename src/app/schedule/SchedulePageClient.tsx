@@ -17,6 +17,8 @@ import {
   EventContent,
   EventTypeRow,
   EventType,
+  EventActions,
+  CalendarAddButton,
   EventTitle,
   EventDetails,
   EventDetail,
@@ -57,7 +59,9 @@ import {
 import { useUpcomingEvents } from "@/hooks/queries/useEvents";
 import { useConcerts } from "@/hooks/queries/useConcerts";
 import { formatDateWithWeekday } from "@/lib/utils/time";
+import { buildIcs, downloadIcs } from "@/lib/utils/ics";
 import KakaoShareButton from "@/components/ui/KakaoShareButton";
+import type { Event } from "@/hooks/queries/useEvents";
 
 // ─── 인라인 아이콘 (의존성 추가 없이 lucide 스타일) ─────────────────
 const IconCalendar = () => (
@@ -99,6 +103,21 @@ const IconArrow = () => (
     aria-hidden
   >
     <path d="M5 12h14M13 6l6 6-6 6" />
+  </svg>
+);
+const IconCalendarPlus = () => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden
+  >
+    <path d="M8 2v4M16 2v4M3 10h18" />
+    <path d="M21 13V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7" />
+    <path d="M16 19h6M19 16v6" />
   </svg>
 );
 
@@ -170,6 +189,29 @@ const SchedulePageClient = () => {
     router.push(`/schedule?event=${id}`, { scroll: false });
   };
 
+  const handleAddToCalendar = (event: Event) => {
+    const ics = buildIcs({
+      title: `[한로로] ${event.title}`,
+      date: event.date,
+      time: event.time,
+      place: event.place,
+      description: [
+        getEventTypeLabel(event.type),
+        event.place,
+        event.ticketOutlets?.map((t) => `${t.label}: ${t.url}`).join(" / "),
+      ]
+        .filter(Boolean)
+        .join("\n"),
+      url:
+        typeof window !== "undefined"
+          ? `${window.location.origin}/schedule?event=${event._id}`
+          : undefined,
+    });
+
+    const safeTitle = event.title.replace(/[^\w가-힣]+/g, "_").slice(0, 40);
+    downloadIcs(ics, `hanroro_${safeTitle}.ics`);
+  };
+
   const featuredDday =
     featured && mounted ? calcDaysUntil(featured.date) : null;
 
@@ -208,19 +250,33 @@ const SchedulePageClient = () => {
                       <EventType type={event.type}>
                         {getEventTypeLabel(event.type)}
                       </EventType>
-                      <KakaoShareButton
-                        title={`[한로로] ${event.title}`}
-                        description={[
-                          formatDateWithWeekday(event.date),
-                          event.place,
-                          event.time,
-                        ]
-                          .filter(Boolean)
-                          .join("\n")}
-                        imageUrl={event.posterUrl}
-                        path={`/schedule?event=${event._id}`}
-                        buttonTitle="일정 보기"
-                      />
+                      <EventActions>
+                        <CalendarAddButton
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAddToCalendar(event);
+                          }}
+                          aria-label="기기 캘린더에 일정 추가"
+                          title="기기 캘린더에 추가"
+                        >
+                          <IconCalendarPlus />
+                          <span>캘린더 추가</span>
+                        </CalendarAddButton>
+                        <KakaoShareButton
+                          title={`[한로로] ${event.title}`}
+                          description={[
+                            formatDateWithWeekday(event.date),
+                            event.place,
+                            event.time,
+                          ]
+                            .filter(Boolean)
+                            .join("\n")}
+                          imageUrl={event.posterUrl}
+                          path={`/schedule?event=${event._id}`}
+                          buttonTitle="일정 보기"
+                        />
+                      </EventActions>
                     </EventTypeRow>
                     <EventTitle>{event.title}</EventTitle>
                     <EventDetails>

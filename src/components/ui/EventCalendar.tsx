@@ -13,6 +13,25 @@ import type { Event } from "@/types/api/event";
 import { EventTicketOutlets } from "@/components/ui/EventTicketOutlets";
 import KakaoShareButton from "@/components/ui/KakaoShareButton";
 import { useScrollLock } from "@/hooks/useScrollLock";
+import { buildIcs, downloadIcs } from "@/lib/utils/ics";
+
+const IconCalendarPlus = () => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden
+    width={18}
+    height={18}
+  >
+    <path d="M8 2v4M16 2v4M3 10h18" />
+    <path d="M21 13V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7" />
+    <path d="M16 19h6M19 16v6" />
+  </svg>
+);
 
 const CalendarWrapper = styled.div`
   width: 100%;
@@ -122,6 +141,30 @@ const EventType = styled.span<{ type: string }>`
   margin-bottom: ${theme.spacing.gap.md};
 `;
 
+const CalendarAddButton = styled.button`
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid ${theme.colors.border};
+  border-radius: ${theme.borderRadius.md};
+  background: ${theme.colors.surfaceAlt};
+  color: ${theme.colors.textPrimary};
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background ${theme.transitions.fast}, color ${theme.transitions.fast},
+    border-color ${theme.transitions.fast};
+
+  &:hover {
+    background: ${theme.colors.primary};
+    border-color: ${theme.colors.primary};
+    color: ${theme.colors.textLight};
+  }
+`;
+
 const modalStyles = {
   overlay: {
     backgroundColor: "rgba(44, 36, 24, 0.5)",
@@ -201,6 +244,29 @@ const EventCalendar = () => {
     router.push("/schedule", { scroll: false });
   };
 
+  const handleAddToCalendar = (event: Event) => {
+    const ics = buildIcs({
+      title: `[한로로] ${event.title}`,
+      date: event.date,
+      time: event.time,
+      place: event.place,
+      description: [
+        getEventTypeLabel(event.type),
+        event.place,
+        event.ticketOutlets?.map((t) => `${t.label}: ${t.url}`).join(" / "),
+      ]
+        .filter(Boolean)
+        .join("\n"),
+      url:
+        typeof window !== "undefined"
+          ? `${window.location.origin}/schedule?event=${event._id}`
+          : undefined,
+    });
+
+    const safeTitle = event.title.replace(/[^\w가-힣]+/g, "_").slice(0, 40);
+    downloadIcs(ics, `hanroro_${safeTitle}.ics`);
+  };
+
   return (
     <CalendarWrapper>
       {mounted && (
@@ -276,7 +342,22 @@ const EventCalendar = () => {
                 />
               )}
 
-              <div style={{ marginTop: theme.spacing.gap.lg }}>
+              <div
+                style={{
+                  marginTop: theme.spacing.gap.lg,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: theme.spacing.gap.sm,
+                }}
+              >
+                <CalendarAddButton
+                  type="button"
+                  onClick={() => handleAddToCalendar(selectedEvent)}
+                  aria-label="기기 캘린더에 일정 추가"
+                >
+                  <IconCalendarPlus />
+                  캘린더에 추가
+                </CalendarAddButton>
                 <KakaoShareButton
                   block
                   size="lg"
