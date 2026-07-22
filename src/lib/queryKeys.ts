@@ -21,6 +21,8 @@ export const queryKeys = {
   },
   youtube: {
     videos: ['youtube', 'videos'] as const,
+    playlists: ['youtube', 'playlists'] as const,
+    playlistItems: (id: string) => ['youtube', 'playlist', id] as const,
   },
   images: {
     all: ['images'] as const,

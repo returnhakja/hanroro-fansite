@@ -22,7 +22,7 @@ export default function GalleryPreviewSection() {
   const shouldReduceMotion = useReducedMotion();
   const router = useRouter();
   const { data: imageData } = useImages();
-  const images = imageData?.slice(0, 6) ?? [];
+  const images = imageData?.slice(0, 3) ?? [];
 
   return (
     <GalleryPreviewSectionWrapper>

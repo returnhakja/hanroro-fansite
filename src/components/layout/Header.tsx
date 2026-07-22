@@ -81,6 +81,9 @@ const Header = () => {
         <NavLink href="/gallery" onClick={() => setMenuOpen(false)}>
           갤러리
         </NavLink>
+        <NavLink href="/videos" onClick={() => setMenuOpen(false)}>
+          영상
+        </NavLink>
         <NavLink href="/board" onClick={() => setMenuOpen(false)}>
           게시판
         </NavLink>
