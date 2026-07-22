@@ -23,6 +23,7 @@ export const queryKeys = {
     videos: ['youtube', 'videos'] as const,
     playlists: ['youtube', 'playlists'] as const,
     playlistItems: (id: string) => ['youtube', 'playlist', id] as const,
+    keyword: (kw: string) => ['youtube', 'keyword', kw] as const,
   },
   images: {
     all: ['images'] as const,
