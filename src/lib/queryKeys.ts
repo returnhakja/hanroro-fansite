@@ -46,4 +46,8 @@ export const queryKeys = {
     detail: (id: string) => ['inquiries', id] as const,
     admin: ['admin', 'inquiries'] as const,
   },
+  songs: {
+    chart: ['songs', 'chart'] as const,
+    myVote: ['songs', 'myVote'] as const,
+  },
 } as const;

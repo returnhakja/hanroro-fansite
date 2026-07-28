@@ -160,3 +160,36 @@ export const findAlbumBySongTitle = (songTitle: string) => {
     ) ?? null
   );
 };
+
+export interface DiscographySong {
+  title: string;
+  album: string;
+  albumImageUrl: string;
+}
+
+/**
+ * 디스코그래피 전체를 "곡" 단위로 펼쳐 중복 없이 반환한다.
+ * - tracks 가 있는 앨범(EP): 각 수록곡을 곡으로
+ * - tracks 가 없는 앨범(싱글): 앨범 제목 자체를 곡으로
+ * - 선공개 싱글과 EP 수록곡이 겹치면 곡 제목 기준으로 하나로 합쳐진다.
+ *   (albums 배열이 최신순이라 EP/최신 릴리즈의 앨범 정보가 우선 채택됨)
+ */
+export const getDiscographySongs = (): DiscographySong[] => {
+  const seen = new Map<string, DiscographySong>();
+  for (const album of artistData.albums) {
+    const titles =
+      album.tracks.length > 0
+        ? album.tracks.map((t) => t.title)
+        : [album.title];
+    for (const title of titles) {
+      const key = title.trim().toLowerCase();
+      if (!key || seen.has(key)) continue;
+      seen.set(key, {
+        title,
+        album: album.title,
+        albumImageUrl: album.coverUrl,
+      });
+    }
+  }
+  return Array.from(seen.values());
+};

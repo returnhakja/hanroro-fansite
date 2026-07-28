@@ -93,6 +93,9 @@ const Header = () => {
         <NavLink href="/setlist" onClick={() => setMenuOpen(false)}>
           셋리스트
         </NavLink>
+        <NavLink href="/chart" onClick={() => setMenuOpen(false)}>
+          차트
+        </NavLink>
         <NavLink href="/chronicle" onClick={() => setMenuOpen(false)}>
           연대기
         </NavLink>
