@@ -49,5 +49,6 @@ export const queryKeys = {
   songs: {
     chart: ['songs', 'chart'] as const,
     myVote: ['songs', 'myVote'] as const,
+    setlistStats: ['songs', 'setlistStats'] as const,
   },
 } as const;

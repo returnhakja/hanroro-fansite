@@ -266,11 +266,14 @@ export const Bar = styled.div`
   overflow: hidden;
 `;
 
-export const BarFill = styled.div<{ $pct: number }>`
+export const BarFill = styled.div<{ $pct: number; $stage?: boolean }>`
   height: 100%;
   width: ${({ $pct }) => $pct}%;
   border-radius: ${theme.borderRadius.full};
-  background: ${theme.colors.gradientGold};
+  background: ${({ $stage }) =>
+    $stage
+      ? `linear-gradient(135deg, ${theme.colors.info} 0%, #9DB0C0 100%)`
+      : theme.colors.gradientGold};
   transform-origin: left;
   transition: width ${theme.transitions.slow};
   animation: ${barGrow} 0.7s ${theme.transitions.spring};
@@ -307,4 +310,77 @@ export const StateBox = styled.div`
   font-family: ${theme.typography.fontBody};
   font-size: 0.95rem;
   color: ${theme.colors.textTertiary};
+`;
+
+// ─── 뷰 토글 ─────────────────────────────────────────────────
+export const Toggle = styled.div`
+  display: inline-flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  margin-bottom: 1.75rem;
+  background: ${theme.colors.surfaceAlt};
+  border: 1px solid ${theme.colors.borderLight};
+  border-radius: ${theme.borderRadius.full};
+`;
+
+export const ToggleButton = styled.button<{ $active: boolean; $view: 'fan' | 'stage' }>`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1.1rem;
+  border: none;
+  border-radius: ${theme.borderRadius.full};
+  font-family: ${theme.typography.fontBody};
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  color: ${({ $active }) =>
+    $active ? theme.colors.textLight : theme.colors.textSecondary};
+  background: ${({ $active, $view }) =>
+    $active
+      ? $view === 'fan'
+        ? theme.colors.error
+        : theme.colors.info
+      : 'transparent'};
+  transition:
+    background ${theme.transitions.fast},
+    color ${theme.transitions.fast};
+
+  &:focus-visible {
+    outline: 2px solid
+      ${({ $view }) => ($view === 'fan' ? theme.colors.error : theme.colors.info)};
+    outline-offset: 2px;
+  }
+`;
+
+// 무대 최다: 등장 횟수·등장률 값
+export const StageValue = styled.span`
+  font-family: ${theme.typography.fontBody};
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: ${theme.colors.textSecondary};
+  white-space: nowrap;
+  min-width: 5.5rem;
+  text-align: right;
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    min-width: 4.5rem;
+    font-size: 0.72rem;
+  }
+`;
+
+// 무대 최다: 매 공연 / 오프닝 단골 등 데이터 태그
+export const Tag = styled.span`
+  display: inline-block;
+  margin-top: 0.4rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: ${theme.borderRadius.sm};
+  font-family: ${theme.typography.fontBody};
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: ${theme.colors.info};
+  background: rgba(123, 143, 161, 0.14);
 `;
