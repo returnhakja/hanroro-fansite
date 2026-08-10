@@ -1,4 +1,4 @@
-import SetList from '@/lib/db/models/SetList';
+import SetList from "@/lib/db/models/SetList";
 
 export interface DayRangeInput {
   day: unknown;
@@ -21,21 +21,24 @@ export interface DayRange {
  * 검증 실패 시 사용자에게 보여줄 메시지를 반환한다.
  */
 export function parseDayRange(
-  input: DayRangeInput
+  input: DayRangeInput,
 ): { ok: true; range: DayRange } | { ok: false; error: string } {
   const day = Number(input.day);
   if (!Number.isInteger(day) || day < 1) {
-    return { ok: false, error: '일차는 1 이상의 정수여야 합니다' };
+    return { ok: false, error: "일차는 1 이상의 정수여야 합니다" };
   }
 
   const date = new Date(String(input.date));
   if (Number.isNaN(date.getTime())) {
-    return { ok: false, error: '날짜 형식이 올바르지 않습니다' };
+    return { ok: false, error: "날짜 형식이 올바르지 않습니다" };
   }
 
-  const hasEndDay = input.endDay !== undefined && input.endDay !== null && input.endDay !== '';
+  const hasEndDay =
+    input.endDay !== undefined && input.endDay !== null && input.endDay !== "";
   const hasEndDate =
-    input.endDate !== undefined && input.endDate !== null && input.endDate !== '';
+    input.endDate !== undefined &&
+    input.endDate !== null &&
+    input.endDate !== "";
 
   // 하루짜리
   if (!hasEndDay && !hasEndDate) {
@@ -43,20 +46,20 @@ export function parseDayRange(
   }
 
   if (!hasEndDay || !hasEndDate) {
-    return { ok: false, error: '종료 일차와 종료 날짜는 함께 입력해야 합니다' };
+    return { ok: false, error: "종료 일차와 종료 날짜는 함께 입력해야 합니다" };
   }
 
   const endDay = Number(input.endDay);
   if (!Number.isInteger(endDay) || endDay <= day) {
-    return { ok: false, error: '종료 일차는 시작 일차보다 커야 합니다' };
+    return { ok: false, error: "종료 일차는 시작 일차보다 커야 합니다" };
   }
 
   const endDate = new Date(String(input.endDate));
   if (Number.isNaN(endDate.getTime())) {
-    return { ok: false, error: '종료 날짜 형식이 올바르지 않습니다' };
+    return { ok: false, error: "종료 날짜 형식이 올바르지 않습니다" };
   }
   if (endDate < date) {
-    return { ok: false, error: '종료 날짜는 시작 날짜보다 빠를 수 없습니다' };
+    return { ok: false, error: "종료 날짜는 시작 날짜보다 빠를 수 없습니다" };
   }
 
   return { ok: true, range: { day, date, endDay, endDate } };
@@ -71,7 +74,7 @@ export function parseDayRange(
 export async function findOverlappingSetlist(
   concertId: string,
   range: DayRange,
-  excludeId?: string
+  excludeId?: string,
 ) {
   const start = range.day;
   const end = range.endDay ?? range.day;
@@ -80,7 +83,7 @@ export async function findOverlappingSetlist(
     concertId,
     ...(excludeId ? { _id: { $ne: excludeId } } : {}),
   })
-    .select('day endDay')
+    .select("day endDay")
     .lean();
 
   return (
