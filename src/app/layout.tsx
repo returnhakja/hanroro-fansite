@@ -12,36 +12,80 @@ import ScrollToTop from "@/components/ui/ScrollToTop";
 import RegisterSW from "@/components/pwa/RegisterSW";
 import "./globals.css";
 
+const SITE_URL = "https://www.hanroro.co.kr";
+
+/**
+ * 사이트 공통 설명 문구.
+ * metadata / openGraph / twitter / JSON-LD 가 각자 다른 문구를 쓰다 어긋나는 걸 막기 위해
+ * 한 곳에서만 관리한다. 검색 스니펫은 한글 기준 80자 부근에서 잘리므로
+ * "수상 이력 + 최신 릴리즈"를 앞에 두고, 사이트 기능 나열은 뒤에 붙인다.
+ */
+const SITE_DESCRIPTION =
+  "2026 한국대중음악상 올해의 음악인 · 신곡 '너와 나' — 싱어송라이터 한로로(HANRORO)의 비공식 팬사이트. 공연 일정, 셋리스트, 갤러리, 연대기, 응원법과 최신 활동을 한곳에서 확인하세요.";
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.hanroro.co.kr"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "한로로 팬사이트 - HANRORO FANSITE",
     template: "%s | 한로로 팬사이트",
   },
-  description:
-    "MBC 라디오스타 출연 · 2026 한국대중음악상 올해의 음악인 · 싱어송라이터 한로로의 팬사이트. 신보 '애증' 발매 — 공연 일정, 갤러리, 팬 커뮤니티",
+  description: SITE_DESCRIPTION,
   applicationName: "한로로 팬사이트",
   keywords: [
+    // 핵심 검색어
     "한로로",
     "HANRORO",
-    "싱어송라이터",
-    "K-POP",
-    "팬사이트",
-    "공연",
-    "갤러리",
-    "커뮤니티",
     "한로로 팬사이트",
+    "한로로 팬페이지",
+    "한로로 비공식 팬사이트",
+    "한지수",
+    "싱어송라이터 한로로",
+
+    // 사이트 핵심 콘텐츠
+    "한로로 일정",
+    "한로로 공연",
+    "한로로 공연 일정",
+    "한로로 콘서트",
+    "한로로 셋리스트",
+    "한로로 갤러리",
+    "한로로 사진",
+    "한로로 연대기",
+    "한로로 응원법",
+    "한로로 팬챈트",
+    "한로로 차트",
+    "한로로 최애곡",
+
+    // 음악
+    "한로로 너와 나",
+    "너와 나",
+    "한로로 애증",
     "애증",
-    "한국대중음악상",
-    "꼰대희",
-    "꼰대희 한로로",
-    "라디오스타",
-    "MBC 라디오스타",
+    "한로로 자몽살구클럽",
+    "자몽살구클럽",
+    "한로로 시간을 달리네",
+    "시간을 달리네",
+    "한로로 0+0",
+    "한로로 입춘",
+
+    // 주요 이력
+    "2026 한국대중음악상",
+    "한국대중음악상 올해의 음악인",
+    "한로로 한국대중음악상",
+
+    // 방송 / 검색 유입
     "한로로 라디오스타",
-    "라디오스타 스프링 페스티벌",
-    "유퀴즈온더블럭",
+    "라디오스타 한로로",
     "한로로 유퀴즈",
-    "성시경의 고막남친",
+    "유퀴즈 한로로",
+    "한로로 꼰대희",
+    "꼰대희 한로로",
+    "강남 한로로",
+
+    // 영문
+    "HANRORO fansite",
+    "HANRORO schedule",
+    "HANRORO setlist",
+    "HANRORO concert",
   ],
   authors: [{ name: "HANRORO Fansite Team" }],
   creator: "HANRORO Fansite",
@@ -49,11 +93,10 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "ko_KR",
-    url: "https://www.hanroro.co.kr",
+    url: SITE_URL,
     siteName: "한로로 팬사이트",
     title: "한로로 팬사이트 - HANRORO Fansite",
-    description:
-      "MBC 라디오스타 출연 · 2026 한국대중음악상 올해의 음악인 · 싱어송라이터 한로로의 팬사이트. 신보 '애증' 발매 — 공연 일정, 갤러리, 팬 커뮤니티",
+    description: SITE_DESCRIPTION,
     images: [
       {
         url: "/assets/한로로프로필사진.jpg",
@@ -66,7 +109,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "한로로 팬사이트 - HANRORO Fansite",
-    description: "싱어송라이터 한로로의 팬사이트 - 갤러리, 공연 일정, 커뮤니티",
+    description: SITE_DESCRIPTION,
     images: ["/assets/한로로프로필사진.jpg"],
   },
   manifest: "/manifest.json",
@@ -105,8 +148,20 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
+  alternates: {
+    canonical: "/",
+    types: {
+      "application/rss+xml": [
+        { url: "/feed.xml", title: "한로로 팬사이트 - 커뮤니티" },
+        { url: "/events.xml", title: "한로로 팬사이트 - 일정" },
+      ],
+    },
+  },
   verification: {
     google: "gUst9xCDKHE1N5UtmTKyMhuS-FXMy9ANeAttMgyGt88",
+    other: {
+      "naver-site-verification": "228f113d2db5fd82017fb9036bddd68e5ebaaa48",
+    },
   },
 };
 
@@ -126,9 +181,9 @@ export default function RootLayout({
     "@type": "Organization",
     name: "한로로 팬사이트",
     alternateName: "HANRORO Fansite",
-    url: "https://www.hanroro.co.kr",
-    logo: "https://www.hanroro.co.kr/assets/한로로프로필사진.jpg",
-    description: "싱어송라이터 한로로의 팬사이트 - 갤러리, 공연 일정, 커뮤니티",
+    url: SITE_URL,
+    logo: `${SITE_URL}/assets/한로로프로필사진.jpg`,
+    description: SITE_DESCRIPTION,
     sameAs: [
       "https://www.youtube.com/channel/UCrDa_5OU-rhvXqWlPx5hgKQ",
       "https://www.instagram.com/hanr0r0/",
@@ -142,15 +197,14 @@ export default function RootLayout({
     "@type": "WebSite",
     name: "HANRORO Fansite",
     alternateName: "한로로 팬사이트",
-    url: "https://www.hanroro.co.kr",
-    description: "싱어송라이터 한로로의 팬사이트 - 갤러리, 공연 일정, 커뮤니티",
+    url: SITE_URL,
+    description: SITE_DESCRIPTION,
     inLanguage: "ko-KR",
     potentialAction: {
       "@type": "SearchAction",
       target: {
         "@type": "EntryPoint",
-        urlTemplate:
-          "https://www.hanroro.co.kr/board?search={search_term_string}",
+        urlTemplate: `${SITE_URL}/board?search={search_term_string}`,
       },
       "query-input": "required name=search_term_string",
     },
@@ -161,55 +215,17 @@ export default function RootLayout({
     "@type": "MusicGroup",
     name: "한로로",
     alternateName: "HANRORO",
-    description: "감성적인 음악으로 많은 팬들의 사랑을 받는 싱어송라이터",
-    genre: ["인디팝", "발라드", "K-POP"],
-    url: "https://www.hanroro.co.kr/profile",
-    image: "https://www.hanroro.co.kr/assets/한로로프로필사진.jpg",
+    description:
+      "청춘의 감성과 경험을 깊이 있게 담아내는 서정적이고 시적인 가사, 그리고 호소력 짙은 보컬의 싱어송라이터. 2026 한국대중음악상 올해의 음악인.",
+    genre: ["모던 록", "인디팝", "K-POP"],
+    url: `${SITE_URL}/profile`,
+    image: `${SITE_URL}/assets/한로로프로필사진.jpg`,
     sameAs: [
       "https://www.youtube.com/channel/UCrDa_5OU-rhvXqWlPx5hgKQ",
       "https://www.instagram.com/hanr0r0/",
       "https://artist.mnetplus.world/main/stg/hanroro",
       "https://blog.naver.com/hanr0r0",
     ],
-  };
-
-  const tvAppearanceSchema = {
-    "@context": "https://schema.org",
-    "@type": "Event",
-    name: "한로로 MBC 라디오스타 출연 - 라디오스타 스프링 페스티벌",
-    description:
-      "한로로가 MBC '라디오스타 스프링 페스티벌' 특집에 김창완, 최정훈, 로이킴과 함께 출연. 첫 지상파 예능 출연으로 동시간대 시청률 1위 기록. 한국대중음악상 올해의 음악인 최연소 수상 비하인드 공개.",
-    startDate: "2026-05-20",
-    endDate: "2026-05-20",
-    eventStatus: "https://schema.org/EventScheduled",
-    eventAttendanceMode: "https://schema.org/MixedEventAttendanceMode",
-    image: ["https://www.hanroro.co.kr/assets/한로로프로필사진.jpg"],
-    location: {
-      "@type": "Place",
-      name: "MBC 라디오스타",
-      address: {
-        "@type": "PostalAddress",
-        addressLocality: "서울",
-        addressCountry: "KR",
-      },
-    },
-    offers: {
-      "@type": "Offer",
-      url: "https://www.hanroro.co.kr",
-      availability: "https://schema.org/InStock",
-      price: "0",
-      priceCurrency: "KRW",
-    },
-    performer: {
-      "@type": "MusicGroup",
-      name: "한로로",
-      alternateName: "HANRORO",
-    },
-    organizer: {
-      "@type": "Organization",
-      name: "MBC",
-      url: "https://www.mbc.co.kr",
-    },
   };
 
   return (
@@ -221,26 +237,10 @@ export default function RootLayout({
           href="https://fonts.gstatic.com"
           crossOrigin="anonymous"
         />
-        <meta
-          name="naver-site-verification"
-          content="228f113d2db5fd82017fb9036bddd68e5ebaaa48"
-        />
+        {/* naver-site-verification / RSS 링크는 metadata 의 verification·alternates 에서 생성된다 */}
         <StructuredData data={organizationSchema} />
         <StructuredData data={websiteSchema} />
         <StructuredData data={musicGroupSchema} />
-        <StructuredData data={tvAppearanceSchema} />
-        <link
-          rel="alternate"
-          type="application/rss+xml"
-          title="한로로 팬사이트 - 커뮤니티"
-          href="https://www.hanroro.co.kr/feed.xml"
-        />
-        <link
-          rel="alternate"
-          type="application/rss+xml"
-          title="한로로 팬사이트 - 일정"
-          href="https://www.hanroro.co.kr/events.xml"
-        />
       </head>
       <body>
         <RegisterSW />
