@@ -4,6 +4,18 @@ import { getAuthHeader } from '@/lib/auth/authHeader';
 import type { Song, SetList, Concert, ActiveSetlistData } from '@/types/api/concert';
 export type { Song, SetList, Concert, ActiveSetlistData };
 
+/**
+ * 셋리스트 생성/수정 요청 본문.
+ * endDay/endDate 는 "여러 날 동일한 셋리스트"일 때만 채워 보낸다.
+ */
+export interface SetlistFormBody {
+  day: number;
+  date: string;
+  endDay?: number | null;
+  endDate?: string | null;
+  songs: Song[];
+}
+
 // ─── 쿼리 훅 ────────────────────────────────────────────────────
 // 공개: 공연 + 셋리스트 목록
 export function useConcerts() {
@@ -149,7 +161,7 @@ export function useToggleConcertActive() {
 export function useCreateSetlist(concertId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (body: { day: number; date: string; songs: Song[]; concertId: string }) => {
+    mutationFn: async (body: SetlistFormBody & { concertId: string }) => {
       const res = await fetch('/api/admin/setlists', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
@@ -170,7 +182,7 @@ export function useCreateSetlist(concertId: string) {
 export function useUpdateSetlist(concertId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, body }: { id: string; body: { day: number; date: string; songs: Song[] } }) => {
+    mutationFn: async ({ id, body }: { id: string; body: SetlistFormBody }) => {
       const res = await fetch(`/api/admin/setlists/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', ...getAuthHeader() },

@@ -1,6 +1,7 @@
 "use client";
 
 import { useReducedMotion } from "framer-motion";
+import { getLatestAlbum } from "@/data/artistData";
 import { SectionOverline } from "./common.styles";
 import {
   NewReleaseSection as NewReleaseSectionWrapper,
@@ -21,6 +22,18 @@ import {
 export default function NewReleaseSection() {
   const shouldReduceMotion = useReducedMotion();
 
+  // 앨범을 새로 추가하면 이 섹션이 자동으로 최신작을 따라간다
+  const album = getLatestAlbum();
+
+  // 수록곡을 따로 두지 않는 싱글은 앨범 제목이 곧 곡 제목이다
+  const isSingle = album.tracks.length === 0;
+  const tracks = isSingle
+    ? [{ title: album.title, duration: "" }]
+    : album.tracks;
+
+  const releaseType = album.tracks.length >= 3 ? "EP" : "Single";
+  const releaseDate = album.releaseDate.replace(/-/g, ".");
+
   return (
     <NewReleaseSectionWrapper>
       <NewReleaseInner>
@@ -30,7 +43,7 @@ export default function NewReleaseSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
         >
-          <img src="/assets/애증.png" alt="애증 앨범 커버" />
+          <img src={album.coverUrl} alt={`${album.title} 앨범 커버`} />
         </AlbumCoverWrap>
         <ReleaseInfo
           initial={shouldReduceMotion ? {} : { opacity: 0, x: 20 }}
@@ -45,42 +58,42 @@ export default function NewReleaseSection() {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
-            애증
+            {album.title}
           </ReleaseTitle>
-          <ReleaseMeta>2026.04.02 · Single</ReleaseMeta>
+          <ReleaseMeta>
+            {releaseDate} · {releaseType}
+          </ReleaseMeta>
           <ReleaseDivider />
           <ReleaseTrackList>
-            <ReleaseTrackItem>
-              <TrackNumber>01</TrackNumber>
-              <span>Game Over?</span>
-              <TitleBadge>TITLE</TitleBadge>
-            </ReleaseTrackItem>
-            <ReleaseTrackItem>
-              <TrackNumber>02</TrackNumber>
-              <span>1111</span>
-            </ReleaseTrackItem>
+            {tracks.map((track, idx) => (
+              <ReleaseTrackItem key={track.title}>
+                <TrackNumber>{String(idx + 1).padStart(2, "0")}</TrackNumber>
+                <span>{track.title}</span>
+                {/* 싱글은 그 곡 자체가 타이틀곡 */}
+                {(isSingle || track.title === album.titleTrack) && (
+                  <TitleBadge>TITLE</TitleBadge>
+                )}
+              </ReleaseTrackItem>
+            ))}
           </ReleaseTrackList>
-          <ReleaseDivider />
-          <ReleaseDesc>
-            사랑은 죽 사랑일 수 없고, 미움은 죽 미움일 수 없습니다. 우리는
-            미워하고 미움 받다 사랑하고 사랑 받는 공간. 이 헛구역질 나는 세계
-            속에서 어떻게든 &apos;나&apos;를 알아가려 합니다.
-          </ReleaseDesc>
-          <TeaserLink
-            href="https://youtu.be/qrzKsS-4lZo?si=k8GxDs_LQ90XeFMJ"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            게임오버 ? 뮤직비디오 보기
-          </TeaserLink>
-          <br />
-          <TeaserLink
-            href="https://youtu.be/Gofn_ULNd5Q?si=wQtnKuUHxb7ktUt_"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            1111 뮤직비디오 보기
-          </TeaserLink>
+          {album.description && (
+            <>
+              <ReleaseDivider />
+              <ReleaseDesc>{album.description}</ReleaseDesc>
+            </>
+          )}
+          {album.videos?.map((video, idx) => (
+            <span key={video.url}>
+              {idx > 0 && <br />}
+              <TeaserLink
+                href={video.url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {video.label}
+              </TeaserLink>
+            </span>
+          ))}
         </ReleaseInfo>
       </NewReleaseInner>
     </NewReleaseSectionWrapper>

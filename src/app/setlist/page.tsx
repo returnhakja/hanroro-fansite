@@ -18,6 +18,7 @@ import {
   TabWrapper,
   TabButton,
   SetlistCard,
+  SetlistDateLabel,
   SetListItem,
   SongOrder,
   AlbumThumb,
@@ -26,6 +27,10 @@ import {
 } from "./Setlist.styles";
 import { useConcerts } from "@/hooks/queries/useConcerts";
 import { formatDateLong } from "@/lib/utils/time";
+import {
+  formatSetlistDays,
+  formatSetlistDateRange,
+} from "@/lib/utils/setlistLabel";
 import KakaoShareButton from "@/components/ui/KakaoShareButton";
 
 function SetlistContent() {
@@ -121,11 +126,22 @@ function SetlistContent() {
                             $active={(activeTabs[concert._id] ?? 0) === idx}
                             onClick={() => handleTabChange(concert._id, idx)}
                           >
-                            Day {setlist.day}
+                            {formatSetlistDays(setlist)}
                           </TabButton>
                         ))}
                       </TabWrapper>
                     )}
+
+                    {(() => {
+                      const active = (concert.setlists ?? [])[
+                        activeTabs[concert._id] ?? 0
+                      ];
+                      return active ? (
+                        <SetlistDateLabel>
+                          {formatSetlistDateRange(active)}
+                        </SetlistDateLabel>
+                      ) : null;
+                    })()}
 
                     <SetlistCard>
                       {(concert.setlists ?? [])[

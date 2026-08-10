@@ -188,6 +188,14 @@ export const TabButton = styled.button<{ $active: boolean }>`
   }
 `;
 
+/** 선택된 셋리스트의 공연 날짜. 여러 날이면 '8월 10일 ~ 8월 11일' 로 표시된다 */
+export const SetlistDateLabel = styled.p`
+  padding: 0 0.5rem 0.6rem;
+  color: ${theme.colors.textSecondary};
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+`;
+
 export const SetlistCard = styled.div`
   max-height: 400px;
   overflow-y: auto;

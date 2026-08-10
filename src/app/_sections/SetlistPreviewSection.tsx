@@ -5,6 +5,7 @@ import { useReducedMotion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Spinner from "@/components/ui/Spinner";
 import { useActiveSetlist } from "@/hooks/queries/useConcerts";
+import { formatSetlistDays } from "@/lib/utils/setlistLabel";
 import {
   SectionOverline,
   SectionTitle,
@@ -76,7 +77,7 @@ export default function SetlistPreviewSection() {
                   $active={activeTab === index}
                   onClick={() => setActiveTab(index)}
                 >
-                  Day {setlist.day}
+                  {formatSetlistDays(setlist)}
                 </TabButton>
               ))}
             </TabWrapper>

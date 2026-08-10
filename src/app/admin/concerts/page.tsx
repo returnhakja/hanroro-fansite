@@ -14,9 +14,14 @@ import {
   useDeleteSetlist,
   type Concert,
   type SetList,
+  type SetlistFormBody,
   type Song,
 } from '@/hooks/queries/useConcerts';
 import { artistData, findAlbumBySongTitle } from '@/data/artistData';
+import {
+  formatSetlistDays,
+  formatSetlistDateRange,
+} from '@/lib/utils/setlistLabel';
 import { useScrollLock } from '@/hooks/useScrollLock';
 
 export default function AdminConcertsPage() {
@@ -38,6 +43,10 @@ export default function AdminConcertsPage() {
   const [setlistForm, setSetlistForm] = useState({
     day: 1,
     date: '',
+    // 이틀 이상 같은 셋리스트로 공연한 경우에만 사용
+    isMultiDay: false,
+    endDay: 2,
+    endDate: '',
     songs: [] as Song[],
   });
 
@@ -98,15 +107,22 @@ export default function AdminConcertsPage() {
   const handleSaveSetlist = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedConcert) return;
+
+    // 체크를 해제한 채 저장하면 종료 일차/날짜를 지워 하루짜리로 되돌린다
+    const body: SetlistFormBody = {
+      day: setlistForm.day,
+      date: setlistForm.date,
+      endDay: setlistForm.isMultiDay ? setlistForm.endDay : null,
+      endDate: setlistForm.isMultiDay ? setlistForm.endDate : null,
+      songs: setlistForm.songs,
+    };
+
     try {
       if (editingSetlist) {
-        await updateSetlist.mutateAsync({
-          id: editingSetlist._id,
-          body: { day: setlistForm.day, date: setlistForm.date, songs: setlistForm.songs },
-        });
+        await updateSetlist.mutateAsync({ id: editingSetlist._id, body });
       } else {
         await createSetlist.mutateAsync({
-          ...setlistForm,
+          ...body,
           concertId: selectedConcert._id,
         });
       }
@@ -155,17 +171,29 @@ export default function AdminConcertsPage() {
 
   const handleOpenSetlistModal = (setlist?: SetList) => {
     if (setlist) {
+      const isMultiDay = !!setlist.endDay;
       setEditingSetlist(setlist);
       setSetlistForm({
         day: setlist.day,
         date: setlist.date.split('T')[0],
+        isMultiDay,
+        endDay: setlist.endDay ?? setlist.day + 1,
+        endDate: setlist.endDate ? setlist.endDate.split('T')[0] : '',
         songs: setlist.songs,
       });
     } else {
+      // 이미 등록된 마지막 일차 다음부터 시작 (여러 날짜리 셋리스트의 끝 일차까지 감안)
+      const lastDay = setlists.reduce(
+        (max, s) => Math.max(max, s.endDay ?? s.day),
+        0,
+      );
       setEditingSetlist(null);
       setSetlistForm({
-        day: setlists.length + 1,
+        day: lastDay + 1,
         date: '',
+        isMultiDay: false,
+        endDay: lastDay + 2,
+        endDate: '',
         songs: [],
       });
     }
@@ -275,9 +303,9 @@ export default function AdminConcertsPage() {
                     <SetlistCard key={setlist._id}>
                       <SetlistHeader>
                         <div>
-                          <SetlistDay>Day {setlist.day}</SetlistDay>
+                          <SetlistDay>{formatSetlistDays(setlist)}</SetlistDay>
                           <SetlistDate>
-                            {new Date(setlist.date).toLocaleDateString('ko-KR')}
+                            {formatSetlistDateRange(setlist)}
                           </SetlistDate>
                         </div>
                         <SetlistActions>
@@ -441,6 +469,66 @@ export default function AdminConcertsPage() {
                   />
                 </FormGroup>
               </FormRow>
+
+              <FormGroup>
+                <CheckboxLabel>
+                  <input
+                    type="checkbox"
+                    checked={setlistForm.isMultiDay}
+                    onChange={(e) =>
+                      setSetlistForm({
+                        ...setlistForm,
+                        isMultiDay: e.target.checked,
+                        // 켤 때 기본값을 다음 일차로 맞춰준다
+                        endDay: e.target.checked
+                          ? Math.max(setlistForm.endDay, setlistForm.day + 1)
+                          : setlistForm.endDay,
+                      })
+                    }
+                  />
+                  여러 날 같은 셋리스트로 공연
+                </CheckboxLabel>
+                <FieldHint>
+                  이틀 이상 동일한 셋리스트일 때 체크하세요. 한 번만 등록하면
+                  됩니다.
+                </FieldHint>
+              </FormGroup>
+
+              {setlistForm.isMultiDay && (
+                <FormRow>
+                  <FormGroup>
+                    <Label>종료 일차 *</Label>
+                    <Input
+                      type="number"
+                      min={setlistForm.day + 1}
+                      value={setlistForm.endDay}
+                      onChange={(e) =>
+                        setSetlistForm({
+                          ...setlistForm,
+                          endDay: parseInt(e.target.value),
+                        })
+                      }
+                      required
+                    />
+                  </FormGroup>
+
+                  <FormGroup>
+                    <Label>종료 날짜 *</Label>
+                    <Input
+                      type="date"
+                      min={setlistForm.date || undefined}
+                      value={setlistForm.endDate}
+                      onChange={(e) =>
+                        setSetlistForm({
+                          ...setlistForm,
+                          endDate: e.target.value,
+                        })
+                      }
+                      required
+                    />
+                  </FormGroup>
+                </FormRow>
+              )}
 
               <FormGroup>
                 <Label>곡 목록</Label>
@@ -816,6 +904,29 @@ const Label = styled.label`
   margin-bottom: 0.5rem;
   color: #2c3e50;
   font-weight: 500;
+`;
+
+const CheckboxLabel = styled.label`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #2c3e50;
+  font-weight: 500;
+  cursor: pointer;
+
+  input {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #8b7355;
+  }
+`;
+
+const FieldHint = styled.p`
+  margin-top: 0.4rem;
+  color: #7f8c8d;
+  font-size: 0.85rem;
+  line-height: 1.4;
 `;
 
 const Input = styled.input`

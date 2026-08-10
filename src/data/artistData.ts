@@ -1,4 +1,31 @@
 // Next.js에서는 public 폴더의 파일을 직접 경로로 참조합니다
+
+export interface AlbumTrack {
+  title: string;
+  duration: string;
+}
+
+/** 앨범과 함께 소개할 영상 (뮤직비디오, 티저 등) */
+export interface AlbumVideo {
+  label: string;
+  url: string;
+}
+
+export interface Album {
+  id: string;
+  title: string;
+  releaseDate: string; // YYYY-MM-DD
+  coverUrl: string;
+  /** 싱글처럼 수록곡을 따로 두지 않는 앨범은 빈 배열 (앨범 제목이 곧 곡 제목) */
+  tracks: AlbumTrack[];
+  /** 타이틀곡 제목. 홈 NEW RELEASE 섹션에서 TITLE 뱃지를 붙이는 데 쓴다 */
+  titleTrack?: string;
+  /** 앨범 소개글. 없으면 홈 섹션에서 해당 영역을 그리지 않는다 */
+  description?: string;
+  /** 없으면 홈 섹션에서 영상 링크를 그리지 않는다 */
+  videos?: AlbumVideo[];
+}
+
 export const artistData = {
   name: "한로로",
   differentName: "한지수, HANRORO",
@@ -14,6 +41,7 @@ export const artistData = {
       releaseDate: "2026-07-08",
       coverUrl: "/assets/너와나.jpg",
       tracks: [],
+      // TODO: 소개글(description)과 뮤직비디오 링크(videos) 추가 필요
     },
     {
       id: "15",
@@ -21,8 +49,21 @@ export const artistData = {
       releaseDate: "2026-04-02",
       coverUrl: "/assets/애증.png",
       tracks: [
-        { title: "Game Over?", duration: "3:17" },
+        { title: "게임 오버 ?", duration: "3:17" },
         { title: "1111", duration: "3:52" },
+      ],
+      titleTrack: "게임 오버 ?",
+      description:
+        "사랑은 죽 사랑일 수 없고, 미움은 죽 미움일 수 없습니다. 우리는 미워하고 미움 받다 사랑하고 사랑 받는 공간. 이 헛구역질 나는 세계 속에서 어떻게든 '나'를 알아가려 합니다.",
+      videos: [
+        {
+          label: "게임 오버 ? 뮤직비디오 보기",
+          url: "https://youtu.be/qrzKsS-4lZo?si=k8GxDs_LQ90XeFMJ",
+        },
+        {
+          label: "1111 뮤직비디오 보기",
+          url: "https://youtu.be/Gofn_ULNd5Q?si=wQtnKuUHxb7ktUt_",
+        },
       ],
     },
     {
@@ -146,8 +187,17 @@ export const artistData = {
       coverUrl: "/assets/입춘.jpg",
       tracks: [],
     },
-  ],
+  ] as Album[],
 };
+
+/**
+ * 가장 최근 발매작. albums 는 최신순으로 관리하지만
+ * 순서가 흐트러져도 안전하도록 발매일로 고른다.
+ */
+export const getLatestAlbum = (): Album =>
+  artistData.albums.reduce((latest, album) =>
+    album.releaseDate > latest.releaseDate ? album : latest,
+  );
 
 export const findAlbumBySongTitle = (songTitle: string) => {
   const normalized = songTitle.trim().toLowerCase();

@@ -4,6 +4,7 @@ import SetList from '@/lib/db/models/SetList';
 import Concert from '@/lib/db/models/Concert';
 import { requireAuth } from '@/lib/auth/middleware';
 import { trySendPushToAll } from '@/lib/push/sendPush';
+import { parseDayRange, findOverlappingSetlist } from '@/lib/setlist/dayRange';
 
 // GET /api/admin/setlists?concertId=xxx - 특정 공연의 셋리스트 목록
 async function handleGet(req: NextRequest) {
@@ -36,7 +37,7 @@ async function handleGet(req: NextRequest) {
 async function handlePost(req: NextRequest) {
   try {
     const body = await req.json();
-    const { concertId, day, date, songs } = body;
+    const { concertId, day, date, endDay, endDate, songs } = body;
 
     if (!concertId || !day || !date) {
       return NextResponse.json(
@@ -45,12 +46,27 @@ async function handlePost(req: NextRequest) {
       );
     }
 
+    const parsed = parseDayRange({ day, date, endDay, endDate });
+    if (!parsed.ok) {
+      return NextResponse.json({ error: parsed.error }, { status: 400 });
+    }
+
     await connectDB();
+
+    const overlap = await findOverlappingSetlist(concertId, parsed.range);
+    if (overlap) {
+      return NextResponse.json(
+        { error: '해당 공연에 일차가 겹치는 셋리스트가 이미 있습니다' },
+        { status: 409 }
+      );
+    }
 
     const setlist = await SetList.create({
       concertId,
-      day,
-      date: new Date(date),
+      day: parsed.range.day,
+      date: parsed.range.date,
+      endDay: parsed.range.endDay ?? undefined,
+      endDate: parsed.range.endDate ?? undefined,
       songs: songs || [],
     });
 

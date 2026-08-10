@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/db/mongoose';
 import SetList from '@/lib/db/models/SetList';
 import { requireAuth } from '@/lib/auth/middleware';
+import { parseDayRange, findOverlappingSetlist } from '@/lib/setlist/dayRange';
 
 // GET /api/admin/setlists/[id] - 셋리스트 조회
 async function handleGet(
@@ -46,7 +47,7 @@ async function handlePut(
     }
     const { id } = await context.params;
     const body = await req.json();
-    const { day, date, songs } = body;
+    const { day, date, endDay, endDate, songs } = body;
 
     if (!day || !date) {
       return NextResponse.json(
@@ -55,13 +56,42 @@ async function handlePut(
       );
     }
 
+    const parsed = parseDayRange({ day, date, endDay, endDate });
+    if (!parsed.ok) {
+      return NextResponse.json({ error: parsed.error }, { status: 400 });
+    }
+
     await connectDB();
+
+    const target = await SetList.findById(id).select('concertId').lean();
+    if (!target) {
+      return NextResponse.json(
+        { error: '셋리스트를 찾을 수 없습니다' },
+        { status: 404 }
+      );
+    }
+
+    const overlap = await findOverlappingSetlist(
+      String(target.concertId),
+      parsed.range,
+      id
+    );
+    if (overlap) {
+      return NextResponse.json(
+        { error: '해당 공연에 일차가 겹치는 셋리스트가 이미 있습니다' },
+        { status: 409 }
+      );
+    }
 
     const setlist = await SetList.findByIdAndUpdate(
       id,
       {
-        day,
-        date: new Date(date),
+        day: parsed.range.day,
+        date: parsed.range.date,
+        // 하루짜리로 되돌릴 수 있어야 하므로 값이 없으면 필드를 제거한다
+        ...(parsed.range.endDay
+          ? { endDay: parsed.range.endDay, endDate: parsed.range.endDate }
+          : { $unset: { endDay: '', endDate: '' } }),
         songs: songs || [],
       },
       { new: true, runValidators: true }
