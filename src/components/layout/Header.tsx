@@ -8,6 +8,20 @@ import { useSession, signIn, signOut } from "next-auth/react";
 import { theme } from "@/styles/theme";
 import PushToggleButton from "@/components/pwa/PushToggleButton";
 
+const archiveLinks = [
+  { href: "/schedule", label: "일정" },
+  { href: "/setlist", label: "셋리스트" },
+  { href: "/chart", label: "차트" },
+  { href: "/chronicle", label: "연대기" },
+];
+
+const communityLinks = [
+  { href: "/gallery", label: "갤러리" },
+  { href: "/videos", label: "영상" },
+  { href: "/board", label: "게시판" },
+  { href: "/fanchant", label: "응원법" },
+];
+
 const Header = () => {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -78,30 +92,36 @@ const Header = () => {
           )}
         </MobileAuthSection>
 
-        <NavLink href="/gallery" onClick={() => setMenuOpen(false)}>
-          갤러리
-        </NavLink>
-        <NavLink href="/videos" onClick={() => setMenuOpen(false)}>
-          영상
-        </NavLink>
-        <NavLink href="/board" onClick={() => setMenuOpen(false)}>
-          게시판
-        </NavLink>
-        <NavLink href="/schedule" onClick={() => setMenuOpen(false)}>
-          일정
-        </NavLink>
-        <NavLink href="/setlist" onClick={() => setMenuOpen(false)}>
-          셋리스트
-        </NavLink>
-        <NavLink href="/chart" onClick={() => setMenuOpen(false)}>
-          차트
-        </NavLink>
-        <NavLink href="/chronicle" onClick={() => setMenuOpen(false)}>
-          연대기
-        </NavLink>
-        <NavLink href="/fanchant" onClick={() => setMenuOpen(false)}>
-          응원법
-        </NavLink>
+        <NavGroup>
+          <NavGroupTrigger>아카이브</NavGroupTrigger>
+          <NavDropdown>
+            {archiveLinks.map((link) => (
+              <NavLink
+                key={link.href}
+                href={link.href}
+                onClick={() => setMenuOpen(false)}
+              >
+                {link.label}
+              </NavLink>
+            ))}
+          </NavDropdown>
+        </NavGroup>
+
+        <NavGroup>
+          <NavGroupTrigger>커뮤니티</NavGroupTrigger>
+          <NavDropdown>
+            {communityLinks.map((link) => (
+              <NavLink
+                key={link.href}
+                href={link.href}
+                onClick={() => setMenuOpen(false)}
+              >
+                {link.label}
+              </NavLink>
+            ))}
+          </NavDropdown>
+        </NavGroup>
+
         <NavLink href="/profile" onClick={() => setMenuOpen(false)}>
           프로필
         </NavLink>
@@ -244,6 +264,83 @@ const CloseButton = styled.button`
 
   @media (min-width: 769px) {
     display: none;
+  }
+`;
+
+const NavGroup = styled.div`
+  position: relative;
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    width: 100%;
+  }
+`;
+
+const NavGroupTrigger = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: ${theme.typography.fontBody};
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: ${theme.colors.textPrimary};
+  cursor: default;
+  padding: 0.5rem 0;
+  transition: color ${theme.transitions.normal};
+
+  &::after {
+    content: "▾";
+    font-size: 0.65em;
+    color: ${theme.colors.textTertiary};
+  }
+
+  ${NavGroup}:hover &,
+  ${NavGroup}:focus-within & {
+    color: ${theme.colors.accent};
+  }
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    font-size: 0.75rem;
+    color: ${theme.colors.textTertiary};
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0.75rem 0 0.25rem;
+
+    &::after {
+      display: none;
+    }
+  }
+`;
+
+const NavDropdown = styled.div`
+  display: none;
+
+  @media (min-width: 769px) {
+    flex-direction: column;
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 0.25rem;
+    padding: 0.5rem;
+    gap: 0.15rem;
+    min-width: 140px;
+    background: ${theme.colors.surface};
+    border: 1px solid ${theme.colors.border};
+    border-radius: ${theme.borderRadius.md};
+    box-shadow: ${theme.shadows.md};
+    z-index: 10;
+
+    ${NavGroup}:hover &,
+    ${NavGroup}:focus-within & {
+      display: flex;
+    }
+  }
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
   }
 `;
 
