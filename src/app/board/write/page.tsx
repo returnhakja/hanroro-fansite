@@ -7,7 +7,7 @@ import styled from "styled-components";
 import dynamic from "next/dynamic";
 import Spinner from "@/components/ui/Spinner";
 import { useCreatePost } from "@/hooks/queries/useBoard";
-import { BOARD_CATEGORIES, DEFAULT_BOARD_CATEGORY } from "@/lib/board/categories";
+import { PUBLIC_BOARD_CATEGORIES, DEFAULT_BOARD_CATEGORY } from "@/lib/board/categories";
 
 const RichTextEditor = dynamic(
   () => import("@/components/features/board/RichTextEditor"),
@@ -74,7 +74,7 @@ export default function BoardWritePage() {
             value={category}
             onChange={(e) => setCategory(e.target.value)}
           >
-            {BOARD_CATEGORIES.map((c) => (
+            {PUBLIC_BOARD_CATEGORIES.map((c) => (
               <option key={c.value} value={c.value}>
                 {c.label}
               </option>

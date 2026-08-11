@@ -95,6 +95,13 @@ export async function PUT(
       );
     }
 
+    if (category === 'notice') {
+      return NextResponse.json(
+        { error: '공지 카테고리는 관리자만 설정할 수 있습니다' },
+        { status: 403 }
+      );
+    }
+
     post.title = title.trim();
     post.content = sanitizeHtml(content.trim());
     if (category !== undefined) {

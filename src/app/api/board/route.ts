@@ -71,6 +71,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (category === 'notice') {
+      return NextResponse.json(
+        { error: '공지 카테고리는 관리자만 설정할 수 있습니다' },
+        { status: 403 }
+      );
+    }
+
     await connectDB();
     const newPost = await Board.create({
       title,

@@ -31,6 +31,7 @@ export interface AdminPost {
   title: string;
   content: string;
   author: string;
+  category: string;
   views: number;
   likes: number;
   createdAt: string;

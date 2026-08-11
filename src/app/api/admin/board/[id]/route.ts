@@ -3,6 +3,48 @@ import { requireAuth, type AuthenticatedRequest } from '@/lib/auth/middleware';
 import connectDB from '@/lib/db/mongoose';
 import Board from '@/lib/db/models/Board';
 import Comment from '@/lib/db/models/Comment';
+import { isBoardCategory } from '@/lib/board/categories';
+
+// 관리자용 게시글 카테고리 변경 (공지 지정 등, JWT 인증 필요)
+async function handlePatch(
+  request: AuthenticatedRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const body = await request.json();
+    const { category } = body;
+
+    if (!isBoardCategory(category)) {
+      return NextResponse.json(
+        { error: '올바르지 않은 카테고리입니다' },
+        { status: 400 }
+      );
+    }
+
+    await connectDB();
+    const post = await Board.findByIdAndUpdate(
+      id,
+      { category },
+      { new: true }
+    );
+
+    if (!post) {
+      return NextResponse.json(
+        { error: '게시글을 찾을 수 없습니다' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(post);
+  } catch (error) {
+    console.error('게시글 카테고리 변경 오류:', error);
+    return NextResponse.json(
+      { error: '카테고리를 변경할 수 없습니다' },
+      { status: 500 }
+    );
+  }
+}
 
 // 관리자용 게시글 삭제 (JWT 인증 필요)
 async function handleDelete(
@@ -41,3 +83,4 @@ async function handleDelete(
 }
 
 export const DELETE = requireAuth(handleDelete);
+export const PATCH = requireAuth(handlePatch);

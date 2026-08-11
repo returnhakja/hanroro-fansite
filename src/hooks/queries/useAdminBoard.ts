@@ -25,6 +25,24 @@ export function useAdminBoard(page: number, searchQuery: string) {
   });
 }
 
+export function useAdminUpdateCategory() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, category }: { id: string; category: string }) => {
+      const res = await fetch(`/api/admin/board/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+        body: JSON.stringify({ category }),
+      });
+      if (!res.ok) throw new Error('카테고리 변경 실패');
+      return res.json() as Promise<AdminPost>;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.adminBoard.all });
+    },
+  });
+}
+
 export function useAdminDeletePost() {
   const queryClient = useQueryClient();
   return useMutation({

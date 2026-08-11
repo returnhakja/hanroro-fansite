@@ -3,7 +3,12 @@
 import { useState } from 'react';
 import styled, { css } from 'styled-components';
 import Link from 'next/link';
-import { useAdminBoard, useAdminDeletePost } from '@/hooks/queries/useAdminBoard';
+import {
+  useAdminBoard,
+  useAdminDeletePost,
+  useAdminUpdateCategory,
+} from '@/hooks/queries/useAdminBoard';
+import { BOARD_CATEGORIES } from '@/lib/board/categories';
 
 export default function BoardManagePage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -15,6 +20,15 @@ export default function BoardManagePage() {
   const totalPages = data?.totalPages ?? 1;
 
   const deleteMutation = useAdminDeletePost();
+  const categoryMutation = useAdminUpdateCategory();
+
+  const handleCategoryChange = async (id: string, category: string) => {
+    try {
+      await categoryMutation.mutateAsync({ id, category });
+    } catch {
+      alert('카테고리를 변경할 수 없습니다');
+    }
+  };
 
   const handleDelete = async (id: string) => {
     if (!confirm('정말 이 게시글을 삭제하시겠습니까?\n(댓글도 함께 삭제됩니다)')) {
@@ -80,11 +94,12 @@ export default function BoardManagePage() {
           <Table>
             <thead>
               <tr>
-                <Th style={{ width: '50%' }}>제목</Th>
-                <Th style={{ width: '15%' }}>작성자</Th>
-                <Th style={{ width: '10%' }}>조회수</Th>
-                <Th style={{ width: '10%' }}>좋아요</Th>
-                <Th style={{ width: '15%' }}>작성일</Th>
+                <Th style={{ width: '40%' }}>제목</Th>
+                <Th style={{ width: '13%' }}>작성자</Th>
+                <Th style={{ width: '14%' }}>카테고리</Th>
+                <Th style={{ width: '8%' }}>조회수</Th>
+                <Th style={{ width: '8%' }}>좋아요</Th>
+                <Th style={{ width: '12%' }}>작성일</Th>
                 <Th style={{ width: '10%' }}>관리</Th>
               </tr>
             </thead>
@@ -108,6 +123,20 @@ export default function BoardManagePage() {
                     </ContentPreview>
                   </Td>
                   <Td data-label="작성자">{post.author}</Td>
+                  <Td data-label="카테고리">
+                    <CategorySelect
+                      value={post.category}
+                      onChange={(e) =>
+                        handleCategoryChange(post._id, e.target.value)
+                      }
+                    >
+                      {BOARD_CATEGORIES.map((c) => (
+                        <option key={c.value} value={c.value}>
+                          {c.label}
+                        </option>
+                      ))}
+                    </CategorySelect>
+                  </Td>
                   <Td data-label="조회수">{post.views}</Td>
                   <Td data-label="좋아요">{post.likes}</Td>
                   <Td data-label="작성일">
@@ -377,6 +406,21 @@ const ContentPreview = styled.div`
   font-size: 0.875rem;
   color: #7f8c8d;
   margin-top: 0.25rem;
+`;
+
+const CategorySelect = styled.select`
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  background: white;
+  color: #495057;
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
+    border-color: #8b7355;
+  }
 `;
 
 const ActionButton = styled.button`

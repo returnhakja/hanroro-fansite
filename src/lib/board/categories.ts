@@ -13,6 +13,11 @@ export const BOARD_CATEGORY_VALUES = BOARD_CATEGORIES.map((c) => c.value);
 
 export const DEFAULT_BOARD_CATEGORY: BoardCategory = "info";
 
+// 공지는 관리자 페이지에서만 지정 가능 — 일반 글쓰기 폼에는 노출하지 않음
+export const PUBLIC_BOARD_CATEGORIES = BOARD_CATEGORIES.filter(
+  (c) => c.value !== "notice"
+);
+
 export function isBoardCategory(value: unknown): value is BoardCategory {
   return (
     typeof value === "string" &&
