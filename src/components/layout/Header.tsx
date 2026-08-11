@@ -318,11 +318,12 @@ const NavDropdown = styled.div`
   @media (min-width: 769px) {
     flex-direction: column;
     position: absolute;
+    /* top(0.25rem 여백) 대신 padding-top으로 여백을 만들어, 트리거→드롭다운 사이에
+       호버가 끊기는 빈 공간이 생기지 않도록 함 */
     top: 100%;
     left: 50%;
     transform: translateX(-50%);
-    margin-top: 0.25rem;
-    padding: 0.5rem;
+    padding: 0.75rem 0.5rem 0.5rem;
     gap: 0.15rem;
     min-width: 140px;
     background: ${theme.colors.surface};

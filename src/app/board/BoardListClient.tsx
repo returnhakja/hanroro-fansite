@@ -18,9 +18,19 @@ interface BoardListClientProps {
 
 const CATEGORY_TABS = [{ value: "all", label: "전체" }, ...BOARD_CATEGORIES];
 
+const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
+  timeZone: "Asia/Seoul",
+  year: "2-digit",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+// 서버(UTC)와 클라이언트(브라우저 로컬 타임존)의 렌더링 결과가 달라 발생하던
+// 하이드레이션 오류(#418)를 막기 위해 타임존을 명시적으로 고정
 function formatDate(iso: string) {
-  const date = new Date(iso);
-  return `${String(date.getFullYear()).slice(2)}.${String(date.getMonth() + 1).padStart(2, "0")}.${String(date.getDate()).padStart(2, "0")}`;
+  const parts = dateFormatter.formatToParts(new Date(iso));
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
+  return `${get("year")}.${get("month")}.${get("day")}`;
 }
 
 export default function BoardListClient({
