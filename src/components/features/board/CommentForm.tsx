@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSession, signIn } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import styled from 'styled-components';
 import { theme } from '@/styles/theme';
 import { useCreateComment } from '@/hooks/queries/useBoard';
@@ -26,11 +26,14 @@ export default function CommentForm({
   const { data: session } = useSession();
   const [content, setContent] = useState('');
   const [author, setAuthor] = useState('');
+  const [password, setPassword] = useState('');
 
   const createComment = useCreateComment(boardId);
   const submitting = createComment.isPending;
 
   const isReply = !!parentId;
+  const isAnonymous = !session?.user;
+  const showAuthorFields = !isReply || isAnonymous;
 
   useEffect(() => {
     if (session?.user) {
@@ -46,8 +49,13 @@ export default function CommentForm({
       return;
     }
 
-    if (!author.trim() && !isReply) {
+    if (showAuthorFields && !author.trim()) {
       alert('작성자명을 입력해주세요');
+      return;
+    }
+
+    if (isAnonymous && password.length < 4) {
+      alert('비밀번호를 4자 이상 입력해주세요 (댓글 수정·삭제 시 필요합니다)');
       return;
     }
 
@@ -56,10 +64,12 @@ export default function CommentForm({
         content: content.trim(),
         author: author.trim() || '익명',
         parentId,
+        password: isAnonymous ? password : undefined,
       },
       {
         onSuccess: () => {
           setContent('');
+          setPassword('');
           if (!isReply) setAuthor('');
           onSubmitSuccess();
         },
@@ -71,22 +81,10 @@ export default function CommentForm({
     );
   };
 
-  if (!session) {
-    return (
-      <FormContainer $isReply={isReply}>
-        <LoginPrompt>
-          댓글을 작성하려면{' '}
-          <LoginLink onClick={() => signIn('google')}>로그인</LoginLink>
-          해주세요.
-        </LoginPrompt>
-      </FormContainer>
-    );
-  }
-
   return (
     <FormContainer $isReply={isReply}>
       <Form onSubmit={handleSubmit}>
-        {!isReply && (
+        {showAuthorFields && (
           <AuthorInput
             type="text"
             value={author}
@@ -94,8 +92,17 @@ export default function CommentForm({
             placeholder="작성자명"
             maxLength={50}
             disabled={submitting}
-            readOnly={!!(session.user?.nickname || session.user?.name)}
-            style={(session.user?.nickname || session.user?.name) ? { backgroundColor: theme.colors.surfaceAlt } : undefined}
+            readOnly={!!(session?.user?.nickname || session?.user?.name)}
+            style={(session?.user?.nickname || session?.user?.name) ? { backgroundColor: theme.colors.surfaceAlt } : undefined}
+          />
+        )}
+        {isAnonymous && (
+          <AuthorInput
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="비밀번호 (4자 이상, 수정·삭제 시 필요)"
+            disabled={submitting}
           />
         )}
         <TextArea
@@ -235,21 +242,3 @@ const SubmitButton = styled(Button)`
   }
 `;
 
-const LoginPrompt = styled.p`
-  color: ${theme.colors.textSecondary};
-  font-size: 0.95rem;
-  text-align: center;
-  padding: 1rem;
-  margin: 0;
-`;
-
-const LoginLink = styled.button`
-  background: none;
-  border: none;
-  color: ${theme.colors.accent};
-  cursor: pointer;
-  font-size: inherit;
-  font-weight: 600;
-  text-decoration: underline;
-  padding: 0;
-`;

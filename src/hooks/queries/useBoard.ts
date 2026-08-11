@@ -140,7 +140,7 @@ export function useLikePost(id: string) {
 export function useCreateComment(boardId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (body: { content: string; author: string; parentId?: string | null }) => {
+    mutationFn: async (body: { content: string; author: string; parentId?: string | null; password?: string }) => {
       const res = await fetch(`/api/board/${boardId}/comments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -161,11 +161,11 @@ export function useCreateComment(boardId: string) {
 export function useUpdateComment(boardId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ commentId, content }: { commentId: string; content: string }) => {
+    mutationFn: async ({ commentId, content, password }: { commentId: string; content: string; password?: string }) => {
       const res = await fetch(`/api/board/comments/${commentId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content }),
+        body: JSON.stringify({ content, password }),
       });
       if (!res.ok) {
         const data = await res.json();
@@ -182,9 +182,11 @@ export function useUpdateComment(boardId: string) {
 export function useDeleteComment(boardId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (commentId: string) => {
+    mutationFn: async ({ commentId, password }: { commentId: string; password?: string }) => {
       const res = await fetch(`/api/board/comments/${commentId}`, {
         method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
       });
       if (!res.ok) {
         const data = await res.json();

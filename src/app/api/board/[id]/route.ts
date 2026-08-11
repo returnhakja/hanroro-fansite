@@ -4,31 +4,7 @@ import connectDB from '@/lib/db/mongoose';
 import Board from '@/lib/db/models/Board';
 import { sanitizeHtml } from '@/lib/utils/sanitize';
 import { isBoardCategory } from '@/lib/board/categories';
-import type { IBoard } from '@/lib/db/models/Board';
-import type { Session } from 'next-auth';
-
-// 작성자 본인 확인: 로그인 작성 글은 세션, 익명 작성 글은 비밀번호로 인증
-async function verifyOwnership(
-  post: IBoard,
-  session: Session | null,
-  password: string | undefined
-): Promise<{ ok: true } | { ok: false; status: number; error: string }> {
-  if (post.userId) {
-    if (!session?.user?.id || post.userId !== session.user.id) {
-      return { ok: false, status: 403, error: '본인이 작성한 글만 처리할 수 있습니다' };
-    }
-    return { ok: true };
-  }
-
-  if (!password) {
-    return { ok: false, status: 400, error: '비밀번호를 입력해주세요' };
-  }
-  const matched = await post.comparePassword(password);
-  if (!matched) {
-    return { ok: false, status: 403, error: '비밀번호가 일치하지 않습니다' };
-  }
-  return { ok: true };
-}
+import { verifyOwnership } from '@/lib/board/ownership';
 
 // 게시글 상세 조회 (조회수 증가)
 export async function GET(

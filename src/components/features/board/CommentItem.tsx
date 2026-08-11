@@ -49,7 +49,10 @@ export default function CommentItem({
   const deleting = deleteComment.isPending;
   const saving = updateComment.isPending;
 
-  const isAuthor = comment.userId && session?.user?.id && comment.userId === session.user.id;
+  // 로그인 작성 댓글은 본인 세션만, 익명 작성 댓글은 누구나 시도 가능 (비밀번호로 최종 확인)
+  const canManage = comment.userId
+    ? !!session?.user?.id && comment.userId === session.user.id
+    : true;
 
   useEffect(() => {
     setTimeText(formatRelativeTime(comment.createdAt));
@@ -57,13 +60,24 @@ export default function CommentItem({
 
   const handleDelete = () => {
     if (!confirm('댓글을 삭제하시겠습니까?')) return;
-    deleteComment.mutate(comment._id, {
-      onSuccess: () => onDelete(comment._id),
-      onError: (error) => {
-        console.error('댓글 삭제 오류:', error);
-        alert(error instanceof Error ? error.message : '댓글 삭제에 실패했습니다');
-      },
-    });
+
+    let password: string | undefined;
+    if (!comment.userId) {
+      const input = window.prompt('작성 시 입력한 비밀번호를 입력하세요');
+      if (input === null) return;
+      password = input;
+    }
+
+    deleteComment.mutate(
+      { commentId: comment._id, password },
+      {
+        onSuccess: () => onDelete(comment._id),
+        onError: (error) => {
+          console.error('댓글 삭제 오류:', error);
+          alert(error instanceof Error ? error.message : '댓글 삭제에 실패했습니다');
+        },
+      }
+    );
   };
 
   const startEdit = () => {
@@ -81,8 +95,16 @@ export default function CommentItem({
       alert('댓글 내용을 입력해주세요');
       return;
     }
+
+    let password: string | undefined;
+    if (!comment.userId) {
+      const input = window.prompt('작성 시 입력한 비밀번호를 입력하세요');
+      if (input === null) return;
+      password = input;
+    }
+
     updateComment.mutate(
-      { commentId: comment._id, content: editContent },
+      { commentId: comment._id, content: editContent, password },
       {
         onSuccess: () => setEditing(false),
         onError: (error) => {
@@ -146,7 +168,7 @@ export default function CommentItem({
                 답글
               </ActionButton>
             )}
-            {isAuthor && (
+            {canManage && (
               <>
                 <ActionButton onClick={startEdit}>수정</ActionButton>
                 <ActionButton onClick={handleDelete} disabled={deleting} $delete>

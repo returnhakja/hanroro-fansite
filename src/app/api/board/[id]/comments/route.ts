@@ -57,16 +57,10 @@ export async function POST(
 ) {
   try {
     const session = await auth();
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: '로그인이 필요합니다' },
-        { status: 401 }
-      );
-    }
 
     const { id } = await params;
     const body = await request.json();
-    const { content, author, parentId } = body;
+    const { content, author, parentId, password } = body;
 
     // Validation
     if (!content?.trim()) {
@@ -79,6 +73,13 @@ export async function POST(
     if (content.length > 500) {
       return NextResponse.json(
         { error: '댓글은 500자를 초과할 수 없습니다' },
+        { status: 400 }
+      );
+    }
+
+    if (!session?.user && (!password || password.length < 4)) {
+      return NextResponse.json(
+        { error: '비밀번호를 4자 이상 입력해주세요' },
         { status: 400 }
       );
     }
@@ -145,13 +146,15 @@ export async function POST(
       boardId: id,
       content: content.trim(),
       author: author.trim(),
-      userId: session.user.id || null,
+      userId: session?.user?.id || null,
+      password: session?.user ? null : password,
       parentId: parentId || null,
       depth,
     });
 
     // Convert to plain object and transform ObjectIds to strings
     const commentObj = newComment.toObject();
+    delete commentObj.password;
     const transformedComment = {
       ...commentObj,
       _id: commentObj._id.toString(),

@@ -1,15 +1,18 @@
 import mongoose, { Document, Model, Schema, Types } from 'mongoose';
+import bcrypt from 'bcryptjs';
 
 export interface IComment extends Document {
   boardId: Types.ObjectId;
   content: string;
   author: string;
   userId?: string;
+  password?: string;
   parentId: Types.ObjectId | null;
   depth: number;
   createdAt: Date;
   deleted: boolean;
   deletedAt: Date | null;
+  comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
 const commentSchema = new Schema<IComment>({
@@ -30,6 +33,8 @@ const commentSchema = new Schema<IComment>({
     maxlength: [50, '작성자명은 50자를 초과할 수 없습니다'],
   },
   userId: { type: String, default: null },
+  // 비로그인(익명) 작성 댓글의 수정·삭제 인증용. 로그인 작성 댓글은 사용하지 않음
+  password: { type: String, default: null, select: false },
   parentId: {
     type: Schema.Types.ObjectId,
     ref: 'Comment',
@@ -59,6 +64,19 @@ const commentSchema = new Schema<IComment>({
 
 // Compound index for efficient board queries
 commentSchema.index({ boardId: 1, createdAt: 1 });
+
+commentSchema.pre('save', async function (next) {
+  if (!this.isModified('password') || !this.password) return next();
+  this.password = await bcrypt.hash(this.password, 10);
+  next();
+});
+
+commentSchema.methods.comparePassword = async function (
+  candidatePassword: string
+): Promise<boolean> {
+  if (!this.password) return false;
+  return bcrypt.compare(candidatePassword, this.password);
+};
 
 const Comment: Model<IComment> =
   mongoose.models.Comment ||
