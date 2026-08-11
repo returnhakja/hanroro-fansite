@@ -4,6 +4,31 @@ import connectDB from '@/lib/db/mongoose';
 import Board from '@/lib/db/models/Board';
 import { sanitizeHtml } from '@/lib/utils/sanitize';
 import { isBoardCategory } from '@/lib/board/categories';
+import type { IBoard } from '@/lib/db/models/Board';
+import type { Session } from 'next-auth';
+
+// 작성자 본인 확인: 로그인 작성 글은 세션, 익명 작성 글은 비밀번호로 인증
+async function verifyOwnership(
+  post: IBoard,
+  session: Session | null,
+  password: string | undefined
+): Promise<{ ok: true } | { ok: false; status: number; error: string }> {
+  if (post.userId) {
+    if (!session?.user?.id || post.userId !== session.user.id) {
+      return { ok: false, status: 403, error: '본인이 작성한 글만 처리할 수 있습니다' };
+    }
+    return { ok: true };
+  }
+
+  if (!password) {
+    return { ok: false, status: 400, error: '비밀번호를 입력해주세요' };
+  }
+  const matched = await post.comparePassword(password);
+  if (!matched) {
+    return { ok: false, status: 403, error: '비밀번호가 일치하지 않습니다' };
+  }
+  return { ok: true };
+}
 
 // 게시글 상세 조회 (조회수 증가)
 export async function GET(
@@ -39,23 +64,17 @@ export async function GET(
   }
 }
 
-// 게시글 수정 (작성자 본인만 가능)
+// 게시글 수정 (작성자 본인 — 로그인 글은 세션, 익명 글은 비밀번호로 확인)
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: '로그인이 필요합니다' },
-        { status: 401 }
-      );
-    }
 
     await connectDB();
     const { id } = await params;
-    const post = await Board.findById(id);
+    const post = await Board.findById(id).select('+password');
 
     if (!post) {
       return NextResponse.json(
@@ -64,15 +83,16 @@ export async function PUT(
       );
     }
 
-    if (post.userId !== session.user.id) {
+    const body = await request.json();
+    const { title, content, category, password } = body;
+
+    const ownership = await verifyOwnership(post, session, password);
+    if (!ownership.ok) {
       return NextResponse.json(
-        { error: '본인이 작성한 글만 수정할 수 있습니다' },
-        { status: 403 }
+        { error: ownership.error },
+        { status: ownership.status }
       );
     }
-
-    const body = await request.json();
-    const { title, content, category } = body;
 
     if (!title?.trim()) {
       return NextResponse.json(
@@ -109,7 +129,10 @@ export async function PUT(
     }
     await post.save();
 
-    return NextResponse.json(post);
+    const responseObj = post.toObject();
+    delete responseObj.password;
+
+    return NextResponse.json(responseObj);
   } catch (error) {
     console.error('게시글 수정 오류:', error);
     return NextResponse.json(
@@ -119,23 +142,17 @@ export async function PUT(
   }
 }
 
-// 게시글 삭제 (작성자 본인만 가능)
+// 게시글 삭제 (작성자 본인 — 로그인 글은 세션, 익명 글은 비밀번호로 확인)
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: '로그인이 필요합니다' },
-        { status: 401 }
-      );
-    }
 
     await connectDB();
     const { id } = await params;
-    const post = await Board.findById(id);
+    const post = await Board.findById(id).select('+password');
 
     if (!post) {
       return NextResponse.json(
@@ -144,11 +161,16 @@ export async function DELETE(
       );
     }
 
-    // 작성자 본인 확인
-    if (post.userId !== session.user.id) {
+    const password = await request
+      .json()
+      .then((body) => body?.password as string | undefined)
+      .catch(() => undefined);
+
+    const ownership = await verifyOwnership(post, session, password);
+    if (!ownership.ok) {
       return NextResponse.json(
-        { error: '본인이 작성한 글만 삭제할 수 있습니다' },
-        { status: 403 }
+        { error: ownership.error },
+        { status: ownership.status }
       );
     }
 

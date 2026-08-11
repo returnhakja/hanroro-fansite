@@ -17,21 +17,15 @@ import { theme } from "@/styles/theme";
 
 export default function BoardWritePage() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [author, setAuthor] = useState("");
+  const [password, setPassword] = useState("");
   const [category, setCategory] = useState<string>(DEFAULT_BOARD_CATEGORY);
   const createPost = useCreatePost();
   const loading = createPost.isPending;
-
-  useEffect(() => {
-    if (status === "loading") return;
-    if (!session) {
-      alert("로그인이 필요합니다");
-      router.push("/board");
-    }
-  }, [session, status, router]);
+  const isAnonymous = !session?.user;
 
   useEffect(() => {
     if (session?.user) {
@@ -47,8 +41,20 @@ export default function BoardWritePage() {
       return;
     }
 
+    if (isAnonymous && password.length < 4) {
+      alert("비밀번호를 4자 이상 입력해주세요 (글 수정·삭제 시 필요합니다)");
+      return;
+    }
+
     createPost.mutate(
-      { title, content, author, category, imageUrls: [] },
+      {
+        title,
+        content,
+        author,
+        category,
+        password: isAnonymous ? password : undefined,
+        imageUrls: [],
+      },
       {
         onSuccess: () => {
           alert("작성 완료!");
@@ -107,6 +113,18 @@ export default function BoardWritePage() {
             }
           />
         </FormGroup>
+
+        {isAnonymous && (
+          <FormGroup>
+            <Label>비밀번호</Label>
+            <Input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="글 수정·삭제 시 필요해요 (4자 이상)"
+            />
+          </FormGroup>
+        )}
 
         <FormGroup>
           <Label>내용</Label>
