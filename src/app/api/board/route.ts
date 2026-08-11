@@ -3,12 +3,35 @@ import { auth } from '@/lib/auth/auth';
 import connectDB from '@/lib/db/mongoose';
 import Board from '@/lib/db/models/Board';
 import { sanitizeHtml } from '@/lib/utils/sanitize';
+import { escapeRegex } from '@/lib/utils/regex';
+import { DEFAULT_BOARD_CATEGORY, isBoardCategory } from '@/lib/board/categories';
 
-// 게시글 목록 조회
-export async function GET() {
+// 게시글 목록 조회 (카테고리 필터 · 검색, 공지 상단 고정)
+export async function GET(request: NextRequest) {
   try {
     await connectDB();
-    const posts = await Board.find().sort({ createdAt: -1 }).lean();
+
+    const searchParams = request.nextUrl.searchParams;
+    const category = searchParams.get('category');
+    const q = escapeRegex((searchParams.get('q') || '').trim());
+
+    const match: Record<string, unknown> = {};
+    if (isBoardCategory(category)) {
+      match.category = category;
+    }
+    if (q) {
+      match.$or = [
+        { title: { $regex: q, $options: 'i' } },
+        { content: { $regex: q, $options: 'i' } },
+      ];
+    }
+
+    const posts = await Board.aggregate([
+      { $match: match },
+      { $addFields: { _pin: { $cond: [{ $eq: ['$category', 'notice'] }, 0, 1] } } },
+      { $sort: { _pin: 1, createdAt: -1 } },
+      { $project: { _pin: 0 } },
+    ]);
 
     return NextResponse.json(posts);
   } catch (error) {
@@ -32,11 +55,18 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { title, content, author, imageUrls } = body;
+    const { title, content, author, imageUrls, category } = body;
 
     if (!title || !content || !author) {
       return NextResponse.json(
         { error: '제목, 내용, 작성자는 필수입니다' },
+        { status: 400 }
+      );
+    }
+
+    if (category !== undefined && !isBoardCategory(category)) {
+      return NextResponse.json(
+        { error: '올바르지 않은 카테고리입니다' },
         { status: 400 }
       );
     }
@@ -47,6 +77,7 @@ export async function POST(request: NextRequest) {
       content: sanitizeHtml(content),
       author,
       userId: session.user.id || null,
+      category: category ?? DEFAULT_BOARD_CATEGORY,
       imageUrls: imageUrls || [],
     });
 

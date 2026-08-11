@@ -14,6 +14,7 @@ import {
   useDeletePost,
 } from "@/hooks/queries/useBoard";
 import { theme } from "@/styles/theme";
+import { getBoardCategoryColor, getBoardCategoryLabel } from "@/lib/board/categories";
 
 const RichTextEditor = dynamic(
   () => import("@/components/features/board/RichTextEditor"),
@@ -137,6 +138,10 @@ export default function BoardDetailClient({
           <Title>{post.title}</Title>
         )}
         <Meta>
+          <CategoryBadge $category={post.category}>
+            {getBoardCategoryLabel(post.category)}
+          </CategoryBadge>
+          <Separator>/</Separator>
           <span>{post.author}</span>
           <Separator>/</Separator>
           <span>조회 {post.views}</span>
@@ -261,6 +266,17 @@ const Meta = styled.div`
 const Separator = styled.span`
   color: ${theme.colors.borderLight};
   font-size: 0.75rem;
+`;
+
+const CategoryBadge = styled.span<{ $category: string }>`
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: ${theme.borderRadius.sm};
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: ${theme.colors.textLight};
+  background: ${({ $category }) => getBoardCategoryColor($category)};
+  white-space: nowrap;
 `;
 
 const Content = styled.div`

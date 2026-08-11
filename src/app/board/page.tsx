@@ -31,15 +31,23 @@ export default async function BoardPage() {
   try {
     await connectDB();
     const raw = await Board.find({})
-      .select("title author views likes createdAt content")
+      .select("title author category views likes createdAt content")
       .sort({ createdAt: -1 })
       .lean();
+
+    // 공지(notice)를 상단에 고정 (안정 정렬이라 나머지는 최신순 유지)
+    raw.sort((a, b) => {
+      const aPin = a.category === "notice" ? 0 : 1;
+      const bPin = b.category === "notice" ? 0 : 1;
+      return aPin - bPin;
+    });
 
     initialPosts = raw.map((post) => ({
       _id: (post._id as { toString(): string }).toString(),
       title: post.title as string,
       content: post.content as string,
       author: post.author as string,
+      category: (post.category as string) || "info",
       views: post.views as number,
       likes: post.likes as number,
       createdAt: (post.createdAt as Date).toISOString(),

@@ -4,16 +4,26 @@ import type { BoardPost, Comment } from '@/types/api/board';
 export type { BoardPost, Comment };
 
 // ─── 쿼리 훅 ────────────────────────────────────────────────────
-export function useBoardList(initialData?: BoardPost[]) {
+export function useBoardList(
+  initialData?: BoardPost[],
+  params: { category?: string; q?: string } = {}
+) {
+  const category = params.category ?? 'all';
+  const q = params.q ?? '';
+
   return useQuery({
-    queryKey: queryKeys.board.all,
+    queryKey: queryKeys.board.list(category, q),
     queryFn: async () => {
-      const res = await fetch('/api/board');
+      const search = new URLSearchParams();
+      if (category !== 'all') search.set('category', category);
+      if (q) search.set('q', q);
+      const query = search.toString();
+      const res = await fetch(`/api/board${query ? `?${query}` : ''}`);
       if (!res.ok) throw new Error('게시글 목록을 불러올 수 없습니다');
       const data: BoardPost[] = await res.json();
       return data;
     },
-    initialData,
+    initialData: category === 'all' && !q ? initialData : undefined,
   });
 }
 
@@ -50,7 +60,7 @@ export function useComments(boardId: string) {
 export function useCreatePost() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (body: { title: string; content: string; author: string; imageUrls?: string[] }) => {
+    mutationFn: async (body: { title: string; content: string; author: string; category: string; imageUrls?: string[] }) => {
       const res = await fetch('/api/board', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -71,7 +81,7 @@ export function useCreatePost() {
 export function useUpdatePost(id: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (body: { title: string; content: string }) => {
+    mutationFn: async (body: { title: string; content: string; category?: string }) => {
       const res = await fetch(`/api/board/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },

@@ -7,6 +7,7 @@ import styled from "styled-components";
 import dynamic from "next/dynamic";
 import Spinner from "@/components/ui/Spinner";
 import { useCreatePost } from "@/hooks/queries/useBoard";
+import { BOARD_CATEGORIES, DEFAULT_BOARD_CATEGORY } from "@/lib/board/categories";
 
 const RichTextEditor = dynamic(
   () => import("@/components/features/board/RichTextEditor"),
@@ -20,6 +21,7 @@ export default function BoardWritePage() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [author, setAuthor] = useState("");
+  const [category, setCategory] = useState<string>(DEFAULT_BOARD_CATEGORY);
   const createPost = useCreatePost();
   const loading = createPost.isPending;
 
@@ -46,7 +48,7 @@ export default function BoardWritePage() {
     }
 
     createPost.mutate(
-      { title, content, author, imageUrls: [] },
+      { title, content, author, category, imageUrls: [] },
       {
         onSuccess: () => {
           alert("작성 완료!");
@@ -66,6 +68,20 @@ export default function BoardWritePage() {
       <PageTitle>새 글 작성</PageTitle>
 
       <Form onSubmit={handleSubmit}>
+        <FormGroup>
+          <Label>카테고리</Label>
+          <Select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+          >
+            {BOARD_CATEGORIES.map((c) => (
+              <option key={c.value} value={c.value}>
+                {c.label}
+              </option>
+            ))}
+          </Select>
+        </FormGroup>
+
         <FormGroup>
           <Label>제목</Label>
           <Input
@@ -164,6 +180,23 @@ const Input = styled.input`
   &::placeholder {
     color: ${theme.colors.textTertiary};
   }
+
+  &:focus {
+    outline: none;
+    border-color: ${theme.colors.accent};
+  }
+`;
+
+const Select = styled.select`
+  padding: 0.75rem 1rem;
+  border: 1px solid ${theme.colors.border};
+  border-radius: ${theme.borderRadius.sm};
+  font-size: 1rem;
+  font-family: ${theme.typography.fontBody};
+  color: ${theme.colors.textPrimary};
+  background: ${theme.colors.surface};
+  transition: border-color ${theme.transitions.fast};
+  width: fit-content;
 
   &:focus {
     outline: none;

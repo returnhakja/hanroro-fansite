@@ -1,6 +1,7 @@
 export const queryKeys = {
   board: {
     all: ['board'] as const,
+    list: (category: string, q: string) => ['board', 'list', category, q] as const,
     detail: (id: string) => ['board', id] as const,
     comments: (id: string) => ['board', id, 'comments'] as const,
   },

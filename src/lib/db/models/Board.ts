@@ -1,10 +1,12 @@
 import mongoose, { Document, Model, Schema } from 'mongoose';
+import { BOARD_CATEGORY_VALUES, DEFAULT_BOARD_CATEGORY } from '@/lib/board/categories';
 
 export interface IBoard extends Document {
   title: string;
   content: string;
   author: string;
   userId?: string;
+  category: string;
   imageUrls: string[];
   createdAt: Date;
   views: number;
@@ -17,6 +19,11 @@ const boardSchema = new Schema<IBoard>({
   content: { type: String, required: true },
   author: { type: String, required: true },
   userId: { type: String, default: null },
+  category: {
+    type: String,
+    enum: BOARD_CATEGORY_VALUES,
+    default: DEFAULT_BOARD_CATEGORY,
+  },
   imageUrls: [{ type: String }],
   createdAt: { type: Date, default: Date.now },
   views: { type: Number, default: 0 },

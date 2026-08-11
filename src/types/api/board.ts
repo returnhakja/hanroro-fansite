@@ -5,6 +5,7 @@ export interface BoardPost {
   content: string;
   author: string;
   userId?: string;
+  category: string;
   createdAt: string;
   views: number;
   likes: number;

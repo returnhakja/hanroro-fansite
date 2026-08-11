@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth/auth';
 import connectDB from '@/lib/db/mongoose';
 import Board from '@/lib/db/models/Board';
 import { sanitizeHtml } from '@/lib/utils/sanitize';
+import { isBoardCategory } from '@/lib/board/categories';
 
 // 게시글 상세 조회 (조회수 증가)
 export async function GET(
@@ -71,7 +72,7 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const { title, content } = body;
+    const { title, content, category } = body;
 
     if (!title?.trim()) {
       return NextResponse.json(
@@ -87,8 +88,18 @@ export async function PUT(
       );
     }
 
+    if (category !== undefined && !isBoardCategory(category)) {
+      return NextResponse.json(
+        { error: '올바르지 않은 카테고리입니다' },
+        { status: 400 }
+      );
+    }
+
     post.title = title.trim();
     post.content = sanitizeHtml(content.trim());
+    if (category !== undefined) {
+      post.category = category;
+    }
     await post.save();
 
     return NextResponse.json(post);
