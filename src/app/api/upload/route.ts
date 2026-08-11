@@ -26,16 +26,20 @@ const ALLOWED_CONTENT_TYPES = [
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: '로그인이 필요합니다' },
-        { status: 401 }
-      );
-    }
-
     const type = request.nextUrl.searchParams.get('type') ?? 'gallery';
     const prefix = type === 'board' ? 'board' : 'gallery';
+
+    // 게시판 에디터는 비로그인(익명) 글쓰기도 허용하므로 로그인 요구하지 않음.
+    // 갤러리 업로드는 계속 로그인 필요.
+    if (prefix !== 'board') {
+      const session = await auth();
+      if (!session?.user?.id) {
+        return NextResponse.json(
+          { error: '로그인이 필요합니다' },
+          { status: 401 }
+        );
+      }
+    }
 
     const { filename, contentType } = (await request.json()) as {
       filename?: string;

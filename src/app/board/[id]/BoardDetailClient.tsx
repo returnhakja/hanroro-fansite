@@ -303,6 +303,8 @@ const Content = styled.div`
   color: ${theme.colors.textPrimary};
   font-size: ${theme.typography.bodyLarge.fontSize};
   font-family: ${theme.typography.fontBody};
+  overflow-wrap: break-word;
+  word-break: break-word;
   margin-bottom: 3rem;
   min-height: 200px;
 

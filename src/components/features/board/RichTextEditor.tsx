@@ -52,7 +52,8 @@ export default function RichTextEditor({
   const uploadFile = useCallback(async (file: File): Promise<string | null> => {
     try {
       return await uploadToR2(file, { type: "board" });
-    } catch {
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "파일 업로드에 실패했습니다");
       return null;
     }
   }, []);
@@ -276,6 +277,8 @@ export default function RichTextEditor({
 }
 
 const EditorContainer = styled.div`
+  /* flex 컨테이너 안에서 긴 줄바꿈 없는 텍스트가 min-content 폭을 밀어내는 것 방지 */
+  min-width: 0;
   border: 1px solid ${theme.colors.border};
   border-radius: ${theme.borderRadius.sm};
   background: ${theme.colors.surface};
@@ -367,6 +370,9 @@ const EditorContentWrapper = styled.div<{ $minHeight: string }>`
     font-size: 1rem;
     line-height: 1.75;
     color: ${theme.colors.textPrimary};
+    /* 공백 없이 긴 텍스트(URL 등)를 입력해도 화면이 옆으로 밀리지 않도록 줄바꿈 */
+    overflow-wrap: break-word;
+    word-break: break-word;
 
     p { margin: 0.5rem 0; }
 
