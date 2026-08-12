@@ -13,16 +13,19 @@ interface KakaoShareButtonProps extends KakaoShareParams {
   size?: "sm" | "lg";
   /** 부모 너비 가득 채우기 */
   block?: boolean;
+  /** 라벨 없이 원형 아이콘 버튼으로 표시 (다른 아이콘 버튼과 나란히 쓸 때) */
+  iconOnly?: boolean;
   className?: string;
 }
 
-const Button = styled.button<{ $size: "sm" | "lg"; $block: boolean }>`
+const Button = styled.button<{ $size: "sm" | "lg"; $block: boolean; $iconOnly: boolean }>`
   display: ${(p) => (p.$block ? "flex" : "inline-flex")};
-  width: ${(p) => (p.$block ? "100%" : "auto")};
+  width: ${(p) => (p.$iconOnly ? "30px" : p.$block ? "100%" : "auto")};
+  height: ${(p) => (p.$iconOnly ? "30px" : "auto")};
   align-items: center;
   justify-content: center;
-  gap: ${(p) => (p.$size === "lg" ? "0.5rem" : "0.4rem")};
-  padding: ${(p) => (p.$size === "lg" ? "0.8rem 1.4rem" : "0.5rem 0.9rem")};
+  gap: ${(p) => (p.$iconOnly ? "0" : p.$size === "lg" ? "0.5rem" : "0.4rem")};
+  padding: ${(p) => (p.$iconOnly ? "0" : p.$size === "lg" ? "0.8rem 1.4rem" : "0.5rem 0.9rem")};
   border: none;
   border-radius: ${theme.borderRadius.full};
   background: #fee500;
@@ -35,8 +38,8 @@ const Button = styled.button<{ $size: "sm" | "lg"; $block: boolean }>`
   transition: ${theme.transitions.fast};
 
   svg {
-    width: ${(p) => (p.$size === "lg" ? "20px" : "16px")};
-    height: ${(p) => (p.$size === "lg" ? "20px" : "16px")};
+    width: ${(p) => (p.$iconOnly ? "14px" : p.$size === "lg" ? "20px" : "16px")};
+    height: ${(p) => (p.$iconOnly ? "14px" : p.$size === "lg" ? "20px" : "16px")};
   }
 
   &:hover {
@@ -46,6 +49,14 @@ const Button = styled.button<{ $size: "sm" | "lg"; $block: boolean }>`
   &:active {
     transform: translateY(1px);
   }
+`;
+
+const VisuallyHiddenLabel = styled.span`
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
 `;
 
 const KakaoIcon = () => (
@@ -63,6 +74,7 @@ export default function KakaoShareButton({
   stopPropagation = true,
   size = "sm",
   block = false,
+  iconOnly = false,
   className,
   ...params
 }: KakaoShareButtonProps) {
@@ -76,12 +88,14 @@ export default function KakaoShareButton({
       type="button"
       $size={size}
       $block={block}
+      $iconOnly={iconOnly}
       className={className}
       onClick={handleClick}
       aria-label="카카오톡으로 공유하기"
+      title={iconOnly ? "카카오톡으로 공유하기" : undefined}
     >
       <KakaoIcon />
-      {label}
+      {iconOnly ? <VisuallyHiddenLabel>{label}</VisuallyHiddenLabel> : label}
     </Button>
   );
 }

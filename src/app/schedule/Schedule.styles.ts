@@ -456,16 +456,15 @@ export const EventActions = styled.div`
 export const CalendarAddButton = styled.button`
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  padding: 0.3rem 0.7rem;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
   border: 1px solid ${theme.colors.border};
-  border-radius: ${theme.borderRadius.full};
+  border-radius: 50%;
   background: transparent;
-  font-size: 0.75rem;
-  font-weight: 600;
   color: ${theme.colors.textSecondary};
   cursor: pointer;
-  white-space: nowrap;
   transition: background ${theme.transitions.fast}, color ${theme.transitions.fast},
     border-color ${theme.transitions.fast};
 
@@ -480,28 +479,28 @@ export const CalendarAddButton = styled.button`
     height: 14px;
   }
 
-  /* 모바일에서는 아이콘만 노출해 공간 절약 */
-  @media (max-width: ${theme.breakpoints.mobile}) {
-    span {
-      display: none;
-    }
-    padding: 0.35rem;
+  /* 라벨은 스크린리더/툴팁용으로만 남기고 시각적으로는 숨김 */
+  span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
   }
 `;
 
 export const AttendButton = styled.button<{ $checked: boolean }>`
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  padding: 0.3rem 0.7rem;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
   border: 1px solid ${(props) => (props.$checked ? theme.colors.accent : theme.colors.border)};
-  border-radius: ${theme.borderRadius.full};
+  border-radius: 50%;
   background: ${(props) => (props.$checked ? theme.colors.accent : 'transparent')};
-  font-size: 0.75rem;
-  font-weight: 600;
   color: ${(props) => (props.$checked ? theme.colors.textLight : theme.colors.textSecondary)};
   cursor: pointer;
-  white-space: nowrap;
   transition: background ${theme.transitions.fast}, color ${theme.transitions.fast},
     border-color ${theme.transitions.fast};
 
@@ -515,11 +514,12 @@ export const AttendButton = styled.button<{ $checked: boolean }>`
     height: 14px;
   }
 
-  @media (max-width: ${theme.breakpoints.mobile}) {
-    span {
-      display: none;
-    }
-    padding: 0.35rem;
+  span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
   }
 `;
 

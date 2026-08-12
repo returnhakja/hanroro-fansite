@@ -340,6 +340,7 @@ const SchedulePageClient = () => {
                           imageUrl={event.posterUrl}
                           path={`/schedule/${event._id}`}
                           buttonTitle="일정 보기"
+                          iconOnly
                         />
                       </EventActions>
                     </EventTypeRow>
