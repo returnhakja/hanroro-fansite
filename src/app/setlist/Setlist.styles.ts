@@ -158,6 +158,38 @@ export const ConcertBody = styled.div`
   }
 `;
 
+export const ConcertActions = styled.div`
+  display: flex;
+  margin-bottom: 1.25rem;
+`;
+
+export const AttendButton = styled.button<{ $checked: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.85rem;
+  border: 1px solid ${(props) => (props.$checked ? theme.colors.accent : theme.colors.border)};
+  border-radius: ${theme.borderRadius.full};
+  background: ${(props) => (props.$checked ? theme.colors.accent : 'transparent')};
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: ${(props) => (props.$checked ? theme.colors.textLight : theme.colors.textSecondary)};
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background ${theme.transitions.fast}, color ${theme.transitions.fast},
+    border-color ${theme.transitions.fast};
+
+  &:hover {
+    border-color: ${theme.colors.accent};
+    ${(props) => !props.$checked && `color: ${theme.colors.accentDark};`}
+  }
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+`;
+
 export const TabWrapper = styled.div`
   display: flex;
   gap: 0.5rem;

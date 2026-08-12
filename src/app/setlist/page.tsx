@@ -3,6 +3,7 @@
 import { Suspense, useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { useReducedMotion } from "framer-motion";
+import { useSession, signIn } from "next-auth/react";
 import {
   Container,
   PageTitle,
@@ -15,6 +16,8 @@ import {
   ActiveBadge,
   HeaderShareSlot,
   ConcertBody,
+  ConcertActions,
+  AttendButton,
   TabWrapper,
   TabButton,
   SetlistCard,
@@ -26,12 +29,30 @@ import {
   NoSetlistMessage,
 } from "./Setlist.styles";
 import { useConcerts } from "@/hooks/queries/useConcerts";
+import {
+  useAttendedConcerts,
+  useToggleAttendedConcert,
+} from "@/hooks/queries/useAttendedConcerts";
 import { formatDateLong } from "@/lib/utils/time";
 import {
   formatSetlistDays,
   formatSetlistDateRange,
 } from "@/lib/utils/setlistLabel";
 import KakaoShareButton from "@/components/ui/KakaoShareButton";
+
+const IconHeart = () => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden
+  >
+    <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z" />
+  </svg>
+);
 
 function SetlistContent() {
   const prefersReducedMotion = useReducedMotion();
@@ -41,6 +62,36 @@ function SetlistContent() {
   const { data: concerts = [], isLoading: loading } = useConcerts();
   const [activeTabs, setActiveTabs] = useState<{ [key: string]: number }>({});
   const cardRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const { data: session } = useSession();
+  const { data: attended = [] } = useAttendedConcerts();
+  const { check, uncheck } = useToggleAttendedConcert();
+
+  const attendedConcertIds = new Set(
+    attended.filter((a) => a.sourceType === "concert").map((a) => a.sourceId),
+  );
+
+  const handleToggleAttend = (concert: {
+    _id: string;
+    title: string;
+    venue: string;
+    endDate: string;
+  }) => {
+    if (!session?.user) {
+      signIn("google");
+      return;
+    }
+    if (attendedConcertIds.has(concert._id)) {
+      uncheck.mutate({ sourceType: "concert", sourceId: concert._id });
+    } else {
+      check.mutate({
+        sourceType: "concert",
+        sourceId: concert._id,
+        title: concert.title,
+        venue: concert.venue,
+        date: concert.endDate,
+      });
+    }
+  };
 
   useEffect(() => {
     setShouldReduceMotion(prefersReducedMotion ?? false);
@@ -116,6 +167,19 @@ function SetlistContent() {
               </ConcertHeader>
 
               <ConcertBody>
+                <ConcertActions>
+                  <AttendButton
+                    type="button"
+                    $checked={attendedConcertIds.has(concert._id)}
+                    onClick={() => handleToggleAttend(concert)}
+                    aria-label="다녀온 공연으로 체크"
+                    title="다녀온 공연으로 체크"
+                  >
+                    <IconHeart />
+                    {attendedConcertIds.has(concert._id) ? "다녀왔어요" : "다녀왔어요 체크"}
+                  </AttendButton>
+                </ConcertActions>
+
                 {(concert.setlists ?? []).length > 0 ? (
                   <>
                     {(concert.setlists ?? []).length > 1 && (
