@@ -17,6 +17,7 @@ import {
   type SetlistFormBody,
   type Song,
 } from '@/hooks/queries/useConcerts';
+import { useAdminEvents, type Event } from '@/hooks/queries/useEvents';
 import { artistData, findAlbumBySongTitle } from '@/data/artistData';
 import {
   formatSetlistDays,
@@ -26,6 +27,7 @@ import { useScrollLock } from '@/hooks/useScrollLock';
 
 export default function AdminConcertsPage() {
   const { data: concerts = [], isLoading } = useAdminConcerts();
+  const { data: events = [] } = useAdminEvents();
   const [selectedConcert, setSelectedConcert] = useState<Concert | null>(null);
   const [showConcertModal, setShowConcertModal] = useState(false);
   const [showSetlistModal, setShowSetlistModal] = useState(false);
@@ -167,6 +169,20 @@ export default function AdminConcertsPage() {
   const handleCloseConcertModal = () => {
     setShowConcertModal(false);
     setEditingConcert(null);
+  };
+
+  // 일정 관리에서 이미 등록해둔 정보를 그대로 가져와 재입력을 줄임
+  const handleImportFromEvent = (eventId: string) => {
+    const event = events.find((e) => e._id === eventId);
+    if (!event) return;
+    const date = event.date.split('T')[0];
+    setConcertForm({
+      title: event.title,
+      venue: event.place || '',
+      startDate: date,
+      endDate: date,
+      posterUrl: event.posterUrl || '',
+    });
   };
 
   const handleOpenSetlistModal = (setlist?: SetList) => {
@@ -354,6 +370,28 @@ export default function AdminConcertsPage() {
               <CloseButton onClick={handleCloseConcertModal}>&times;</CloseButton>
             </ModalHeader>
             <Form onSubmit={handleSaveConcert}>
+              {!editingConcert && events.length > 0 && (
+                <FormGroup>
+                  <Label>일정에서 불러오기</Label>
+                  <ImportSelect
+                    defaultValue=""
+                    onChange={(e) => {
+                      if (e.target.value) handleImportFromEvent(e.target.value);
+                    }}
+                  >
+                    <option value="">직접 입력...</option>
+                    {events.map((event: Event) => (
+                      <option key={event._id} value={event._id}>
+                        {event.title} · {event.date.split('T')[0]}
+                      </option>
+                    ))}
+                  </ImportSelect>
+                  <FieldHint>
+                    일정을 고르면 제목·장소·날짜·포스터가 자동으로 채워져요 (필요하면 아래에서 수정하세요)
+                  </FieldHint>
+                </FormGroup>
+              )}
+
               <FormGroup>
                 <Label>제목 *</Label>
                 <Input
@@ -927,6 +965,21 @@ const FieldHint = styled.p`
   color: #7f8c8d;
   font-size: 0.85rem;
   line-height: 1.4;
+`;
+
+const ImportSelect = styled.select`
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background: white;
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
+    border-color: #8b7355;
+  }
 `;
 
 const Input = styled.input`
