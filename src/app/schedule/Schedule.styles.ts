@@ -489,6 +489,40 @@ export const CalendarAddButton = styled.button`
   }
 `;
 
+export const AttendButton = styled.button<{ $checked: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid ${(props) => (props.$checked ? theme.colors.accent : theme.colors.border)};
+  border-radius: ${theme.borderRadius.full};
+  background: ${(props) => (props.$checked ? theme.colors.accent : 'transparent')};
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: ${(props) => (props.$checked ? theme.colors.textLight : theme.colors.textSecondary)};
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background ${theme.transitions.fast}, color ${theme.transitions.fast},
+    border-color ${theme.transitions.fast};
+
+  &:hover {
+    border-color: ${theme.colors.accent};
+    ${(props) => !props.$checked && `color: ${theme.colors.accentDark};`}
+  }
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  @media (max-width: ${theme.breakpoints.mobile}) {
+    span {
+      display: none;
+    }
+    padding: 0.35rem;
+  }
+`;
+
 export const EventType = styled.span<{ type: string }>`
   display: inline-block;
   padding: 0.3rem 0.75rem;
@@ -801,6 +835,10 @@ export const SetlistBadge = styled.div`
 
 export const PastConcertContent = styled.div`
   padding: 1rem 1.25rem 1.25rem;
+`;
+
+export const PastConcertFooter = styled.div`
+  margin-top: 0.6rem;
 `;
 
 export const PastConcertTitle = styled.h3`

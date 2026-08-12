@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useReducedMotion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { useSession, signIn } from "next-auth/react";
 import EventCalendar from "@/components/ui/EventCalendar";
 import {
   Container,
@@ -19,6 +20,7 @@ import {
   EventType,
   EventActions,
   CalendarAddButton,
+  AttendButton,
   EventTitle,
   EventDetails,
   EventDetail,
@@ -49,6 +51,7 @@ import {
   PastConcertContent,
   PastConcertTitle,
   PastConcertDate,
+  PastConcertFooter,
   RelatedSection,
   RelatedIntro,
   RelatedLinkGrid,
@@ -58,6 +61,11 @@ import {
 } from "./Schedule.styles";
 import { useUpcomingEvents } from "@/hooks/queries/useEvents";
 import { useConcerts } from "@/hooks/queries/useConcerts";
+import {
+  useAttendedConcerts,
+  useToggleAttendedConcert,
+  type AttendedConcertInput,
+} from "@/hooks/queries/useAttendedConcerts";
 import { formatDateWithWeekday } from "@/lib/utils/time";
 import { buildIcs, downloadIcs } from "@/lib/utils/ics";
 import KakaoShareButton from "@/components/ui/KakaoShareButton";
@@ -105,6 +113,19 @@ const IconArrow = () => (
     <path d="M5 12h14M13 6l6 6-6 6" />
   </svg>
 );
+const IconHeart = () => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden
+  >
+    <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z" />
+  </svg>
+);
 const IconCalendarPlus = () => (
   <svg
     viewBox="0 0 24 24"
@@ -126,8 +147,29 @@ const SchedulePageClient = () => {
   const [shouldReduceMotion, setShouldReduceMotion] = useState(false);
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
+  const { data: session } = useSession();
   const { data, isLoading: loading } = useUpcomingEvents();
   const { data: concerts = [] } = useConcerts();
+  const { data: attended = [] } = useAttendedConcerts();
+  const { check, uncheck } = useToggleAttendedConcert();
+
+  const attendedKeys = useMemo(
+    () => new Set(attended.map((a) => `${a.sourceType}:${a.sourceId}`)),
+    [attended],
+  );
+
+  const handleToggleAttend = (input: AttendedConcertInput) => {
+    if (!session?.user) {
+      signIn("google");
+      return;
+    }
+    const key = `${input.sourceType}:${input.sourceId}`;
+    if (attendedKeys.has(key)) {
+      uncheck.mutate({ sourceType: input.sourceType, sourceId: input.sourceId });
+    } else {
+      check.mutate(input);
+    }
+  };
 
   useEffect(() => {
     setShouldReduceMotion(prefersReducedMotion ?? false);
@@ -251,6 +293,31 @@ const SchedulePageClient = () => {
                         {getEventTypeLabel(event.type)}
                       </EventType>
                       <EventActions>
+                        {event.type === "concert" && (
+                          <AttendButton
+                            type="button"
+                            $checked={attendedKeys.has(`event:${event._id}`)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleToggleAttend({
+                                sourceType: "event",
+                                sourceId: event._id,
+                                title: event.title,
+                                venue: event.place,
+                                date: event.date,
+                              });
+                            }}
+                            aria-label="내 공연으로 체크"
+                            title="내 공연으로 체크"
+                          >
+                            <IconHeart />
+                            <span>
+                              {attendedKeys.has(`event:${event._id}`)
+                                ? "체크됨"
+                                : "내 공연 체크"}
+                            </span>
+                          </AttendButton>
+                        )}
                         <CalendarAddButton
                           type="button"
                           onClick={(e) => {
@@ -398,6 +465,31 @@ const SchedulePageClient = () => {
                       <IconCalendar />
                       {formatDateWithWeekday(concert.endDate)}
                     </PastConcertDate>
+                    <PastConcertFooter>
+                      <AttendButton
+                        type="button"
+                        $checked={attendedKeys.has(`concert:${concert._id}`)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleToggleAttend({
+                            sourceType: "concert",
+                            sourceId: concert._id,
+                            title: concert.title,
+                            venue: concert.venue,
+                            date: concert.endDate,
+                          });
+                        }}
+                        aria-label="다녀온 공연으로 체크"
+                        title="다녀온 공연으로 체크"
+                      >
+                        <IconHeart />
+                        <span>
+                          {attendedKeys.has(`concert:${concert._id}`)
+                            ? "다녀왔어요"
+                            : "다녀왔어요 체크"}
+                        </span>
+                      </AttendButton>
+                    </PastConcertFooter>
                   </PastConcertContent>
                 </PastConcertCard>
               );

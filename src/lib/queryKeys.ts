@@ -52,4 +52,10 @@ export const queryKeys = {
     myVote: ['songs', 'myVote'] as const,
     setlistStats: ['songs', 'setlistStats'] as const,
   },
+  attendedConcerts: {
+    all: ['user', 'attendedConcerts'] as const,
+  },
+  userStats: {
+    all: ['user', 'stats'] as const,
+  },
 } as const;
