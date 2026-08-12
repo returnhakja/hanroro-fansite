@@ -293,31 +293,29 @@ const SchedulePageClient = () => {
                         {getEventTypeLabel(event.type)}
                       </EventType>
                       <EventActions>
-                        {event.type === "concert" && (
-                          <AttendButton
-                            type="button"
-                            $checked={attendedKeys.has(`event:${event._id}`)}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleToggleAttend({
-                                sourceType: "event",
-                                sourceId: event._id,
-                                title: event.title,
-                                venue: event.place,
-                                date: event.date,
-                              });
-                            }}
-                            aria-label="내 공연으로 체크"
-                            title="내 공연으로 체크"
-                          >
-                            <IconHeart />
-                            <span>
-                              {attendedKeys.has(`event:${event._id}`)
-                                ? "체크됨"
-                                : "내 공연 체크"}
-                            </span>
-                          </AttendButton>
-                        )}
+                        <AttendButton
+                          type="button"
+                          $checked={attendedKeys.has(`event:${event._id}`)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleToggleAttend({
+                              sourceType: "event",
+                              sourceId: event._id,
+                              title: event.title,
+                              venue: event.place,
+                              date: event.date,
+                            });
+                          }}
+                          aria-label="내 공연으로 체크"
+                          title="내 공연으로 체크"
+                        >
+                          <IconHeart />
+                          <span>
+                            {attendedKeys.has(`event:${event._id}`)
+                              ? "체크됨"
+                              : "내 공연 체크"}
+                          </span>
+                        </AttendButton>
                         <CalendarAddButton
                           type="button"
                           onClick={(e) => {
