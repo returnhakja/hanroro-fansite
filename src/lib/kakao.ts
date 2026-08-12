@@ -64,7 +64,7 @@ export interface KakaoShareParams {
   description?: string;
   /** 썸네일 이미지 URL (절대 경로). 없으면 기본 프로필 이미지 */
   imageUrl?: string;
-  /** 사이트 내 경로. 예) /schedule?event=123 */
+  /** 사이트 내 경로. 예) /schedule/123 */
   path: string;
   /** 하단 버튼 라벨 */
   buttonTitle?: string;

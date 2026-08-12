@@ -316,7 +316,7 @@ export default function MyPage() {
                   </ConcertMeta>
                   <ConcertActions>
                     {item.sourceType === "event" && (
-                      <ConcertLink href={`/schedule?event=${item.sourceId}`}>
+                      <ConcertLink href={`/schedule/${item.sourceId}`}>
                         일정 보기
                       </ConcertLink>
                     )}

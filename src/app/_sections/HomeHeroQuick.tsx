@@ -152,7 +152,7 @@ export default function HomeHeroQuick() {
     featured && mounted ? calcDaysUntil(featured.date) : null;
 
   const openEventDetail = (id: string) => {
-    router.push(`/schedule?event=${id}`);
+    router.push(`/schedule/${id}`);
   };
 
   return (

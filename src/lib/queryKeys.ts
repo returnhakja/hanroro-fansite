@@ -18,7 +18,11 @@ export const queryKeys = {
   },
   events: {
     upcoming: ['events', 'upcoming'] as const,
+    detail: (id: string) => ['events', id] as const,
     admin: ['admin', 'events'] as const,
+  },
+  eventReviews: {
+    list: (eventId: string) => ['events', eventId, 'reviews'] as const,
   },
   youtube: {
     videos: ['youtube', 'videos'] as const,

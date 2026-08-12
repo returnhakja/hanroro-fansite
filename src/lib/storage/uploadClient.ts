@@ -7,8 +7,8 @@
  */
 
 export interface UploadToR2Options {
-  /** 'gallery' | 'board' */
-  type?: 'gallery' | 'board';
+  /** 'gallery' | 'board' | 'review' */
+  type?: 'gallery' | 'board' | 'review';
   /** 진행률 콜백 (0~100) */
   onProgress?: (percentage: number) => void;
 }

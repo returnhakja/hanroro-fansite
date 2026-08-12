@@ -21,6 +21,16 @@ export interface Event {
   ticketOutlets?: TicketOutlet[];
 }
 
+export interface EventReview {
+  _id: string;
+  eventId: string;
+  author: string;
+  userId?: string;
+  content: string;
+  imageUrls: string[];
+  createdAt: string;
+}
+
 export interface EventFormData {
   title: string;
   date: string;

@@ -17,6 +17,20 @@ export function useUpcomingEvents() {
   });
 }
 
+// 공개: 단건 일정 조회 (지난 일정 포함, 상세 페이지용)
+export function useEvent(id: string) {
+  return useQuery({
+    queryKey: queryKeys.events.detail(id),
+    queryFn: async () => {
+      const res = await fetch(`/api/events/${id}`);
+      if (!res.ok) throw new Error('일정을 불러올 수 없습니다');
+      const data = await res.json();
+      return data.event as Event;
+    },
+    enabled: !!id,
+  });
+}
+
 export function useAdminEvents() {
   return useQuery({
     queryKey: queryKeys.events.admin,

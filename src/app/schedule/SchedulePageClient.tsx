@@ -228,7 +228,7 @@ const SchedulePageClient = () => {
   };
 
   const openEventDetail = (id: string) => {
-    router.push(`/schedule?event=${id}`, { scroll: false });
+    router.push(`/schedule/${id}`);
   };
 
   const handleAddToCalendar = (event: Event) => {
@@ -246,7 +246,7 @@ const SchedulePageClient = () => {
         .join("\n"),
       url:
         typeof window !== "undefined"
-          ? `${window.location.origin}/schedule?event=${event._id}`
+          ? `${window.location.origin}/schedule/${event._id}`
           : undefined,
     });
 
@@ -338,7 +338,7 @@ const SchedulePageClient = () => {
                             .filter(Boolean)
                             .join("\n")}
                           imageUrl={event.posterUrl}
-                          path={`/schedule?event=${event._id}`}
+                          path={`/schedule/${event._id}`}
                           buttonTitle="일정 보기"
                         />
                       </EventActions>

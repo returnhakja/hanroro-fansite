@@ -6,6 +6,7 @@ import { createPresignedUploadUrl } from '@/lib/storage/r2';
  * 통합 업로드 엔드포인트 (Cloudflare R2 presigned URL 발급)
  * - ?type=gallery (기본): 갤러리 이미지/동영상 → gallery/ 접두사
  * - ?type=board            : 게시판 에디터 미디어 → board/ 접두사
+ * - ?type=review           : 공연 후기 첨부 이미지 → review/ 접두사
  *
  * 요청: { filename: string, contentType: string }
  * 응답: { uploadUrl: string, publicUrl: string }
@@ -27,11 +28,13 @@ const ALLOWED_CONTENT_TYPES = [
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const type = request.nextUrl.searchParams.get('type') ?? 'gallery';
-    const prefix = type === 'board' ? 'board' : 'gallery';
+    const prefix =
+      type === 'board' ? 'board' : type === 'review' ? 'review' : 'gallery';
 
-    // 게시판 에디터는 비로그인(익명) 글쓰기도 허용하므로 로그인 요구하지 않음.
+    // 게시판/공연 후기는 비로그인(익명) 작성도 허용하므로 로그인 요구하지 않음.
     // 갤러리 업로드는 계속 로그인 필요.
-    if (prefix !== 'board') {
+    const ANONYMOUS_PREFIXES = ['board', 'review'];
+    if (!ANONYMOUS_PREFIXES.includes(prefix)) {
       const session = await auth();
       if (!session?.user?.id) {
         return NextResponse.json(

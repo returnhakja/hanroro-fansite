@@ -67,7 +67,7 @@ async function handlePost(req: NextRequest) {
     await trySendPushToAll({
       title: `새 일정 ${event.title}이 등록 되었어요`,
       body: detail,
-      url: `/schedule?event=${event._id}`,
+      url: `/schedule/${event._id}`,
     });
 
     return NextResponse.json({ event }, { status: 201 });
