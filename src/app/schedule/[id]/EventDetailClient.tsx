@@ -34,6 +34,7 @@ import {
   SectionTitle,
   ReviewForm,
   ReviewFormRow,
+  AnonymousNotice,
   ReviewInput,
   ReviewTextarea,
   ImageAttachRow,
@@ -117,7 +118,6 @@ export default function EventDetailClient({ eventId }: { eventId: string }) {
   const deleteReview = useDeleteEventReview(eventId);
 
   const [reviewAuthor, setReviewAuthor] = useState("");
-  const [reviewPassword, setReviewPassword] = useState("");
   const [reviewContent, setReviewContent] = useState("");
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -231,10 +231,6 @@ export default function EventDetailClient({ eventId }: { eventId: string }) {
       alert("닉네임을 입력해주세요");
       return;
     }
-    if (isAnonymous && reviewPassword.length < 4) {
-      alert("비밀번호를 4자 이상 입력해주세요");
-      return;
-    }
 
     const author = isAnonymous
       ? reviewAuthor.trim()
@@ -244,13 +240,11 @@ export default function EventDetailClient({ eventId }: { eventId: string }) {
       {
         author,
         content: reviewContent.trim(),
-        password: isAnonymous ? reviewPassword : undefined,
         imageUrls,
       },
       {
         onSuccess: () => {
           setReviewContent("");
-          setReviewPassword("");
           setImageUrls([]);
         },
         onError: (err) => {
@@ -260,24 +254,14 @@ export default function EventDetailClient({ eventId }: { eventId: string }) {
     );
   };
 
-  const handleDeleteReview = (reviewId: string, hasUserId: boolean) => {
+  const handleDeleteReview = (reviewId: string) => {
     if (!confirm("이 후기를 삭제하시겠습니까?")) return;
 
-    let password: string | undefined;
-    if (!hasUserId) {
-      const input = window.prompt("작성 시 입력한 비밀번호를 입력하세요");
-      if (input === null) return;
-      password = input;
-    }
-
-    deleteReview.mutate(
-      { reviewId, password },
-      {
-        onError: (err) => {
-          alert(err instanceof Error ? err.message : "삭제에 실패했습니다");
-        },
+    deleteReview.mutate(reviewId, {
+      onError: (err) => {
+        alert(err instanceof Error ? err.message : "삭제에 실패했습니다");
       },
-    );
+    });
   };
 
   return (
@@ -366,15 +350,12 @@ export default function EventDetailClient({ eventId }: { eventId: string }) {
                 readOnly={!isAnonymous}
                 maxLength={50}
               />
-              {isAnonymous && (
-                <ReviewInput
-                  type="password"
-                  placeholder="비밀번호 (4자 이상)"
-                  value={reviewPassword}
-                  onChange={(e) => setReviewPassword(e.target.value)}
-                />
-              )}
             </ReviewFormRow>
+            {isAnonymous && (
+              <AnonymousNotice>
+                비로그인으로 작성하면 이후 수정·삭제가 불가능해요
+              </AnonymousNotice>
+            )}
             <ReviewTextarea
               placeholder="이 공연은 어떠셨나요?"
               value={reviewContent}
@@ -427,12 +408,14 @@ export default function EventDetailClient({ eventId }: { eventId: string }) {
                   <ReviewTop>
                     <ReviewAuthor>{review.author}</ReviewAuthor>
                     <ReviewTime>{formatRelativeTime(review.createdAt)}</ReviewTime>
-                    <ReviewDeleteButton
-                      type="button"
-                      onClick={() => handleDeleteReview(review._id, !!review.userId)}
-                    >
-                      삭제
-                    </ReviewDeleteButton>
+                    {!!review.userId && review.userId === session?.user?.id && (
+                      <ReviewDeleteButton
+                        type="button"
+                        onClick={() => handleDeleteReview(review._id)}
+                      >
+                        삭제
+                      </ReviewDeleteButton>
+                    )}
                   </ReviewTop>
                   <ReviewBody>{review.content}</ReviewBody>
                   {review.imageUrls.length > 0 && (

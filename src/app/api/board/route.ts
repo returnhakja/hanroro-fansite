@@ -30,8 +30,7 @@ export async function GET(request: NextRequest) {
       { $match: match },
       { $addFields: { _pin: { $cond: [{ $eq: ['$category', 'notice'] }, 0, 1] } } },
       { $sort: { _pin: 1, createdAt: -1 } },
-      // aggregate는 스키마의 select:false를 적용하지 않으므로 password를 명시적으로 제외
-      { $project: { _pin: 0, password: 0 } },
+      { $project: { _pin: 0 } },
     ]);
 
     return NextResponse.json(posts);
@@ -44,13 +43,13 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// 게시글 작성 (로그인 없이도 닉네임 + 비밀번호로 작성 가능)
+// 게시글 작성 (로그인 없이도 닉네임으로 작성 가능. 단, 익명 글은 이후 수정·삭제 불가)
 export async function POST(request: NextRequest) {
   try {
     const session = await auth();
 
     const body = await request.json();
-    const { title, content, author, imageUrls, category, password } = body;
+    const { title, content, author, imageUrls, category } = body;
 
     if (!title || !content || !author) {
       return NextResponse.json(
@@ -73,29 +72,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 비로그인 작성 시 수정·삭제 인증용 비밀번호 필수
-    if (!session?.user && (!password || password.length < 4)) {
-      return NextResponse.json(
-        { error: '비밀번호를 4자 이상 입력해주세요' },
-        { status: 400 }
-      );
-    }
-
     await connectDB();
     const newPost = await Board.create({
       title,
       content: sanitizeHtml(content),
       author,
       userId: session?.user?.id || null,
-      password: session?.user ? null : password,
       category: category ?? DEFAULT_BOARD_CATEGORY,
       imageUrls: imageUrls || [],
     });
 
-    const responseObj = newPost.toObject();
-    delete responseObj.password;
-
-    return NextResponse.json(responseObj, { status: 201 });
+    return NextResponse.json(newPost, { status: 201 });
   } catch (error) {
     console.error('게시글 작성 오류:', error);
     return NextResponse.json(

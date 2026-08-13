@@ -49,10 +49,8 @@ export default function CommentItem({
   const deleting = deleteComment.isPending;
   const saving = updateComment.isPending;
 
-  // 로그인 작성 댓글은 본인 세션만, 익명 작성 댓글은 누구나 시도 가능 (비밀번호로 최종 확인)
-  const canManage = comment.userId
-    ? !!session?.user?.id && comment.userId === session.user.id
-    : true;
+  // 로그인 작성 댓글만 본인 세션으로 수정/삭제 가능. 익명 댓글은 도용 방지를 위해 아무도 수정·삭제할 수 없음
+  const canManage = !!comment.userId && !!session?.user?.id && comment.userId === session.user.id;
 
   useEffect(() => {
     setTimeText(formatRelativeTime(comment.createdAt));
@@ -61,23 +59,13 @@ export default function CommentItem({
   const handleDelete = () => {
     if (!confirm('댓글을 삭제하시겠습니까?')) return;
 
-    let password: string | undefined;
-    if (!comment.userId) {
-      const input = window.prompt('작성 시 입력한 비밀번호를 입력하세요');
-      if (input === null) return;
-      password = input;
-    }
-
-    deleteComment.mutate(
-      { commentId: comment._id, password },
-      {
-        onSuccess: () => onDelete(comment._id),
-        onError: (error) => {
-          console.error('댓글 삭제 오류:', error);
-          alert(error instanceof Error ? error.message : '댓글 삭제에 실패했습니다');
-        },
-      }
-    );
+    deleteComment.mutate(comment._id, {
+      onSuccess: () => onDelete(comment._id),
+      onError: (error) => {
+        console.error('댓글 삭제 오류:', error);
+        alert(error instanceof Error ? error.message : '댓글 삭제에 실패했습니다');
+      },
+    });
   };
 
   const startEdit = () => {
@@ -96,15 +84,8 @@ export default function CommentItem({
       return;
     }
 
-    let password: string | undefined;
-    if (!comment.userId) {
-      const input = window.prompt('작성 시 입력한 비밀번호를 입력하세요');
-      if (input === null) return;
-      password = input;
-    }
-
     updateComment.mutate(
-      { commentId: comment._id, content: editContent, password },
+      { commentId: comment._id, content: editContent },
       {
         onSuccess: () => setEditing(false),
         onError: (error) => {

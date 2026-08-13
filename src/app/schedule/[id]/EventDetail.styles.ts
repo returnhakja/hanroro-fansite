@@ -194,6 +194,12 @@ export const ReviewFormRow = styled.div`
   flex-wrap: wrap;
 `;
 
+export const AnonymousNotice = styled.p`
+  margin: 0 0 0.6rem;
+  font-size: 0.8rem;
+  color: ${theme.colors.textTertiary};
+`;
+
 export const ReviewInput = styled.input`
   padding: 0.55rem 0.75rem;
   border: 1px solid ${theme.colors.border};

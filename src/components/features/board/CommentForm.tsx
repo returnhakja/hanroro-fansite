@@ -26,7 +26,6 @@ export default function CommentForm({
   const { data: session } = useSession();
   const [content, setContent] = useState('');
   const [author, setAuthor] = useState('');
-  const [password, setPassword] = useState('');
 
   const createComment = useCreateComment(boardId);
   const submitting = createComment.isPending;
@@ -54,22 +53,15 @@ export default function CommentForm({
       return;
     }
 
-    if (isAnonymous && password.length < 4) {
-      alert('비밀번호를 4자 이상 입력해주세요 (댓글 수정·삭제 시 필요합니다)');
-      return;
-    }
-
     createComment.mutate(
       {
         content: content.trim(),
         author: author.trim() || '익명',
         parentId,
-        password: isAnonymous ? password : undefined,
       },
       {
         onSuccess: () => {
           setContent('');
-          setPassword('');
           if (!isReply) setAuthor('');
           onSubmitSuccess();
         },
@@ -97,13 +89,9 @@ export default function CommentForm({
           />
         )}
         {isAnonymous && (
-          <AuthorInput
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="비밀번호 (4자 이상, 수정·삭제 시 필요)"
-            disabled={submitting}
-          />
+          <AnonymousHint>
+            비로그인으로 작성하면 이후 수정·삭제가 불가능해요
+          </AnonymousHint>
         )}
         <TextArea
           value={content}
@@ -169,6 +157,12 @@ const AuthorInput = styled.input`
   @media (max-width: ${theme.breakpoints.mobile}) {
     width: 100%;
   }
+`;
+
+const AnonymousHint = styled.p`
+  margin: 0;
+  font-size: 0.8rem;
+  color: ${theme.colors.textTertiary};
 `;
 
 const TextArea = styled.textarea`

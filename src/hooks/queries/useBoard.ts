@@ -60,7 +60,7 @@ export function useComments(boardId: string) {
 export function useCreatePost() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (body: { title: string; content: string; author: string; category: string; password?: string; imageUrls?: string[] }) => {
+    mutationFn: async (body: { title: string; content: string; author: string; category: string; imageUrls?: string[] }) => {
       const res = await fetch('/api/board', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -81,7 +81,7 @@ export function useCreatePost() {
 export function useUpdatePost(id: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (body: { title: string; content: string; category?: string; password?: string }) => {
+    mutationFn: async (body: { title: string; content: string; category?: string }) => {
       const res = await fetch(`/api/board/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -103,12 +103,8 @@ export function useUpdatePost(id: string) {
 export function useDeletePost(id: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (password?: string) => {
-      const res = await fetch(`/api/board/${id}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password }),
-      });
+    mutationFn: async () => {
+      const res = await fetch(`/api/board/${id}`, { method: 'DELETE' });
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error || '삭제에 실패했습니다');
@@ -140,7 +136,7 @@ export function useLikePost(id: string) {
 export function useCreateComment(boardId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (body: { content: string; author: string; parentId?: string | null; password?: string }) => {
+    mutationFn: async (body: { content: string; author: string; parentId?: string | null }) => {
       const res = await fetch(`/api/board/${boardId}/comments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -161,11 +157,11 @@ export function useCreateComment(boardId: string) {
 export function useUpdateComment(boardId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ commentId, content, password }: { commentId: string; content: string; password?: string }) => {
+    mutationFn: async ({ commentId, content }: { commentId: string; content: string }) => {
       const res = await fetch(`/api/board/comments/${commentId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content, password }),
+        body: JSON.stringify({ content }),
       });
       if (!res.ok) {
         const data = await res.json();
@@ -182,11 +178,9 @@ export function useUpdateComment(boardId: string) {
 export function useDeleteComment(boardId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ commentId, password }: { commentId: string; password?: string }) => {
+    mutationFn: async (commentId: string) => {
       const res = await fetch(`/api/board/comments/${commentId}`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password }),
       });
       if (!res.ok) {
         const data = await res.json();

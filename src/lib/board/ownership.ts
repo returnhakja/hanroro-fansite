@@ -2,32 +2,29 @@ import type { Session } from 'next-auth';
 
 interface Ownable {
   userId?: string | null;
-  comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
 export type OwnershipResult =
   | { ok: true }
   | { ok: false; status: number; error: string };
 
-// 작성자 본인 확인: 로그인 작성 글/댓글은 세션, 익명 작성 글/댓글은 비밀번호로 인증
-export async function verifyOwnership(
+// 작성자 본인 확인: 로그인 작성 글/댓글만 세션으로 인증.
+// 익명 작성 글/댓글은 도용·비밀번호 대입 공격을 막기 위해 본인도 수정·삭제 불가.
+export function verifyOwnership(
   item: Ownable,
-  session: Session | null,
-  password: string | undefined
-): Promise<OwnershipResult> {
-  if (item.userId) {
-    if (!session?.user?.id || item.userId !== session.user.id) {
-      return { ok: false, status: 403, error: '본인이 작성한 글만 처리할 수 있습니다' };
-    }
-    return { ok: true };
+  session: Session | null
+): OwnershipResult {
+  if (!item.userId) {
+    return {
+      ok: false,
+      status: 403,
+      error: '익명으로 작성한 글은 수정·삭제할 수 없습니다',
+    };
   }
 
-  if (!password) {
-    return { ok: false, status: 400, error: '비밀번호를 입력해주세요' };
+  if (!session?.user?.id || item.userId !== session.user.id) {
+    return { ok: false, status: 403, error: '본인이 작성한 글만 처리할 수 있습니다' };
   }
-  const matched = await item.comparePassword(password);
-  if (!matched) {
-    return { ok: false, status: 403, error: '비밀번호가 일치하지 않습니다' };
-  }
+
   return { ok: true };
 }

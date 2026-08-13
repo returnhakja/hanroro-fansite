@@ -4,7 +4,7 @@ import connectDB from '@/lib/db/mongoose';
 import Comment from '@/lib/db/models/Comment';
 import { verifyOwnership } from '@/lib/board/ownership';
 
-// 댓글 수정 (작성자 본인 — 로그인 댓글은 세션, 익명 댓글은 비밀번호로 확인)
+// 댓글 수정 (로그인 작성 댓글의 작성자 본인만 가능. 익명 댓글은 수정 불가)
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ commentId: string }> }
@@ -14,7 +14,7 @@ export async function PUT(
 
     await connectDB();
     const { commentId } = await params;
-    const comment = await Comment.findById(commentId).select('+password');
+    const comment = await Comment.findById(commentId);
 
     if (!comment) {
       return NextResponse.json(
@@ -30,16 +30,16 @@ export async function PUT(
       );
     }
 
-    const body = await request.json();
-    const { content, password } = body;
-
-    const ownership = await verifyOwnership(comment, session, password);
+    const ownership = verifyOwnership(comment, session);
     if (!ownership.ok) {
       return NextResponse.json(
         { error: ownership.error },
         { status: ownership.status }
       );
     }
+
+    const body = await request.json();
+    const { content } = body;
 
     if (!content?.trim()) {
       return NextResponse.json(
@@ -72,7 +72,7 @@ export async function PUT(
   }
 }
 
-// Soft delete a comment (작성자 본인만 가능)
+// Soft delete a comment (로그인 작성 댓글의 작성자 본인만 가능. 익명 댓글은 삭제 불가)
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ commentId: string }> }
@@ -83,7 +83,7 @@ export async function DELETE(
     await connectDB();
     const { commentId } = await params;
 
-    const comment = await Comment.findById(commentId).select('+password');
+    const comment = await Comment.findById(commentId);
 
     if (!comment) {
       return NextResponse.json(
@@ -99,12 +99,7 @@ export async function DELETE(
       );
     }
 
-    const password = await request
-      .json()
-      .then((body) => body?.password as string | undefined)
-      .catch(() => undefined);
-
-    const ownership = await verifyOwnership(comment, session, password);
+    const ownership = verifyOwnership(comment, session);
     if (!ownership.ok) {
       return NextResponse.json(
         { error: ownership.error },

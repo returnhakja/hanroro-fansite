@@ -22,7 +22,6 @@ export function useCreateEventReview(eventId: string) {
     mutationFn: async (body: {
       author: string;
       content: string;
-      password?: string;
       imageUrls?: string[];
     }) => {
       const res = await fetch(`/api/events/${eventId}/reviews`, {
@@ -45,11 +44,9 @@ export function useCreateEventReview(eventId: string) {
 export function useDeleteEventReview(eventId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ reviewId, password }: { reviewId: string; password?: string }) => {
+    mutationFn: async (reviewId: string) => {
       const res = await fetch(`/api/events/${eventId}/reviews/${reviewId}`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password }),
       });
       if (!res.ok) {
         const data = await res.json();

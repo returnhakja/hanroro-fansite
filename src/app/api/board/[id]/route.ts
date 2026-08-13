@@ -40,7 +40,7 @@ export async function GET(
   }
 }
 
-// 게시글 수정 (작성자 본인 — 로그인 글은 세션, 익명 글은 비밀번호로 확인)
+// 게시글 수정 (로그인 작성 글의 작성자 본인만 가능. 익명 글은 수정 불가)
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -50,7 +50,7 @@ export async function PUT(
 
     await connectDB();
     const { id } = await params;
-    const post = await Board.findById(id).select('+password');
+    const post = await Board.findById(id);
 
     if (!post) {
       return NextResponse.json(
@@ -59,16 +59,16 @@ export async function PUT(
       );
     }
 
-    const body = await request.json();
-    const { title, content, category, password } = body;
-
-    const ownership = await verifyOwnership(post, session, password);
+    const ownership = verifyOwnership(post, session);
     if (!ownership.ok) {
       return NextResponse.json(
         { error: ownership.error },
         { status: ownership.status }
       );
     }
+
+    const body = await request.json();
+    const { title, content, category } = body;
 
     if (!title?.trim()) {
       return NextResponse.json(
@@ -105,10 +105,7 @@ export async function PUT(
     }
     await post.save();
 
-    const responseObj = post.toObject();
-    delete responseObj.password;
-
-    return NextResponse.json(responseObj);
+    return NextResponse.json(post);
   } catch (error) {
     console.error('게시글 수정 오류:', error);
     return NextResponse.json(
@@ -118,7 +115,7 @@ export async function PUT(
   }
 }
 
-// 게시글 삭제 (작성자 본인 — 로그인 글은 세션, 익명 글은 비밀번호로 확인)
+// 게시글 삭제 (로그인 작성 글의 작성자 본인만 가능. 익명 글은 삭제 불가)
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -128,7 +125,7 @@ export async function DELETE(
 
     await connectDB();
     const { id } = await params;
-    const post = await Board.findById(id).select('+password');
+    const post = await Board.findById(id);
 
     if (!post) {
       return NextResponse.json(
@@ -137,12 +134,7 @@ export async function DELETE(
       );
     }
 
-    const password = await request
-      .json()
-      .then((body) => body?.password as string | undefined)
-      .catch(() => undefined);
-
-    const ownership = await verifyOwnership(post, session, password);
+    const ownership = verifyOwnership(post, session);
     if (!ownership.ok) {
       return NextResponse.json(
         { error: ownership.error },

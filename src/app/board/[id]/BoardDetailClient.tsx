@@ -66,10 +66,8 @@ export default function BoardDetailClient({
   const updateMutation = useUpdatePost(postId);
   const deleteMutation = useDeletePost(postId);
 
-  // 로그인 작성 글은 본인 세션만, 익명 작성 글은 누구나 시도 가능 (비밀번호로 최종 확인)
-  const canManage = post?.userId
-    ? !!session?.user?.id && post.userId === session.user.id
-    : true;
+  // 로그인 작성 글만 본인 세션으로 수정/삭제 가능. 익명 글은 도용 방지를 위해 아무도 수정·삭제할 수 없음
+  const canManage = !!post?.userId && !!session?.user?.id && post.userId === session.user.id;
   const isLiked = post?.likedBy?.includes(session?.user?.id || "");
 
   const handleLike = async () => {
@@ -87,15 +85,8 @@ export default function BoardDetailClient({
   const handleDelete = async () => {
     if (!confirm("정말 삭제하시겠습니까?")) return;
 
-    let password: string | undefined;
-    if (!post?.userId) {
-      const input = window.prompt("작성 시 입력한 비밀번호를 입력하세요");
-      if (input === null) return;
-      password = input;
-    }
-
     try {
-      await deleteMutation.mutateAsync(password);
+      await deleteMutation.mutateAsync();
       alert("삭제되었습니다");
       router.push("/board");
     } catch (err: unknown) {
@@ -109,18 +100,10 @@ export default function BoardDetailClient({
       return;
     }
 
-    let password: string | undefined;
-    if (!post?.userId) {
-      const input = window.prompt("작성 시 입력한 비밀번호를 입력하세요");
-      if (input === null) return;
-      password = input;
-    }
-
     try {
       await updateMutation.mutateAsync({
         title: editTitle,
         content: editContent,
-        password,
       });
       setEditing(false);
     } catch (err: unknown) {

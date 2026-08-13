@@ -21,7 +21,6 @@ export default function BoardWritePage() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [author, setAuthor] = useState("");
-  const [password, setPassword] = useState("");
   const [category, setCategory] = useState<string>(DEFAULT_BOARD_CATEGORY);
   const createPost = useCreatePost();
   const loading = createPost.isPending;
@@ -41,18 +40,12 @@ export default function BoardWritePage() {
       return;
     }
 
-    if (isAnonymous && password.length < 4) {
-      alert("비밀번호를 4자 이상 입력해주세요 (글 수정·삭제 시 필요합니다)");
-      return;
-    }
-
     createPost.mutate(
       {
         title,
         content,
         author,
         category,
-        password: isAnonymous ? password : undefined,
         imageUrls: [],
       },
       {
@@ -115,15 +108,9 @@ export default function BoardWritePage() {
         </FormGroup>
 
         {isAnonymous && (
-          <FormGroup>
-            <Label>비밀번호</Label>
-            <Input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="글 수정·삭제 시 필요해요 (4자 이상)"
-            />
-          </FormGroup>
+          <AnonymousNotice>
+            비로그인 상태로 작성하면 이후 수정·삭제가 불가능해요. 나중에 수정·삭제하고 싶다면 로그인 후 작성해주세요.
+          </AnonymousNotice>
         )}
 
         <FormGroup>
@@ -203,6 +190,17 @@ const Input = styled.input`
     outline: none;
     border-color: ${theme.colors.accent};
   }
+`;
+
+const AnonymousNotice = styled.p`
+  margin: 0;
+  padding: 0.75rem 1rem;
+  background: ${theme.colors.surfaceAlt};
+  border: 1px solid ${theme.colors.borderLight};
+  border-radius: ${theme.borderRadius.sm};
+  color: ${theme.colors.textSecondary};
+  font-size: 0.85rem;
+  line-height: 1.5;
 `;
 
 const Select = styled.select`
