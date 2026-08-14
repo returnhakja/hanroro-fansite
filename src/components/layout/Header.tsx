@@ -40,6 +40,12 @@ const Header = () => {
   }, []);
 
   useEffect(() => {
+    // 드롭다운 안 링크 클릭 시 브라우저가 포커스를 남기는데, 헤더는 페이지 이동해도
+    // 리마운트되지 않아 :focus-within이 계속 유지되며 드롭다운이 안 닫히는 문제 방지
+    (document.activeElement as HTMLElement | null)?.blur();
+  }, [pathname]);
+
+  useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
