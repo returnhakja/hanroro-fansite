@@ -244,6 +244,8 @@ const Nav = styled.nav<{ $open: boolean }>`
     right: 0;
     width: 260px;
     height: 100vh;
+    height: 100dvh;
+    overflow-y: auto;
     padding: 2.5rem 2rem;
     border-left: 1px solid ${theme.colors.border};
     z-index: 999;
