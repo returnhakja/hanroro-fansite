@@ -120,7 +120,12 @@ export default function BoardListClient({
                 </CategoryBadge>
               </Cell>
               <Cell>
-                <TitleText>{post.title}</TitleText>
+                <TitleRow>
+                  <TitleText>{post.title}</TitleText>
+                  {!!post.commentCount && (
+                    <CommentCount>{post.commentCount}</CommentCount>
+                  )}
+                </TitleRow>
                 <MobileMeta>
                   {post.author} · {formatDate(post.createdAt)} · 조회{" "}
                   {post.views}
@@ -329,12 +334,26 @@ const Row = styled.div`
   }
 `;
 
+const TitleRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+`;
+
 const TitleText = styled.span`
   font-family: ${theme.typography.fontBody};
   font-weight: 500;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+`;
+
+const CommentCount = styled.span`
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: ${theme.colors.accentDark};
 `;
 
 const MobileMeta = styled.span`

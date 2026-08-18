@@ -30,7 +30,32 @@ export async function GET(request: NextRequest) {
       { $match: match },
       { $addFields: { _pin: { $cond: [{ $eq: ['$category', 'notice'] }, 0, 1] } } },
       { $sort: { _pin: 1, createdAt: -1 } },
-      { $project: { _pin: 0 } },
+      {
+        $lookup: {
+          from: 'comments',
+          let: { boardId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$boardId', '$$boardId'] },
+                    { $eq: ['$deleted', false] },
+                  ],
+                },
+              },
+            },
+            { $count: 'count' },
+          ],
+          as: '_commentCount',
+        },
+      },
+      {
+        $addFields: {
+          commentCount: { $ifNull: [{ $arrayElemAt: ['$_commentCount.count', 0] }, 0] },
+        },
+      },
+      { $project: { _pin: 0, _commentCount: 0 } },
     ]);
 
     return NextResponse.json(posts);

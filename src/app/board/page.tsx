@@ -30,10 +30,35 @@ export default async function BoardPage() {
 
   try {
     await connectDB();
-    const raw = await Board.find({})
-      .select("title author category views likes createdAt content")
-      .sort({ createdAt: -1 })
-      .lean();
+    const raw = await Board.aggregate([
+      { $sort: { createdAt: -1 } },
+      {
+        $lookup: {
+          from: "comments",
+          let: { boardId: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$boardId", "$$boardId"] },
+                    { $eq: ["$deleted", false] },
+                  ],
+                },
+              },
+            },
+            { $count: "count" },
+          ],
+          as: "_commentCount",
+        },
+      },
+      {
+        $addFields: {
+          commentCount: { $ifNull: [{ $arrayElemAt: ["$_commentCount.count", 0] }, 0] },
+        },
+      },
+      { $project: { title: 1, author: 1, category: 1, views: 1, likes: 1, createdAt: 1, commentCount: 1 } },
+    ]);
 
     // 공지(notice)를 상단에 고정 (안정 정렬이라 나머지는 최신순 유지)
     raw.sort((a, b) => {
@@ -45,12 +70,13 @@ export default async function BoardPage() {
     initialPosts = raw.map((post) => ({
       _id: (post._id as { toString(): string }).toString(),
       title: post.title as string,
-      content: post.content as string,
+      content: "",
       author: post.author as string,
       category: (post.category as string) || "info",
       views: post.views as number,
       likes: post.likes as number,
       createdAt: (post.createdAt as Date).toISOString(),
+      commentCount: post.commentCount as number,
     }));
   } catch {
     // DB 오류 시 클라이언트에서 직접 fetch로 폴백

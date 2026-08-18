@@ -11,6 +11,7 @@ export interface BoardPost {
   likes: number;
   likedBy?: string[];
   imageUrls?: string[];
+  commentCount?: number;
 }
 
 export interface Comment {
