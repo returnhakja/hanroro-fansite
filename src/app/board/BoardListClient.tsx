@@ -339,9 +339,12 @@ const TitleRow = styled.div`
   align-items: center;
   gap: 0.35rem;
   min-width: 0;
+  width: 100%;
 `;
 
 const TitleText = styled.span`
+  flex: 1 1 auto;
+  min-width: 0;
   font-family: ${theme.typography.fontBody};
   font-weight: 500;
   overflow: hidden;
