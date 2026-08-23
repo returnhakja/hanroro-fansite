@@ -36,6 +36,14 @@ export const artistData = {
   imageUrl: "/assets/애증프로필.jpg",
   albums: [
     {
+      id: "17",
+      title: "잔혹한 천사의 테제",
+      releaseDate: "2026-07-30",
+      coverUrl: "/assets/잔테제.jpg",
+      tracks: [],
+      // TODO: 소개글(description)과 뮤직비디오 링크(videos) 추가 필요
+    },
+    {
       id: "16",
       title: "너와 나",
       releaseDate: "2026-07-08",
