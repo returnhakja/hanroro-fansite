@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useActivities } from '@/hooks/queries/useActivities';
 import type { Activity } from '@/hooks/queries/useActivities';
 import {
@@ -28,9 +28,42 @@ import {
   EmptyMessage,
 } from './Chronicle.styles';
 
-// 2줄(-webkit-line-clamp: 2) 넘길 가능성이 높은 대략적인 글자수 기준.
-// 정확한 측정 대신 카드 폭 기준 대략치로 "더보기" 버튼 노출 여부만 결정한다.
-const DESCRIPTION_CLAMP_THRESHOLD = 50;
+// 글자수 기준(대략치)이 아니라, 실제로 2줄 안에 다 들어가는지 브라우저가
+// 계산한 결과(scrollHeight > clientHeight)로 "더보기" 버튼 노출 여부를 정한다.
+// PC처럼 카드 폭이 넓어 2줄 안에 다 들어갈 땐 버튼이 뜨지 않는다.
+function ClampedDescription({ text }: { text: string }) {
+  const ref = useRef<HTMLParagraphElement>(null);
+  const [expanded, setExpanded] = useState(false);
+  const [overflowing, setOverflowing] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || expanded) return;
+
+    const checkOverflow = () => {
+      setOverflowing(el.scrollHeight > el.clientHeight + 1);
+    };
+
+    checkOverflow();
+
+    const ro = new ResizeObserver(checkOverflow);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [text, expanded]);
+
+  return (
+    <>
+      <CardDescription ref={ref} $expanded={expanded}>
+        {text}
+      </CardDescription>
+      {(overflowing || expanded) && (
+        <MoreButton type="button" onClick={() => setExpanded((prev) => !prev)}>
+          {expanded ? '접기' : '더보기'}
+        </MoreButton>
+      )}
+    </>
+  );
+}
 
 const TYPE_LABEL: Record<string, string> = {
   concert: '공연',
@@ -54,16 +87,6 @@ export default function ChronicleClient() {
   }, [activities]);
 
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
-  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
-
-  const toggleExpanded = (id: string) => {
-    setExpandedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
 
   const activeYear = selectedYear ?? years[0] ?? null;
 
@@ -128,19 +151,7 @@ export default function ChronicleClient() {
                         </CardTop>
                         <CardTitle>{activity.title}</CardTitle>
                         {activity.description && (
-                          <>
-                            <CardDescription $expanded={expandedIds.has(activity._id)}>
-                              {activity.description}
-                            </CardDescription>
-                            {activity.description.length > DESCRIPTION_CLAMP_THRESHOLD && (
-                              <MoreButton
-                                type="button"
-                                onClick={() => toggleExpanded(activity._id)}
-                              >
-                                {expandedIds.has(activity._id) ? '접기' : '더보기'}
-                              </MoreButton>
-                            )}
-                          </>
+                          <ClampedDescription text={activity.description} />
                         )}
                         {activity.link && (
                           <CardLink
