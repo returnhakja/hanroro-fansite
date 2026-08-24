@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import styled from 'styled-components';
 import Link from 'next/link';
 import { useScrollLock } from '@/hooks/useScrollLock';
+import Spinner from '@/components/ui/Spinner';
 
 export default function AdminLayout({
   children,
@@ -79,7 +80,7 @@ export default function AdminLayout({
   }
 
   if (loading) {
-    return <LoadingScreen>로딩 중...</LoadingScreen>;
+    return <Spinner />;
   }
 
   if (!isAuthenticated) {
@@ -289,11 +290,3 @@ const Main = styled.main`
   }
 `;
 
-const LoadingScreen = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  font-size: 1.25rem;
-  color: #7f8c8d;
-`;

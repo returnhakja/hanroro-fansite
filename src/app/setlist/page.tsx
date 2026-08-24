@@ -4,6 +4,7 @@ import { Suspense, useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { useReducedMotion } from "framer-motion";
 import { useSession, signIn } from "next-auth/react";
+import Spinner from "@/components/ui/Spinner";
 import {
   Container,
   PageTitle,
@@ -120,7 +121,7 @@ function SetlistContent() {
       <PageSubtitle>한로로의 공연 셋리스트를 확인하세요</PageSubtitle>
 
       {loading ? (
-        <EmptyMessage>로딩 중...</EmptyMessage>
+        <Spinner />
       ) : concerts.length > 0 ? (
         <ConcertGrid>
           {concerts.map((concert, index) => (

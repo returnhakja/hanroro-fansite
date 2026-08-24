@@ -9,6 +9,7 @@ import type {
   AdminInquiryModalDetail as ModalDetail,
 } from "@/types/api/inquiry";
 import { useScrollLock } from "@/hooks/useScrollLock";
+import Spinner from "@/components/ui/Spinner";
 
 export default function AdminInquiriesPage() {
   const [rows, setRows] = useState<InquiryRow[]>([]);
@@ -161,7 +162,7 @@ export default function AdminInquiriesPage() {
       {error && <ErrorBanner role="alert">{error}</ErrorBanner>}
 
       {loading ? (
-        <LoadingText>로딩 중...</LoadingText>
+        <Spinner />
       ) : rows.length === 0 ? (
         <EmptyText>접수된 문의가 없습니다</EmptyText>
       ) : (
@@ -364,9 +365,6 @@ const ErrorBanner = styled.div`
   margin-bottom: 1rem;
 `;
 
-const LoadingText = styled.p`
-  color: #7f8c8d;
-`;
 
 const EmptyText = styled.p`
   color: #7f8c8d;

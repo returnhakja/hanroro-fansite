@@ -24,6 +24,7 @@ import {
   formatSetlistDateRange,
 } from '@/lib/utils/setlistLabel';
 import { useScrollLock } from '@/hooks/useScrollLock';
+import Spinner from '@/components/ui/Spinner';
 
 export default function AdminConcertsPage() {
   const { data: concerts = [], isLoading } = useAdminConcerts();
@@ -257,7 +258,7 @@ export default function AdminConcertsPage() {
   };
 
   if (isLoading) {
-    return <Container>로딩 중...</Container>;
+    return <Spinner />;
   }
 
   return (

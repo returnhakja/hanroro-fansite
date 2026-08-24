@@ -9,6 +9,7 @@ import {
   useAdminUpdateCategory,
 } from '@/hooks/queries/useAdminBoard';
 import { BOARD_CATEGORIES } from '@/lib/board/categories';
+import Spinner from '@/components/ui/Spinner';
 
 export default function BoardManagePage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -86,7 +87,7 @@ export default function BoardManagePage() {
 
       {/* 게시글 목록 */}
       {isLoading ? (
-        <LoadingText>로딩 중...</LoadingText>
+        <Spinner />
       ) : posts.length === 0 ? (
         <EmptyText>게시글이 없습니다</EmptyText>
       ) : (
@@ -439,12 +440,6 @@ const ActionButton = styled.button`
   }
 `;
 
-const LoadingText = styled.div`
-  text-align: center;
-  padding: 3rem;
-  color: #7f8c8d;
-  font-size: 1.1rem;
-`;
 
 const EmptyText = styled.div`
   text-align: center;

@@ -13,6 +13,7 @@ import {
 } from '@/hooks/queries/useEvents';
 import type { TicketOutlet } from '@/types/api/event';
 import { useScrollLock } from '@/hooks/useScrollLock';
+import Spinner from '@/components/ui/Spinner';
 
 function emptyTicketOutlet(): TicketOutlet {
   return {
@@ -141,7 +142,7 @@ export default function AdminEventsPage() {
   };
 
   if (isLoading) {
-    return <Container>로딩 중...</Container>;
+    return <Spinner />;
   }
 
   return (

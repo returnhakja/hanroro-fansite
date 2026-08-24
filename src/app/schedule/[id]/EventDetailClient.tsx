@@ -124,11 +124,7 @@ export default function EventDetailClient({ eventId }: { eventId: string }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (isLoading) {
-    return (
-      <Container>
-        <LoadingText>로딩 중...</LoadingText>
-      </Container>
-    );
+    return <Spinner />;
   }
 
   if (!event) {

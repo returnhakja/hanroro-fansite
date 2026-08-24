@@ -5,6 +5,7 @@ import { useReducedMotion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useSession, signIn } from "next-auth/react";
 import EventCalendar from "@/components/ui/EventCalendar";
+import Spinner from "@/components/ui/Spinner";
 import {
   Container,
   SectionHeader,
@@ -266,7 +267,7 @@ const SchedulePageClient = () => {
           <SectionTitle>다가오는 공연</SectionTitle>
         </SectionHeader>
         {loading ? (
-          <EmptyMessage>로딩 중...</EmptyMessage>
+          <Spinner />
         ) : upcomingEvents.length > 0 ? (
           <UpcomingGrid>
             {upcomingEvents.map((event, index) => {

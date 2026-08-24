@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useActivities } from '@/hooks/queries/useActivities';
 import type { Activity } from '@/hooks/queries/useActivities';
+import Spinner from '@/components/ui/Spinner';
 import {
   Container,
   PageHeader,
@@ -108,7 +109,7 @@ export default function ChronicleClient() {
       </PageHeader>
 
       {isLoading ? (
-        <EmptyMessage>로딩 중...</EmptyMessage>
+        <Spinner />
       ) : years.length === 0 ? (
         <EmptyMessage>등록된 활동이 없습니다</EmptyMessage>
       ) : (

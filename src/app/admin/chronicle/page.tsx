@@ -11,6 +11,7 @@ import {
   type ActivityFormData,
 } from '@/hooks/queries/useActivities';
 import { useScrollLock } from '@/hooks/useScrollLock';
+import Spinner from '@/components/ui/Spinner';
 
 const CURRENT_YEAR = new Date().getFullYear();
 
@@ -107,7 +108,7 @@ export default function AdminChroniclePage() {
   };
 
   if (isLoading) {
-    return <Container>로딩 중...</Container>;
+    return <Spinner />;
   }
 
   return (

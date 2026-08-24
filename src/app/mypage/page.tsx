@@ -6,6 +6,7 @@ import { useSession, signIn, signOut } from "next-auth/react";
 import styled from "styled-components";
 import { theme } from "@/styles/theme";
 import { useScrollLock } from "@/hooks/useScrollLock";
+import Spinner from "@/components/ui/Spinner";
 import {
   useAttendedConcerts,
   useUserStats,
@@ -165,11 +166,7 @@ export default function MyPage() {
   };
 
   if (status === "loading" || loading) {
-    return (
-      <Container>
-        <LoadingText>로딩 중...</LoadingText>
-      </Container>
-    );
+    return <Spinner />;
   }
 
   if (!session) {
@@ -895,12 +892,6 @@ const WithdrawButton = styled.button`
 `;
 
 /* ── 로딩 / 로그인 ───────────────────────────── */
-
-const LoadingText = styled.p`
-  text-align: center;
-  color: ${theme.colors.textTertiary};
-  padding: 3rem 0;
-`;
 
 const LoginSection = styled.div`
   text-align: center;
