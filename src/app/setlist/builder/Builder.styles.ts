@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import { Reorder } from 'framer-motion';
 import { theme } from '@/styles/theme';
 
 export const Container = styled.div`
@@ -156,19 +157,39 @@ export const RoundButton = styled.button<{ $disabled?: boolean }>`
   opacity: ${({ $disabled }) => ($disabled ? 0.5 : 1)};
 `;
 
-export const PickList = styled.div`
+export const PickList = styled(Reorder.Group)`
   min-height: 120px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
 `;
 
-export const PickRow = styled.div`
+export const PickRow = styled(Reorder.Item)`
   display: flex;
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 0.15rem;
   border-bottom: 1px solid ${theme.colors.border};
+  background: ${theme.colors.surfaceAlt};
 
   &:last-child {
     border-bottom: none;
+  }
+`;
+
+export const DragHandle = styled.span`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  flex-shrink: 0;
+  color: ${theme.colors.textTertiary};
+  font-size: 0.9rem;
+  cursor: grab;
+  touch-action: none;
+
+  &:active {
+    cursor: grabbing;
   }
 `;
 

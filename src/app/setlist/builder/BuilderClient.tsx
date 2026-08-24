@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useDragControls } from 'framer-motion';
 import { getAllSongs } from '@/lib/utils/songs';
 import { useCreateFavoriteSetlist } from '@/hooks/queries/useFavoriteSetlist';
 import {
@@ -24,6 +25,7 @@ import {
   PickRow,
   PickNum,
   PickTitle,
+  DragHandle,
   ReorderGroup,
   TinyButton,
   RemoveButton,
@@ -33,6 +35,68 @@ import {
 
 const MAX_SONGS = 20;
 const DRAFT_KEY = 'hanroro-setlist-draft';
+
+const IconGrip = () => (
+  <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden>
+    <circle cx="9" cy="6" r="1.5" />
+    <circle cx="15" cy="6" r="1.5" />
+    <circle cx="9" cy="12" r="1.5" />
+    <circle cx="15" cy="12" r="1.5" />
+    <circle cx="9" cy="18" r="1.5" />
+    <circle cx="15" cy="18" r="1.5" />
+  </svg>
+);
+
+function PickListItem({
+  title,
+  index,
+  total,
+  onMoveUp,
+  onMoveDown,
+  onRemove,
+}: {
+  title: string;
+  index: number;
+  total: number;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
+  onRemove: () => void;
+}) {
+  const dragControls = useDragControls();
+
+  return (
+    <PickRow value={title} dragListener={false} dragControls={dragControls}>
+      <DragHandle onPointerDown={(e) => dragControls.start(e)} aria-hidden>
+        <IconGrip />
+      </DragHandle>
+      <ReorderGroup>
+        <TinyButton
+          type="button"
+          $disabled={index === 0}
+          disabled={index === 0}
+          onClick={onMoveUp}
+          aria-label="위로 이동"
+        >
+          ▲
+        </TinyButton>
+        <TinyButton
+          type="button"
+          $disabled={index === total - 1}
+          disabled={index === total - 1}
+          onClick={onMoveDown}
+          aria-label="아래로 이동"
+        >
+          ▼
+        </TinyButton>
+      </ReorderGroup>
+      <PickNum>{String(index + 1).padStart(2, '0')}</PickNum>
+      <PickTitle>{title}</PickTitle>
+      <RemoveButton type="button" onClick={onRemove} aria-label="빼기">
+        ×
+      </RemoveButton>
+    </PickRow>
+  );
+}
 
 export default function BuilderClient() {
   const router = useRouter();
@@ -151,41 +215,23 @@ export default function BuilderClient() {
 
           <Pane $alt>
             <PaneLabel>내 세트리스트</PaneLabel>
-            <PickList>
-              {picked.length === 0 ? (
-                <EmptyPick>왼쪽에서 곡을 골라 담아보세요</EmptyPick>
-              ) : (
-                picked.map((title, index) => (
-                  <PickRow key={title}>
-                    <ReorderGroup>
-                      <TinyButton
-                        type="button"
-                        $disabled={index === 0}
-                        disabled={index === 0}
-                        onClick={() => moveSong(index, -1)}
-                        aria-label="위로 이동"
-                      >
-                        ▲
-                      </TinyButton>
-                      <TinyButton
-                        type="button"
-                        $disabled={index === picked.length - 1}
-                        disabled={index === picked.length - 1}
-                        onClick={() => moveSong(index, 1)}
-                        aria-label="아래로 이동"
-                      >
-                        ▼
-                      </TinyButton>
-                    </ReorderGroup>
-                    <PickNum>{String(index + 1).padStart(2, '0')}</PickNum>
-                    <PickTitle>{title}</PickTitle>
-                    <RemoveButton type="button" onClick={() => removeSong(title)} aria-label="빼기">
-                      ×
-                    </RemoveButton>
-                  </PickRow>
-                ))
-              )}
-            </PickList>
+            {picked.length === 0 ? (
+              <EmptyPick>왼쪽에서 곡을 골라 담아보세요</EmptyPick>
+            ) : (
+              <PickList axis="y" values={picked} onReorder={setPicked}>
+                {picked.map((title, index) => (
+                  <PickListItem
+                    key={title}
+                    title={title}
+                    index={index}
+                    total={picked.length}
+                    onMoveUp={() => moveSong(index, -1)}
+                    onMoveDown={() => moveSong(index, 1)}
+                    onRemove={() => removeSong(title)}
+                  />
+                ))}
+              </PickList>
+            )}
             <FinishButton
               type="button"
               disabled={picked.length === 0 || createMutation.isPending}
