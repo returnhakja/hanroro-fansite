@@ -2,6 +2,13 @@ import styled from 'styled-components';
 import { Reorder } from 'framer-motion';
 import { theme } from '@/styles/theme';
 
+// Reorder.Group/Item은 제네릭 컴포넌트라, styled()로 그대로 감싸면 제네릭이
+// unknown으로 소거되어 onReorder(string[] => void) 등에서 타입 에러가 난다.
+// <string>으로 미리 고정해서 넘겨주면 styled()도 올바른 타입을 물려받는다.
+// Reorder.Group의 제네릭은 원소 타입이 아니라 배열 전체 타입이라 string[]로 고정한다
+const StringReorderGroup = Reorder.Group<string[]>;
+const StringReorderItem = Reorder.Item<string>;
+
 export const Container = styled.div`
   max-width: 920px;
   margin: 0 auto;
@@ -157,14 +164,14 @@ export const RoundButton = styled.button<{ $disabled?: boolean }>`
   opacity: ${({ $disabled }) => ($disabled ? 0.5 : 1)};
 `;
 
-export const PickList = styled(Reorder.Group)`
+export const PickList = styled(StringReorderGroup)`
   min-height: 120px;
   list-style: none;
   margin: 0;
   padding: 0;
 `;
 
-export const PickRow = styled(Reorder.Item)`
+export const PickRow = styled(StringReorderItem)`
   display: flex;
   align-items: center;
   gap: 0.5rem;
