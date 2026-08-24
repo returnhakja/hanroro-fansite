@@ -30,13 +30,15 @@ export const BackLink = styled(Link)`
 export const ShareWrap = styled.div`
   display: flex;
   align-items: flex-start;
+  justify-content: center;
   gap: 2rem;
   flex-wrap: wrap;
 `;
 
 export const Poster = styled.div`
   position: relative;
-  width: 280px;
+  width: 100%;
+  max-width: 340px;
   aspect-ratio: 3 / 4;
   border-radius: ${theme.borderRadius.xl};
   background: linear-gradient(165deg, ${theme.colors.primaryDark} 0%, ${theme.colors.textPrimary} 65%, #1E1810 100%);
@@ -45,7 +47,6 @@ export const Poster = styled.div`
   display: flex;
   flex-direction: column;
   color: #F3ECE0;
-  flex-shrink: 0;
   overflow: hidden;
 
   /* 우상단 은은한 골드 글로우 + 배경 워드마크 텍스처 (opengraph-image.tsx와 동일한 느낌).
