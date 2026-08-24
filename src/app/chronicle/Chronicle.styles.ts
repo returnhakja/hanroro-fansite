@@ -142,10 +142,10 @@ export const ActivityCard = styled(motion.div)`
   background: ${theme.colors.surface};
   border: 1px solid ${theme.colors.border};
   border-radius: ${theme.borderRadius.lg};
-  overflow: hidden;
   display: flex;
   align-items: center;
-  gap: 0;
+  gap: 1rem;
+  padding: 0.75rem;
   box-shadow: ${theme.shadows.sm};
   transition: box-shadow ${theme.transitions.normal};
 
@@ -158,6 +158,7 @@ export const CardImage = styled.div<{ $url: string }>`
   width: 120px;
   height: 120px;
   flex-shrink: 0;
+  border-radius: ${theme.borderRadius.md};
   background-image: url(${({ $url }) => $url});
   background-size: cover;
   background-position: center;
@@ -169,7 +170,6 @@ export const CardImage = styled.div<{ $url: string }>`
 `;
 
 export const CardBody = styled.div`
-  padding: 1rem 1.25rem;
   flex: 1;
   min-width: 0;
 `;
