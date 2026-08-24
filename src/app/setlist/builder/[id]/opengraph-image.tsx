@@ -30,7 +30,16 @@ export default async function Image({ params }: { params: Promise<{ id: string }
     // DB 조회 실패해도 기본 이미지는 반환
   }
 
-  const fontData = await loadKoreanFont(STATIC_TEXT + songs.join(''));
+  // Google Fonts가 일시적으로 응답을 안 하거나 응답 형식이 바뀌면 이 fetch가
+  // 실패할 수 있는데, 그대로 두면 카카오 공유 썸네일·다운로드 이미지 전체가
+  // 500 에러로 죽는다. 실패 시엔 한글 폰트 없이(=한글은 안 보일 수 있지만)
+  // 최소한 이미지 자체는 항상 응답하도록 폴백한다.
+  let fontData: ArrayBuffer | null = null;
+  try {
+    fontData = await loadKoreanFont(STATIC_TEXT + songs.join(''));
+  } catch (error) {
+    console.error('세트리스트 공유 이미지용 폰트 로드 실패', error);
+  }
 
   return new ImageResponse(
     (
@@ -154,7 +163,9 @@ export default async function Image({ params }: { params: Promise<{ id: string }
     ),
     {
       ...size,
-      fonts: [{ name: 'Noto Sans KR', data: fontData, style: 'normal', weight: 700 }],
+      fonts: fontData
+        ? [{ name: 'Noto Sans KR', data: fontData, style: 'normal', weight: 700 }]
+        : [],
     }
   );
 }
