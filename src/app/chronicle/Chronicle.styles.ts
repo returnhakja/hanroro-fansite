@@ -144,6 +144,7 @@ export const ActivityCard = styled(motion.div)`
   border-radius: ${theme.borderRadius.lg};
   overflow: hidden;
   display: flex;
+  align-items: center;
   gap: 0;
   box-shadow: ${theme.shadows.sm};
   transition: box-shadow ${theme.transitions.normal};
@@ -155,6 +156,7 @@ export const ActivityCard = styled(motion.div)`
 
 export const CardImage = styled.div<{ $url: string }>`
   width: 120px;
+  height: 120px;
   flex-shrink: 0;
   background-image: url(${({ $url }) => $url});
   background-size: cover;
@@ -162,6 +164,7 @@ export const CardImage = styled.div<{ $url: string }>`
 
   @media (max-width: ${theme.breakpoints.mobile}) {
     width: 90px;
+    height: 90px;
   }
 `;
 
