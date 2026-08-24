@@ -23,9 +23,14 @@ import {
   TypeBadge,
   CardTitle,
   CardDescription,
+  MoreButton,
   CardLink,
   EmptyMessage,
 } from './Chronicle.styles';
+
+// 2줄(-webkit-line-clamp: 2) 넘길 가능성이 높은 대략적인 글자수 기준.
+// 정확한 측정 대신 카드 폭 기준 대략치로 "더보기" 버튼 노출 여부만 결정한다.
+const DESCRIPTION_CLAMP_THRESHOLD = 50;
 
 const TYPE_LABEL: Record<string, string> = {
   concert: '공연',
@@ -49,6 +54,16 @@ export default function ChronicleClient() {
   }, [activities]);
 
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+
+  const toggleExpanded = (id: string) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   const activeYear = selectedYear ?? years[0] ?? null;
 
@@ -113,7 +128,19 @@ export default function ChronicleClient() {
                         </CardTop>
                         <CardTitle>{activity.title}</CardTitle>
                         {activity.description && (
-                          <CardDescription>{activity.description}</CardDescription>
+                          <>
+                            <CardDescription $expanded={expandedIds.has(activity._id)}>
+                              {activity.description}
+                            </CardDescription>
+                            {activity.description.length > DESCRIPTION_CLAMP_THRESHOLD && (
+                              <MoreButton
+                                type="button"
+                                onClick={() => toggleExpanded(activity._id)}
+                              >
+                                {expandedIds.has(activity._id) ? '접기' : '더보기'}
+                              </MoreButton>
+                            )}
+                          </>
                         )}
                         {activity.link && (
                           <CardLink

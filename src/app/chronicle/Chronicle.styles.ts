@@ -217,11 +217,37 @@ export const CardTitle = styled.h3`
   line-height: 1.4;
 `;
 
-export const CardDescription = styled.p`
+export const CardDescription = styled.p<{ $expanded?: boolean }>`
   font-size: 0.875rem;
   color: ${theme.colors.textSecondary};
   line-height: 1.6;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
+
+  ${({ $expanded }) =>
+    $expanded
+      ? ''
+      : `
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  `}
+`;
+
+export const MoreButton = styled.button`
+  display: block;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0 0 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: ${theme.colors.textTertiary};
+  cursor: pointer;
+
+  &:hover {
+    color: ${theme.colors.accent};
+  }
 `;
 
 export const CardLink = styled.a`
