@@ -108,16 +108,43 @@ export default async function Image({ params }: { params: Promise<{ id: string }
 
           <div style={{ display: 'flex', width: 64, height: 3, background: '#C9A96E', marginBottom: 40 }} />
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 22, flex: 1 }}>
-            {songs.slice(0, 14).map((title, index) => (
-              <div key={title} style={{ display: 'flex', alignItems: 'baseline', gap: 20, fontSize: 32 }}>
-                <div style={{ display: 'flex', color: '#DEC596', fontSize: 26, width: 44 }}>
-                  {String(index + 1).padStart(2, '0')}
-                </div>
-                <div style={{ display: 'flex' }}>{title}</div>
+          {(() => {
+            // 세로 한 줄로만 나열하면 12곡 즈음에서 카드 높이를 넘어가 잘려버리므로,
+            // 10곡을 넘으면 1~10 / 11~20으로 고정 2단 배치한다 (최대 20곡 기준 10개씩)
+            const shown = songs.slice(0, 20);
+            const twoColumns = shown.length > 10;
+            const half = twoColumns ? 10 : shown.length;
+            const columns = twoColumns ? [shown.slice(0, half), shown.slice(half)] : [shown];
+            const rowFontSize = twoColumns ? 26 : 32;
+            const numFontSize = twoColumns ? 21 : 26;
+            const rowGap = twoColumns ? 16 : 22;
+
+            return (
+              <div style={{ display: 'flex', flexDirection: 'row', gap: 40, flex: 1 }}>
+                {columns.map((col, colIndex) => (
+                  <div
+                    key={colIndex}
+                    style={{ display: 'flex', flexDirection: 'column', gap: rowGap, flex: 1 }}
+                  >
+                    {col.map((title, i) => {
+                      const order = colIndex * half + i;
+                      return (
+                        <div
+                          key={title}
+                          style={{ display: 'flex', alignItems: 'baseline', gap: 16, fontSize: rowFontSize }}
+                        >
+                          <div style={{ display: 'flex', color: '#DEC596', fontSize: numFontSize, width: 40 }}>
+                            {String(order + 1).padStart(2, '0')}
+                          </div>
+                          <div style={{ display: 'flex' }}>{title}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            );
+          })()}
 
           <div style={{ display: 'flex', fontSize: 22, letterSpacing: 4, color: 'rgba(243,236,224,0.55)' }}>
             HANRORO.CO.KR
