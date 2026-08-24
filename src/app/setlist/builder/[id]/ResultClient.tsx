@@ -46,7 +46,9 @@ export default function ResultClient({ id }: { id: string }) {
   }
 
   const imageUrl = `/setlist/builder/${id}/opengraph-image`;
-  const description = setlist.songs.slice(0, 3).join(' · ') + (setlist.songs.length > 3 ? ' 외' : '');
+  // 카카오 공유 카드의 설명 문구는 노래 목록 나열 대신, 받은 사람도 직접
+  // 만들어보고 싶어지게끔 유도하는 문구로 채운다 (바이럴 확산이 목적)
+  const kakaoDescription = `${setlist.songs.length}곡을 골랐어요! 너의 최애 세트리스트는 몇 곡이야?`;
 
   return (
     <Container>
@@ -81,10 +83,10 @@ export default function ResultClient({ id }: { id: string }) {
           </PillLink>
           <KakaoShareButton
             title="내 최애 세트리스트"
-            description={description}
+            description={kakaoDescription}
             imageUrl={imageUrl}
-            path={`/setlist/builder/${id}`}
-            buttonTitle="세트리스트 보기"
+            path="/setlist/builder"
+            buttonTitle="나도 만들어보기"
             label="카카오톡 공유"
             size="lg"
           />
