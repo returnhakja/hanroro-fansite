@@ -7,46 +7,62 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://www.hanroro.co.kr";
 
   // 정적 페이지
+  // lastModified는 실제 콘텐츠 변경 시점을 추적하지 않는 페이지들이라
+  // "요청 시점의 현재 시각"을 매번 박아넣지 않고 생략한다 (Google에 부정확한
+  // 재크롤링 신호를 주지 않기 위함). changeFrequency/priority로만 안내한다.
   const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
-      lastModified: new Date(),
       changeFrequency: "daily",
       priority: 1,
     },
     {
       url: `${baseUrl}/gallery`,
-      lastModified: new Date(),
       changeFrequency: "daily",
       priority: 0.9,
     },
     {
       url: `${baseUrl}/board`,
-      lastModified: new Date(),
       changeFrequency: "daily",
       priority: 0.9,
     },
     {
       url: `${baseUrl}/schedule`,
-      lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.85,
     },
     {
       url: `${baseUrl}/setlist`,
-      lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.8,
     },
     {
+      url: `${baseUrl}/chart`,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/chronicle`,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/videos`,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/fanchant`,
+      changeFrequency: "monthly",
+      priority: 0.6,
+    },
+    {
       url: `${baseUrl}/profile`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.8,
     },
     {
       url: `${baseUrl}/contact`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.5,
     },

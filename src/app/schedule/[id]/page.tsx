@@ -18,19 +18,27 @@ const getEventById = cache(async (id: string) => {
   return Event.findById(id).lean();
 });
 
-const defaultMetadata: Metadata = {
-  title: "일정을 찾을 수 없습니다",
-};
-
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
+  const { id } = await params;
+  // layout.tsx가 /schedule/* 전체에 canonical: "/schedule"을 기본으로 깔아두기 때문에,
+  // 여기서 canonical을 명시적으로 안 내려주면(=상속) 개별 일정 페이지가 목록 페이지의
+  // "대체 페이지"로 취급되어 색인에서 빠진다. 조회 실패/에러 상황에도 반드시
+  // 이 페이지 자신을 canonical로 지정한다.
+  const canonical = `${BASE_URL}/schedule/${id}`;
+
   try {
-    const { id } = await params;
     const event = await getEventById(id);
-    if (!event) return defaultMetadata;
+    if (!event) {
+      return {
+        title: "일정을 찾을 수 없습니다",
+        alternates: { canonical },
+        robots: { index: false, follow: true },
+      };
+    }
 
     const title = event.title as string;
     const description = buildEventDescription({
@@ -76,11 +84,14 @@ export async function generateMetadata({
         images: posterUrl ? [posterUrl] : ["/assets/한로로프로필사진.jpg"],
       },
       alternates: {
-        canonical: `${BASE_URL}/schedule/${id}`,
+        canonical,
       },
     };
   } catch {
-    return defaultMetadata;
+    return {
+      title: "일정을 찾을 수 없습니다",
+      alternates: { canonical },
+    };
   }
 }
 

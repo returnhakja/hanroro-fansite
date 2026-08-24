@@ -15,12 +15,22 @@ export async function generateMetadata({
 }: {
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
+  const { id } = await params;
+  // layout.tsx가 /board/* 전체에 canonical: "/board"를 기본으로 깔아두기 때문에,
+  // 여기서 canonical을 명시적으로 안 내려주면(=상속) 개별 게시글이 목록 페이지의
+  // "대체 페이지"로 취급되어 색인에서 빠진다. 조회 실패/에러 상황에도 반드시
+  // 이 페이지 자신을 canonical로 지정한다.
+  const canonical = `https://www.hanroro.co.kr/board/${id}`;
+
   try {
-    const { id } = await params;
     const post = await getPost(id);
 
     if (!post) {
-      return { title: "게시글을 찾을 수 없습니다" };
+      return {
+        title: "게시글을 찾을 수 없습니다",
+        alternates: { canonical },
+        robots: { index: false, follow: true },
+      };
     }
 
     const title = post.title as string;
@@ -37,11 +47,14 @@ export async function generateMetadata({
         type: "article",
       },
       alternates: {
-        canonical: `https://www.hanroro.co.kr/board/${id}`,
+        canonical,
       },
     };
   } catch {
-    return { title: "게시판" };
+    return {
+      title: "게시글을 찾을 수 없습니다",
+      alternates: { canonical },
+    };
   }
 }
 
