@@ -35,6 +35,7 @@ export const ShareWrap = styled.div`
 `;
 
 export const Poster = styled.div`
+  position: relative;
   width: 280px;
   aspect-ratio: 3 / 4;
   border-radius: ${theme.borderRadius.xl};
@@ -45,6 +46,39 @@ export const Poster = styled.div`
   flex-direction: column;
   color: #F3ECE0;
   flex-shrink: 0;
+  overflow: hidden;
+
+  /* 우상단 은은한 골드 글로우 + 배경 워드마크 텍스처 (opengraph-image.tsx와 동일한 느낌).
+     position:absolute 의사요소는 z-index:auto여도 in-flow 콘텐츠보다 위에 그려지므로
+     음수 z-index로 명시적으로 내용 뒤에 깔아준다. */
+  &::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    top: -70px;
+    right: -90px;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201, 169, 110, 0.32) 0%, rgba(201, 169, 110, 0) 70%);
+    pointer-events: none;
+  }
+
+  &::after {
+    content: "HANRORO";
+    position: absolute;
+    z-index: -1;
+    left: -22px;
+    bottom: 8px;
+    font-family: ${theme.typography.fontHeading};
+    font-size: 4.5rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: rgba(243, 236, 224, 0.055);
+    transform: rotate(-7deg);
+    white-space: nowrap;
+    pointer-events: none;
+  }
 `;
 
 export const PosterBrand = styled.span`

@@ -39,40 +39,89 @@ export default async function Image({ params }: { params: Promise<{ id: string }
           width: '100%',
           height: '100%',
           display: 'flex',
-          flexDirection: 'column',
-          padding: '76px 64px',
+          position: 'relative',
+          overflow: 'hidden',
           background: 'linear-gradient(165deg, #6B5740 0%, #2C2418 65%, #1E1810 100%)',
           color: '#F3ECE0',
           fontFamily: 'Noto Sans KR',
         }}
       >
-        <div style={{ display: 'flex', fontSize: 26, letterSpacing: 10, color: '#DEC596' }}>
-          H A N R O R O
-        </div>
+        {/* 우상단 은은한 골드 글로우 */}
         <div
           style={{
+            position: 'absolute',
+            zIndex: -1,
+            top: -140,
+            right: -180,
+            width: 640,
+            height: 640,
+            borderRadius: 9999,
             display: 'flex',
-            flexDirection: 'column',
-            fontSize: 56,
-            lineHeight: 1.3,
-            margin: '56px 0 52px',
+            background: 'radial-gradient(circle, rgba(201,169,110,0.32) 0%, rgba(201,169,110,0) 70%)',
+          }}
+        />
+
+        {/* 배경 워드마크 텍스처 (사이트 로고 타이포를 크게 흐리게) */}
+        <div
+          style={{
+            position: 'absolute',
+            zIndex: -1,
+            left: -70,
+            bottom: 30,
+            display: 'flex',
+            fontSize: 250,
+            fontWeight: 700,
+            letterSpacing: 2,
+            color: 'rgba(243,236,224,0.055)',
+            transform: 'rotate(-7deg)',
           }}
         >
-          <div style={{ display: 'flex' }}>나의 최애</div>
-          <div style={{ display: 'flex' }}>세트리스트</div>
+          HANRORO
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 22, flex: 1 }}>
-          {songs.slice(0, 14).map((title, index) => (
-            <div key={title} style={{ display: 'flex', alignItems: 'baseline', gap: 20, fontSize: 32 }}>
-              <div style={{ display: 'flex', color: '#DEC596', fontSize: 26, width: 44 }}>
-                {String(index + 1).padStart(2, '0')}
+
+        {/* 실제 콘텐츠 */}
+        <div
+          style={{
+            position: 'relative',
+            display: 'flex',
+            flexDirection: 'column',
+            width: '100%',
+            height: '100%',
+            padding: '76px 64px',
+          }}
+        >
+          <div style={{ display: 'flex', fontSize: 26, letterSpacing: 10, color: '#DEC596' }}>
+            H A N R O R O
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              fontSize: 56,
+              lineHeight: 1.3,
+              margin: '52px 0 28px',
+            }}
+          >
+            <div style={{ display: 'flex' }}>나의 최애</div>
+            <div style={{ display: 'flex' }}>세트리스트</div>
+          </div>
+
+          <div style={{ display: 'flex', width: 64, height: 3, background: '#C9A96E', marginBottom: 40 }} />
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 22, flex: 1 }}>
+            {songs.slice(0, 14).map((title, index) => (
+              <div key={title} style={{ display: 'flex', alignItems: 'baseline', gap: 20, fontSize: 32 }}>
+                <div style={{ display: 'flex', color: '#DEC596', fontSize: 26, width: 44 }}>
+                  {String(index + 1).padStart(2, '0')}
+                </div>
+                <div style={{ display: 'flex' }}>{title}</div>
               </div>
-              <div style={{ display: 'flex' }}>{title}</div>
-            </div>
-          ))}
-        </div>
-        <div style={{ display: 'flex', fontSize: 22, letterSpacing: 4, color: 'rgba(243,236,224,0.55)' }}>
-          HANRORO.CO.KR
+            ))}
+          </div>
+
+          <div style={{ display: 'flex', fontSize: 22, letterSpacing: 4, color: 'rgba(243,236,224,0.55)' }}>
+            HANRORO.CO.KR
+          </div>
         </div>
       </div>
     ),
