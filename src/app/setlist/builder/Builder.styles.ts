@@ -123,7 +123,8 @@ export const SongSwatch = styled.div<{ $cover: string }>`
   height: 30px;
   border-radius: 6px;
   flex-shrink: 0;
-  background-image: url(${({ $cover }) => $cover});
+  /* 파일명에 공백 등이 섞여 있으면 url() 안에서 값이 깨지므로 인코딩해서 넣는다 */
+  background-image: url(${({ $cover }) => encodeURI($cover)});
   background-size: cover;
   background-position: center;
   background-color: ${theme.colors.surfaceWarm};
