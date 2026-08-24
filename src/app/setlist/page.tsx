@@ -28,6 +28,9 @@ import {
   AlbumThumb,
   EmptyMessage,
   NoSetlistMessage,
+  BuilderCta,
+  BuilderCtaCopy,
+  BuilderCtaArrow,
 } from "./Setlist.styles";
 import { useConcerts } from "@/hooks/queries/useConcerts";
 import {
@@ -119,6 +122,14 @@ function SetlistContent() {
     <Container>
       <PageTitle>셋리스트</PageTitle>
       <PageSubtitle>한로로의 공연 셋리스트를 확인하세요</PageSubtitle>
+
+      <BuilderCta href="/setlist/builder">
+        <BuilderCtaCopy>
+          <strong>내 최애 세트리스트 만들어보기</strong>
+          <span>좋아하는 곡을 골라 나만의 세트리스트를 완성해요</span>
+        </BuilderCtaCopy>
+        <BuilderCtaArrow>→</BuilderCtaArrow>
+      </BuilderCta>
 
       {loading ? (
         <Spinner />

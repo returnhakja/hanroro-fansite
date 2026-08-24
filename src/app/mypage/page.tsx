@@ -13,6 +13,7 @@ import {
   useToggleAttendedConcert,
   type AttendedConcert,
 } from "@/hooks/queries/useAttendedConcerts";
+import { useMyFavoriteSetlists } from "@/hooks/queries/useFavoriteSetlist";
 
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 
@@ -55,6 +56,18 @@ const IconChevron = ({ className }: { className?: string }) => (
     <path d="m9 18 6-6-6-6" />
   </svg>
 );
+const IconMusic = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <path d="M9 18V5l12-2v13" />
+    <circle cx="6" cy="18" r="3" />
+    <circle cx="18" cy="16" r="3" />
+  </svg>
+);
+
+function formatShortDateTime(iso: string): string {
+  const d = new Date(iso);
+  return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
+}
 
 export default function MyPage() {
   const { data: session, status, update } = useSession();
@@ -70,6 +83,7 @@ export default function MyPage() {
   const { data: stats } = useUserStats();
   const { data: attended = [] } = useAttendedConcerts();
   const { uncheck } = useToggleAttendedConcert();
+  const { data: mySetlists = [] } = useMyFavoriteSetlists(!!session?.user?.id);
 
   useScrollLock(showWithdrawModal);
 
@@ -367,6 +381,34 @@ export default function MyPage() {
               </ConcertCard>
             ))}
           </ConcertGrid>
+        )}
+      </Section>
+
+      <Section>
+        <SectionHead>
+          <SectionHeadTitle>
+            <IconMusic />
+            <h2>내가 만든 최애 세트리스트</h2>
+          </SectionHeadTitle>
+          <SectionCount>{mySetlists.length}개</SectionCount>
+        </SectionHead>
+
+        {mySetlists.length === 0 ? (
+          <EmptyHint>
+            아직 만든 세트리스트가 없어요.{" "}
+            <Link href="/setlist/builder">최애 세트리스트 만들기</Link>에서 시작해보세요.
+          </EmptyHint>
+        ) : (
+          <SetlistList>
+            {mySetlists.map((item) => (
+              <SetlistRow key={item._id} href={`/setlist/builder/${item._id}`}>
+                <SetlistRowTitle>{item.songs.slice(0, 3).join(" · ")}{item.songs.length > 3 ? " 외" : ""}</SetlistRowTitle>
+                <SetlistRowMeta>
+                  {item.songs.length}곡 · {formatShortDateTime(item.createdAt)}
+                </SetlistRowMeta>
+              </SetlistRow>
+            ))}
+          </SetlistList>
         )}
       </Section>
 
@@ -749,6 +791,38 @@ const EmptyHint = styled.p`
     color: ${theme.colors.primaryDark};
     font-weight: 500;
   }
+`;
+
+const SetlistList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+`;
+
+const SetlistRow = styled(Link)`
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.9rem 1.1rem;
+  border: 1px solid ${theme.colors.border};
+  border-radius: ${theme.borderRadius.md};
+  text-decoration: none;
+  transition: border-color ${theme.transitions.fast};
+
+  &:hover {
+    border-color: ${theme.colors.accent};
+  }
+`;
+
+const SetlistRowTitle = styled.span`
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: ${theme.colors.textPrimary};
+`;
+
+const SetlistRowMeta = styled.span`
+  font-size: 0.78rem;
+  color: ${theme.colors.textTertiary};
 `;
 
 const ConcertGrid = styled.div`

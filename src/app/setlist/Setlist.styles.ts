@@ -1,6 +1,54 @@
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 import { theme } from '@/styles/theme';
+
+export const BuilderCta = styled(Link)`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.1rem 1.4rem;
+  border-radius: ${theme.borderRadius.lg};
+  background: linear-gradient(135deg, ${theme.colors.accent} 0%, ${theme.colors.accentLight} 100%);
+  color: #3A2E14;
+  text-decoration: none;
+  margin: 1.5rem 0 2.5rem;
+  box-shadow: ${theme.shadows.sm};
+  transition: box-shadow ${theme.transitions.normal};
+
+  &:hover {
+    box-shadow: ${theme.shadows.md};
+  }
+`;
+
+export const BuilderCtaCopy = styled.span`
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+
+  strong {
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  span {
+    font-size: 0.8rem;
+    opacity: 0.85;
+  }
+`;
+
+export const BuilderCtaArrow = styled.span`
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+`;
 
 export const Container = styled.div`
   max-width: 1400px;
