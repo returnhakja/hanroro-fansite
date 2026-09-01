@@ -46,6 +46,7 @@ export async function generateMetadata({
       type: event.type as string,
       date: event.date as Date,
       time: event.time as string | undefined,
+      endTime: event.endTime as string | undefined,
       place: event.place as string | undefined,
     });
     const posterUrl = event.posterUrl as string | undefined;
@@ -111,22 +112,27 @@ export default async function EventDetailPage({
       const title = event.title as string;
       const date = event.date as Date;
       const time = event.time as string | undefined;
+      const endTime = event.endTime as string | undefined;
       const place = event.place as string | undefined;
       const posterUrl = event.posterUrl as string | undefined;
       const eventType = event.type as string;
 
       const startDate = buildStartDate(date, time);
+      // 종료 시각이 있으면(페스티벌 타임테이블 등) 실제 종료 시각을 쓰고,
+      // 없으면 기존처럼 시작 시각과 동일하게 둔다
+      const endDate = endTime ? buildStartDate(date, endTime) : startDate;
       eventSchema = {
         "@context": "https://schema.org",
         "@type": getSchemaEventType(eventType),
         name: title,
         startDate,
-        endDate: startDate,
+        endDate,
         description: buildEventDescription({
           title,
           type: eventType,
           date,
           time,
+          endTime,
           place,
         }),
         url: `${BASE_URL}/schedule/${id}`,

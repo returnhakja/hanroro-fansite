@@ -68,6 +68,7 @@ import {
   type AttendedConcertInput,
 } from "@/hooks/queries/useAttendedConcerts";
 import { formatDateWithWeekday } from "@/lib/utils/time";
+import { formatEventTime } from "@/lib/utils/eventSchema";
 import { buildIcs, downloadIcs } from "@/lib/utils/ics";
 import KakaoShareButton from "@/components/ui/KakaoShareButton";
 import type { Event } from "@/hooks/queries/useEvents";
@@ -237,6 +238,7 @@ const SchedulePageClient = () => {
       title: `[한로로] ${event.title}`,
       date: event.date,
       time: event.time,
+      endTime: event.endTime,
       place: event.place,
       description: [
         getEventTypeLabel(event.type),
@@ -334,7 +336,7 @@ const SchedulePageClient = () => {
                           description={[
                             formatDateWithWeekday(event.date),
                             event.place,
-                            event.time,
+                            formatEventTime(event.time, event.endTime),
                           ]
                             .filter(Boolean)
                             .join("\n")}
@@ -357,7 +359,7 @@ const SchedulePageClient = () => {
                         <IconCalendar />
                         <span>
                           {formatDateWithWeekday(event.date)}
-                          {event.time ? ` ${event.time}` : ""}
+                          {event.time ? ` ${formatEventTime(event.time, event.endTime)}` : ""}
                         </span>
                       </EventDetail>
                     </EventDetails>

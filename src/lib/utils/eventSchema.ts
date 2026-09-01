@@ -24,6 +24,12 @@ export function getSchemaEventType(type: string): 'MusicEvent' | 'Event' {
     : 'Event';
 }
 
+/** "18:30" 또는(종료시간이 있으면) "18:30 - 19:10" 형태로 표시용 문자열을 만든다 */
+export function formatEventTime(time?: string | null, endTime?: string | null): string {
+  if (!time) return '';
+  return endTime ? `${time} - ${endTime}` : time;
+}
+
 export function buildStartDate(date: Date, time?: string): string {
   const kstDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
   const [dateStr] = kstDate.toISOString().split('T');
@@ -44,6 +50,7 @@ export function buildEventDescription(event: {
   type: string;
   date: Date;
   time?: string | null;
+  endTime?: string | null;
   place?: string | null;
 }): string {
   const dateStr = new Date(event.date).toLocaleDateString('ko-KR', {
@@ -58,7 +65,11 @@ export function buildEventDescription(event: {
   let desc = `${dateStr}`;
   if (event.place) desc += ` ${event.place}에서`;
   desc += ` 열리는 한로로 ${typeLabel}입니다.`;
-  if (event.time) desc += ` ${event.time}에 시작합니다.`;
+  if (event.time) {
+    desc += event.endTime
+      ? ` ${event.time}부터 ${event.endTime}까지 진행됩니다.`
+      : ` ${event.time}에 시작합니다.`;
+  }
 
   return desc;
 }

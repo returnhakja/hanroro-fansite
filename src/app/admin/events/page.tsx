@@ -41,6 +41,7 @@ const emptyFormState = (): EventFormData => ({
   title: '',
   date: '',
   time: '',
+  endTime: '',
   place: '',
   posterUrl: '',
   type: 'other',
@@ -102,6 +103,7 @@ export default function AdminEventsPage() {
         title: event.title,
         date: event.date.split('T')[0],
         time: event.time || '',
+        endTime: event.endTime || '',
         place: event.place || '',
         posterUrl: event.posterUrl || '',
         type: event.type,
@@ -181,7 +183,9 @@ export default function AdminEventsPage() {
               <Td data-label="날짜">
                 {new Date(event.date).toLocaleDateString('ko-KR')}
               </Td>
-              <Td data-label="시간">{event.time || '-'}</Td>
+              <Td data-label="시간">
+                {event.time ? `${event.time}${event.endTime ? ` - ${event.endTime}` : ''}` : '-'}
+              </Td>
               <Td data-label="장소">{event.place || '-'}</Td>
               <Td data-label="유형">
                 <TypeBadge $type={event.type}>{getTypeLabel(event.type)}</TypeBadge>
@@ -237,7 +241,7 @@ export default function AdminEventsPage() {
                 </FormGroup>
 
                 <FormGroup>
-                  <Label>시간</Label>
+                  <Label>시작 시간</Label>
                   <Input
                     type="time"
                     value={formData.time}
@@ -248,16 +252,30 @@ export default function AdminEventsPage() {
                 </FormGroup>
               </FormRow>
 
-              <FormGroup>
-                <Label>장소</Label>
-                <Input
-                  type="text"
-                  value={formData.place}
-                  onChange={(e) =>
-                    setFormData({ ...formData, place: e.target.value })
-                  }
-                />
-              </FormGroup>
+              <FormRow>
+                <FormGroup>
+                  <Label>종료 시간</Label>
+                  <Input
+                    type="time"
+                    value={formData.endTime}
+                    onChange={(e) =>
+                      setFormData({ ...formData, endTime: e.target.value })
+                    }
+                  />
+                  <HelpText>페스티벌 타임테이블처럼 끝나는 시각이 있을 때만 입력</HelpText>
+                </FormGroup>
+
+                <FormGroup>
+                  <Label>장소</Label>
+                  <Input
+                    type="text"
+                    value={formData.place}
+                    onChange={(e) =>
+                      setFormData({ ...formData, place: e.target.value })
+                    }
+                  />
+                </FormGroup>
+              </FormRow>
 
               <FormGroup>
                 <Label>유형</Label>
@@ -699,6 +717,12 @@ const Label = styled.label<{ $inline?: boolean }>`
   margin-bottom: ${(p) => (p.$inline ? '0' : '0.5rem')};
   color: #2c3e50;
   font-weight: 500;
+`;
+
+const HelpText = styled.p`
+  margin: 0.35rem 0 0;
+  font-size: 0.78rem;
+  color: #8e9aab;
 `;
 
 const OutletSectionHeader = styled.div`

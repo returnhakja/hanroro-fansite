@@ -18,7 +18,7 @@ import {
 import { uploadToR2 } from "@/lib/storage/uploadClient";
 import { buildIcs, downloadIcs } from "@/lib/utils/ics";
 import { formatRelativeTime } from "@/lib/utils/time";
-import { getEventTypeLabel } from "@/lib/utils/eventSchema";
+import { getEventTypeLabel, formatEventTime } from "@/lib/utils/eventSchema";
 import {
   Container,
   BackLink,
@@ -169,6 +169,7 @@ export default function EventDetailClient({ eventId }: { eventId: string }) {
       title: `[한로로] ${event.title}`,
       date: event.date,
       time: event.time,
+      endTime: event.endTime,
       place: event.place,
       description: [
         getEventTypeLabel(event.type),
@@ -286,7 +287,7 @@ export default function EventDetailClient({ eventId }: { eventId: string }) {
               weekday: "short",
             })}
           </strong>
-          {event.time && <>&nbsp;· {event.time}</>}
+          {event.time && <>&nbsp;· {formatEventTime(event.time, event.endTime)}</>}
         </MetaRow>
         {event.place && (
           <MetaRow>
@@ -315,7 +316,7 @@ export default function EventDetailClient({ eventId }: { eventId: string }) {
               weekday: "short",
             }),
             event.place,
-            event.time,
+            formatEventTime(event.time, event.endTime),
           ]
             .filter(Boolean)
             .join("\n")}

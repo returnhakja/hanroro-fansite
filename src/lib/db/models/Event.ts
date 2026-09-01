@@ -15,6 +15,8 @@ export interface IEvent extends Document {
   title: string;
   date: Date;
   time?: string;
+  /** 페스티벌 타임테이블처럼 종료 시각이 있는 경우 (선택) */
+  endTime?: string;
   place?: string;
   posterUrl?: string;
   type: 'concert' | 'award' | 'broadcast' | 'other' | 'festival' | 'fanmeeting';
@@ -41,6 +43,9 @@ const eventSchema = new Schema<IEvent>(
       required: true,
     },
     time: {
+      type: String,
+    },
+    endTime: {
       type: String,
     },
     place: {

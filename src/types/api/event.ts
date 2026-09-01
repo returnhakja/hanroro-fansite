@@ -14,6 +14,8 @@ export interface Event {
   title: string;
   date: string;
   time?: string;
+  /** 페스티벌 타임테이블처럼 종료 시각이 있는 경우 (선택) */
+  endTime?: string;
   place?: string;
   posterUrl?: string;
   type: 'concert' | 'award' | 'broadcast' | 'other' | 'festival' | 'fanmeeting';
@@ -35,6 +37,7 @@ export interface EventFormData {
   title: string;
   date: string;
   time: string;
+  endTime: string;
   place: string;
   posterUrl: string;
   type: Event['type'];

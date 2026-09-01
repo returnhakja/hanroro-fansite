@@ -47,7 +47,7 @@ async function handlePut(
     }
     const { id } = await context.params;
     const body = await req.json();
-    const { title, date, time, place, posterUrl, type } = body;
+    const { title, date, time, endTime, place, posterUrl, type } = body;
     const ticketOutlets = ensureSinglePrimary(
       normalizeTicketOutlets(body.ticketOutlets)
     );
@@ -67,6 +67,7 @@ async function handlePut(
         title,
         date: new Date(date),
         time,
+        endTime,
         place,
         posterUrl,
         type,

@@ -29,7 +29,7 @@ async function handleGet(req: NextRequest) {
 async function handlePost(req: NextRequest) {
   try {
     const body = await req.json();
-    const { title, date, time, place, posterUrl, type } = body;
+    const { title, date, time, endTime, place, posterUrl, type } = body;
     const ticketOutlets = ensureSinglePrimary(
       normalizeTicketOutlets(body.ticketOutlets)
     );
@@ -47,6 +47,7 @@ async function handlePost(req: NextRequest) {
       title,
       date: new Date(date),
       time,
+      endTime,
       place,
       posterUrl,
       type: type || 'other',

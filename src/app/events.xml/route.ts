@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/db/mongoose";
 import Event from "@/lib/db/models/Event";
 import { formatDateLong } from "@/lib/utils/time";
+import { formatEventTime } from "@/lib/utils/eventSchema";
 
 const BASE_URL = "https://www.hanroro.co.kr";
 
@@ -32,7 +33,7 @@ export async function GET() {
 
       const descParts = [`[${typeLabel}] ${eventDate}`];
       if (event.place) descParts.push(`장소: ${event.place}`);
-      if (event.time) descParts.push(`시간: ${event.time}`);
+      if (event.time) descParts.push(`시간: ${formatEventTime(event.time, event.endTime)}`);
       const description = descParts
         .join(" | ")
         .replace(/&/g, "&amp;")

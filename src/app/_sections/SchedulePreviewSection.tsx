@@ -4,6 +4,7 @@ import { useReducedMotion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useUpcomingEvents } from "@/hooks/queries/useEvents";
 import { formatDateLong } from "@/lib/utils/time";
+import { formatEventTime } from "@/lib/utils/eventSchema";
 import {
   SectionOverline,
   SectionTitle,
@@ -53,7 +54,7 @@ export default function SchedulePreviewSection() {
               <PreviewItemMeta>
                 <span>{formatDateLong(event.date)}</span>
                 {event.place && <span>{event.place}</span>}
-                {event.time && <span>{event.time}</span>}
+                {event.time && <span>{formatEventTime(event.time, event.endTime)}</span>}
               </PreviewItemMeta>
             </PreviewItem>
           ))}

@@ -14,6 +14,8 @@ export interface IcsEventInput {
   date: string;
   /** "19:00" 형태. 없으면 종일 이벤트로 처리 */
   time?: string;
+  /** "19:40" 형태. 있으면 durationMinutes 대신 실제 종료 시각을 사용 */
+  endTime?: string;
   place?: string;
   description?: string;
   /** 상세 페이지 링크 */
@@ -46,7 +48,7 @@ function toIcsDate(date: Date): string {
 
 /** IcsEventInput → .ics 문자열 (CRLF 규격) */
 export function buildIcs(input: IcsEventInput): string {
-  const { title, date, time, place, description, url, durationMinutes = 120 } = input;
+  const { title, date, time, endTime, place, description, url, durationMinutes = 120 } = input;
 
   const base = new Date(date);
   const lines: string[] = [
@@ -67,7 +69,21 @@ export function buildIcs(input: IcsEventInput): string {
     const [hh, mm] = time.split(':').map(Number);
     const start = new Date(base);
     start.setHours(hh || 0, mm || 0, 0, 0);
-    const end = new Date(start.getTime() + durationMinutes * 60 * 1000);
+
+    let end: Date;
+    if (endTime) {
+      // 페스티벌 타임테이블처럼 실제 종료 시각이 있으면 그걸 그대로 사용
+      const [eh, em] = endTime.split(':').map(Number);
+      end = new Date(base);
+      end.setHours(eh || 0, em || 0, 0, 0);
+      // 자정을 넘기는 경우(예: 23:50 시작 -> 00:10 종료) 하루를 더해준다
+      if (end.getTime() <= start.getTime()) {
+        end.setDate(end.getDate() + 1);
+      }
+    } else {
+      end = new Date(start.getTime() + durationMinutes * 60 * 1000);
+    }
+
     lines.push(`DTSTART:${toIcsUtc(start)}`);
     lines.push(`DTEND:${toIcsUtc(end)}`);
   } else {
