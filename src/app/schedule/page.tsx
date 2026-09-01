@@ -92,6 +92,10 @@ export default async function SchedulePage() {
             event.date as Date,
             event.time as string | undefined,
           );
+          const eventEndTime = event.endTime as string | undefined;
+          const eventEndDate = eventEndTime
+            ? buildStartDate(event.date as Date, eventEndTime)
+            : eventStartDate;
           return {
             "@type": "ListItem",
             position: index + 1,
@@ -99,7 +103,7 @@ export default async function SchedulePage() {
               "@type": getSchemaEventType(event.type as string),
               name: event.title,
               startDate: eventStartDate,
-              endDate: eventStartDate,
+              endDate: eventEndDate,
               url: `${BASE_URL}/schedule/${eventId}`,
               eventStatus: "https://schema.org/EventScheduled",
               eventAttendanceMode:

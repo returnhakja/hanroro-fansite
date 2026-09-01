@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUpcomingEvents } from "@/hooks/queries/useEvents";
 import { formatDateWithWeekday } from "@/lib/utils/time";
+import { formatEventTime } from "@/lib/utils/eventSchema";
 import { HomeHeroQuickRoot } from "./HomeHeroQuick.styles";
 import {
   HeroSection,
@@ -197,7 +198,7 @@ export default function HomeHeroQuick() {
                 )}
                 <span>
                   <IconCalendar /> {formatDateWithWeekday(featured.date)}
-                  {featured.time ? ` ${featured.time}` : ""}
+                  {featured.time ? ` ${formatEventTime(featured.time, featured.endTime)}` : ""}
                 </span>
               </FeaturedMeta>
               <FeaturedCTAButton
