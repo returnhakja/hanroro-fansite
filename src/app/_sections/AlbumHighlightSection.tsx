@@ -14,6 +14,7 @@ import {
   AlbumHighlightSectionWrapper,
   AlbumGrid,
   AlbumCard,
+  AlbumCardOverlay,
   AlbumBadge,
   AlbumCardTitle,
   AlbumCardMeta,
@@ -49,11 +50,13 @@ export default function AlbumHighlightSection() {
             transition={{ duration: 0.5, delay: index * 0.1 }}
           >
             <img src={album.coverUrl} alt={`${album.title} 앨범 커버`} />
-            {index === 0 && <AlbumBadge>NEW</AlbumBadge>}
-            <AlbumCardTitle>{album.title}</AlbumCardTitle>
-            <AlbumCardMeta>
-              {album.releaseDate.replace(/-/g, ".")}
-            </AlbumCardMeta>
+            <AlbumCardOverlay>
+              {index === 0 && <AlbumBadge>NEW</AlbumBadge>}
+              <AlbumCardTitle>{album.title}</AlbumCardTitle>
+              <AlbumCardMeta>
+                {album.releaseDate.replace(/-/g, ".")}
+              </AlbumCardMeta>
+            </AlbumCardOverlay>
           </AlbumCard>
         ))}
       </AlbumGrid>
