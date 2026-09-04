@@ -207,6 +207,17 @@ export const getLatestAlbum = (): Album =>
     album.releaseDate > latest.releaseDate ? album : latest,
   );
 
+/**
+ * 홈 화면에 띄울 앨범 하이라이트. 최신작 1장은 고정으로 노출해 신곡 홍보를
+ * 챙기고, 나머지는 방문할 때마다 랜덤으로 섞어 재방문 시에도 신선하게 보이게 한다.
+ */
+export const getHomeAlbumHighlights = (count = 3): Album[] => {
+  const latest = getLatestAlbum();
+  const rest = artistData.albums.filter((album) => album.id !== latest.id);
+  const shuffled = [...rest].sort(() => Math.random() - 0.5);
+  return [latest, ...shuffled.slice(0, Math.max(0, count - 1))];
+};
+
 export const findAlbumBySongTitle = (songTitle: string) => {
   const normalized = songTitle.trim().toLowerCase();
   if (!normalized) return null;
