@@ -4,6 +4,7 @@ import connectDB from "@/lib/db/mongoose";
 import Event from "@/lib/db/models/Event";
 import StructuredData from "@/components/seo/StructuredData";
 import EventDetailClient from "./EventDetailClient";
+import type { Event as EventApiType } from "@/types/api/event";
 import {
   buildStartDate,
   buildEventDescription,
@@ -105,6 +106,7 @@ export default async function EventDetailPage({
 
   let eventSchema: object | null = null;
   let breadcrumbSchema: object | null = null;
+  let initialEvent: EventApiType | undefined;
 
   try {
     const event = await getEventById(id);
@@ -116,6 +118,19 @@ export default async function EventDetailPage({
       const place = event.place as string | undefined;
       const posterUrl = event.posterUrl as string | undefined;
       const eventType = event.type as string;
+
+      initialEvent = {
+        _id: (event._id as { toString(): string }).toString(),
+        title,
+        date: date.toISOString(),
+        time,
+        endTime,
+        place,
+        posterUrl,
+        type: eventType as EventApiType["type"],
+        isPinned: Boolean(event.isPinned),
+        ticketOutlets: event.ticketOutlets as EventApiType["ticketOutlets"],
+      };
 
       const startDate = buildStartDate(date, time);
       // 종료 시각이 있으면(페스티벌 타임테이블 등) 실제 종료 시각을 쓰고,
@@ -200,7 +215,7 @@ export default async function EventDetailPage({
     <>
       {eventSchema && <StructuredData data={eventSchema} />}
       {breadcrumbSchema && <StructuredData data={breadcrumbSchema} />}
-      <EventDetailClient eventId={id} />
+      <EventDetailClient eventId={id} initialEvent={initialEvent} />
     </>
   );
 }

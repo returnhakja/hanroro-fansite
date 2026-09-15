@@ -6,6 +6,7 @@ import Spinner from "@/components/ui/Spinner";
 import { EventTicketOutlets } from "@/components/ui/EventTicketOutlets";
 import KakaoShareButton from "@/components/ui/KakaoShareButton";
 import { useEvent } from "@/hooks/queries/useEvents";
+import type { Event } from "@/types/api/event";
 import {
   useAttendedConcerts,
   useToggleAttendedConcert,
@@ -106,9 +107,15 @@ function calcDaysUntil(iso: string): number {
   return Math.ceil((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 }
 
-export default function EventDetailClient({ eventId }: { eventId: string }) {
+export default function EventDetailClient({
+  eventId,
+  initialEvent,
+}: {
+  eventId: string;
+  initialEvent?: Event;
+}) {
   const { data: session } = useSession();
-  const { data: event, isLoading } = useEvent(eventId);
+  const { data: event, isLoading } = useEvent(eventId, initialEvent);
 
   const { data: attended = [] } = useAttendedConcerts();
   const { check, uncheck } = useToggleAttendedConcert();

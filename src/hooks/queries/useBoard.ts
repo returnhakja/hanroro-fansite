@@ -27,7 +27,7 @@ export function useBoardList(
   });
 }
 
-export function useBoardDetail(id: string) {
+export function useBoardDetail(id: string, initialData?: BoardPost) {
   return useQuery({
     queryKey: queryKeys.board.detail(id),
     queryFn: async () => {
@@ -40,6 +40,10 @@ export function useBoardDetail(id: string) {
       return data;
     },
     enabled: !!id,
+    initialData,
+    // 조회수가 서버에서 GET 시점에 증가하므로, SSR로 받은 초기 데이터를
+    // 즉시 보여주되 그 이후엔 항상 stale 취급해 마운트 시 다시 fetch되게 한다.
+    staleTime: 0,
   });
 }
 

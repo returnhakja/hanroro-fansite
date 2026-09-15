@@ -18,7 +18,7 @@ export function useUpcomingEvents() {
 }
 
 // 공개: 단건 일정 조회 (지난 일정 포함, 상세 페이지용)
-export function useEvent(id: string) {
+export function useEvent(id: string, initialData?: Event) {
   return useQuery({
     queryKey: queryKeys.events.detail(id),
     queryFn: async () => {
@@ -28,6 +28,7 @@ export function useEvent(id: string) {
       return data.event as Event;
     },
     enabled: !!id,
+    initialData,
   });
 }
 

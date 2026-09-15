@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, memo } from "react";
+import { useState, memo } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import styled from "styled-components";
@@ -12,6 +12,7 @@ import {
   useLikePost,
   useUpdatePost,
   useDeletePost,
+  type BoardPost,
 } from "@/hooks/queries/useBoard";
 import { theme } from "@/styles/theme";
 import { getBoardCategoryColor, getBoardCategoryLabel } from "@/lib/board/categories";
@@ -45,26 +46,23 @@ const PostImageItem = memo(({ url, index }: { url: string; index: number }) => (
 PostImageItem.displayName = "PostImageItem";
 
 export default function BoardDetailClient({
-  params,
+  id,
+  initialPost,
 }: {
-  params: Promise<{ id: string }>;
+  id: string;
+  initialPost?: BoardPost;
 }) {
   const router = useRouter();
   const { data: session } = useSession();
-  const [postId, setPostId] = useState<string>("");
 
   const [editing, setEditing] = useState(false);
   const [editTitle, setEditTitle] = useState("");
   const [editContent, setEditContent] = useState("");
 
-  useEffect(() => {
-    params.then(({ id }) => setPostId(id));
-  }, [params]);
-
-  const { data: post, isLoading } = useBoardDetail(postId);
-  const likeMutation = useLikePost(postId);
-  const updateMutation = useUpdatePost(postId);
-  const deleteMutation = useDeletePost(postId);
+  const { data: post, isLoading } = useBoardDetail(id, initialPost);
+  const likeMutation = useLikePost(id);
+  const updateMutation = useUpdatePost(id);
+  const deleteMutation = useDeletePost(id);
 
   // 로그인 작성 글만 본인 세션으로 수정/삭제 가능. 익명 글은 도용 방지를 위해 아무도 수정·삭제할 수 없음
   const canManage = !!post?.userId && !!session?.user?.id && post.userId === session.user.id;
@@ -211,7 +209,7 @@ export default function BoardDetailClient({
         )}
       </Actions>
 
-      {postId && <CommentSection boardId={postId} />}
+      {id && <CommentSection boardId={id} />}
     </Container>
   );
 }

@@ -4,6 +4,8 @@ import connectDB from "@/lib/db/mongoose";
 import Board from "@/lib/db/models/Board";
 import BoardDetailClient from "./BoardDetailClient";
 import StructuredData from "@/components/seo/StructuredData";
+import { sanitizeHtml } from "@/lib/utils/sanitize";
+import type { BoardPost } from "@/hooks/queries/useBoard";
 
 const getPost = cache(async (id: string) => {
   await connectDB();
@@ -67,6 +69,7 @@ export default async function BoardDetailPage({
 
   let discussionSchema: object | null = null;
   let breadcrumbSchema: object | null = null;
+  let initialPost: BoardPost | undefined;
 
   try {
     const post = await getPost(id);
@@ -75,6 +78,20 @@ export default async function BoardDetailPage({
       const plainText = (post.content as string)
         .replace(/<[^>]*>/g, "")
         .slice(0, 500);
+
+      initialPost = {
+        _id: (post._id as { toString(): string }).toString(),
+        title,
+        content: sanitizeHtml(post.content as string),
+        author: post.author as string,
+        userId: post.userId as string | undefined,
+        category: post.category as string,
+        createdAt: (post.createdAt as Date).toISOString(),
+        views: post.views as number,
+        likes: post.likes as number,
+        likedBy: post.likedBy as string[] | undefined,
+        imageUrls: post.imageUrls as string[] | undefined,
+      };
 
       discussionSchema = {
         "@context": "https://schema.org",
@@ -137,7 +154,7 @@ export default async function BoardDetailPage({
     <>
       {discussionSchema && <StructuredData data={discussionSchema} />}
       {breadcrumbSchema && <StructuredData data={breadcrumbSchema} />}
-      <BoardDetailClient params={params} />
+      <BoardDetailClient id={id} initialPost={initialPost} />
     </>
   );
 }
