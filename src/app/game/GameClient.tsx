@@ -7,6 +7,7 @@ import {
   useStartGameRound,
   useCheckGameAnswer,
   useSubmitGame,
+  useUpdateResultNickname,
 } from '@/hooks/queries/useGame';
 import { useYoutubeSnippetPlayer } from '@/lib/game/useYoutubeSnippetPlayer';
 import { DIFFICULTY_LABEL, QUESTIONS_PER_ROUND } from '@/lib/game/difficulty';
@@ -114,6 +115,7 @@ export default function GameClient() {
   const startRound = useStartGameRound();
   const checkAnswer = useCheckGameAnswer();
   const submitGame = useSubmitGame();
+  const updateNickname = useUpdateResultNickname();
 
   const playedIndexRef = useRef(-1);
 
@@ -186,12 +188,7 @@ export default function GameClient() {
   const handleRegister = async () => {
     if (!nickname.trim() || !finalScore) return;
     try {
-      await submitGame.mutateAsync({
-        roundToken,
-        nickname: nickname.trim(),
-        guesses,
-        elapsedMs: finalScore.elapsedMs,
-      });
+      await updateNickname.mutateAsync({ id: finalScore.resultId, nickname: nickname.trim() });
       setRegistered(true);
     } catch (err) {
       setErrorText(err instanceof Error ? err.message : '등록에 실패했습니다');
@@ -324,7 +321,7 @@ export default function GameClient() {
                       value={nickname}
                       onChange={(e) => setNickname(e.target.value)}
                     />
-                    <RegisterButton type="button" onClick={handleRegister} disabled={!nickname.trim() || submitGame.isPending}>
+                    <RegisterButton type="button" onClick={handleRegister} disabled={!nickname.trim() || updateNickname.isPending}>
                       등록
                     </RegisterButton>
                   </NicknameRow>

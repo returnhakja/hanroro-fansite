@@ -64,6 +64,23 @@ export function useSubmitGame() {
   });
 }
 
+export function useUpdateResultNickname() {
+  return useMutation({
+    mutationFn: async ({ id, nickname }: { id: string; nickname: string }) => {
+      const res = await fetch(`/api/game/result/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nickname }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || '닉네임 변경에 실패했습니다');
+      }
+      return (await res.json()) as { result: GameResultDetail };
+    },
+  });
+}
+
 export function useGameRanking(difficulty: GameDifficulty) {
   return useQuery({
     queryKey: queryKeys.game.ranking(difficulty),
