@@ -333,6 +333,7 @@ export default function GameClient() {
               <KakaoFlex
                 title="한로로 음악 맞추기"
                 description={shareText}
+                imageUrl={`/game/result/${finalScore.resultId}/opengraph-image`}
                 path={`/game/result/${finalScore.resultId}`}
                 buttonTitle="나도 도전하기"
                 label="카카오톡 공유"
