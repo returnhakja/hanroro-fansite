@@ -378,3 +378,14 @@ export const ErrorText = styled.p`
   color: ${theme.colors.error};
   text-align: center;
 `;
+
+export const SecondaryLink = styled.a`
+  display: block;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: ${theme.colors.textSecondary};
+  text-decoration: none;
+
+  &:hover { color: ${theme.colors.primary}; }
+`;

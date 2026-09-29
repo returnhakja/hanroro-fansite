@@ -1,5 +1,6 @@
 'use client';
 
+import styled from 'styled-components';
 import { useGameResult } from '@/hooks/queries/useGame';
 import { DIFFICULTY_LABEL, QUESTIONS_PER_ROUND } from '@/lib/game/difficulty';
 import type { GameResultDetail } from '@/types/api/game';
@@ -15,6 +16,10 @@ import {
   ResultActions,
   RankLink,
 } from '../../Game.styles';
+
+const KakaoFlex = styled(KakaoShareButton)`
+  flex: 1;
+`;
 
 export default function ResultClient({
   id,
@@ -48,14 +53,12 @@ export default function ResultClient({
         </ResultHeader>
 
         <ResultActions>
-          <KakaoShareButton
+          <KakaoFlex
             title="한로로 음악 맞추기"
             description={shareText}
             path={`/game/result/${result._id}`}
             buttonTitle="나도 도전하기"
             label="카카오톡 공유"
-            size="lg"
-            block
           />
           <RankLink href="/game">나도 하기</RankLink>
         </ResultActions>

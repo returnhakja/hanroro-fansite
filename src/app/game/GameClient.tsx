@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import styled from 'styled-components';
 import {
   useStartGameRound,
   useCheckGameAnswer,
@@ -54,9 +55,13 @@ import {
   ResultActions,
   RankLink,
   ErrorText,
+  SecondaryLink,
 } from './Game.styles';
 
 const DIFFICULTIES: GameDifficulty[] = ['easy', 'normal', 'hard'];
+const KakaoFlex = styled(KakaoShareButton)`
+  flex: 1;
+`;
 const DIFFICULTY_DESC: Record<GameDifficulty, string> = {
   easy: '누구나 편하게',
   normal: '적당히 아는 정도',
@@ -230,6 +235,7 @@ export default function GameClient() {
             <PrimaryButton type="button" onClick={handleStart} disabled={startRound.isPending}>
               {startRound.isPending ? '준비 중...' : `${DIFFICULTY_LABEL[difficulty]} 난이도로 시작`}
             </PrimaryButton>
+            <SecondaryLink href="/game/ranking">랭킹만 보기 →</SecondaryLink>
           </>
         )}
 
@@ -327,14 +333,12 @@ export default function GameClient() {
             </ResultCard>
 
             <ResultActions>
-              <KakaoShareButton
+              <KakaoFlex
                 title="한로로 음악 맞추기"
                 description={shareText}
                 path={`/game/result/${finalScore.resultId}`}
                 buttonTitle="나도 도전하기"
                 label="카카오톡 공유"
-                size="lg"
-                block
               />
               <RankLink href="/game/ranking">전체 랭킹</RankLink>
             </ResultActions>
