@@ -4,7 +4,7 @@ import GameResult from '@/lib/db/models/GameResult';
 import { isGameDifficulty } from '@/lib/game/difficulty';
 
 const VOTER_COOKIE = 'vid';
-const LIMIT = 50;
+const LIMIT = 10;
 
 // GET /api/game/ranking?difficulty=normal - 난이도별 리더보드.
 // 같은 voterId의 기록 중 최고 기록(점수 desc, 소요시간 asc) 1개만 남긴다.
