@@ -88,7 +88,7 @@ type Phase = 'difficulty' | 'playing' | 'feedback' | 'result';
 
 export default function GameClient() {
   const router = useRouter();
-  const { containerRef, play } = useYoutubeSnippetPlayer();
+  const { containerRef, play, stop } = useYoutubeSnippetPlayer();
 
   const [phase, setPhase] = useState<Phase>('difficulty');
   const [difficulty, setDifficulty] = useState<GameDifficulty>('normal');
@@ -146,6 +146,8 @@ export default function GameClient() {
     e.preventDefault();
     if (!guess.trim() || checkAnswer.isPending) return;
 
+    stop();
+    setIsPlayingClip(false);
     try {
       const result = await checkAnswer.mutateAsync({ roundToken, index, guess });
       setGuesses((prev) => [...prev, guess]);
@@ -257,9 +259,9 @@ export default function GameClient() {
                   placeholder="곡 제목을 입력하세요"
                   value={guess}
                   onChange={(e) => setGuess(e.target.value)}
-                  disabled={isPlayingClip}
+                  autoFocus
                 />
-                <SubmitButton type="submit" disabled={isPlayingClip || checkAnswer.isPending || !guess.trim()}>
+                <SubmitButton type="submit" disabled={checkAnswer.isPending || !guess.trim()}>
                   제출
                 </SubmitButton>
               </GuessRow>
