@@ -20,6 +20,7 @@ const communityLinks = [
   { href: "/videos", label: "영상" },
   { href: "/board", label: "게시판" },
   { href: "/fanchant", label: "응원법" },
+  { href: "/game", label: "게임" },
 ];
 
 const Header = () => {

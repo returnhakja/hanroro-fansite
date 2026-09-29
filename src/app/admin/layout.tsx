@@ -143,6 +143,12 @@ export default function AdminLayout({
           >
             📖 연대기 관리
           </NavItem>
+          <NavItem
+            href="/admin/game"
+            $active={pathname.startsWith('/admin/game')}
+          >
+            🎮 음악 맞추기 관리
+          </NavItem>
         </Nav>
         <LogoutButton onClick={handleLogout}>로그아웃</LogoutButton>
       </Sidebar>
