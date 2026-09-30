@@ -44,7 +44,7 @@ export default function ResultClient({
     );
   }
 
-  const shareText = `한로로 로로시 게임에서 11.11초에 ${formatMs(result.diffMs)}초 차이로 멈췄어요!`;
+  const shareText = `로로시 게임에서 11.11초에 ${formatMs(result.diffMs)}초 차이로 멈췄어요!`;
 
   return (
     <PageWrapper>
@@ -57,7 +57,7 @@ export default function ResultClient({
 
         <ResultActions>
           <KakaoFlex
-            title="한로로 로로시 게임"
+            title="로로시 게임"
             description={shareText}
             imageUrl={`/game/rorosi/result/${result._id}/opengraph-image`}
             path={`/game/rorosi/result/${result._id}`}

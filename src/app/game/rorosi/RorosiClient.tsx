@@ -115,7 +115,7 @@ export default function RorosiClient() {
 
   const shareText = useMemo(() => {
     if (!finalResult) return '';
-    return `한로로 로로시 게임에서 11.11초에 ${formatMs(finalResult.diffMs)}초 차이로 멈췄어요!`;
+    return `로로시 게임에서 11.11초에 ${formatMs(finalResult.diffMs)}초 차이로 멈췄어요!`;
   }, [finalResult]);
 
   return (
@@ -181,7 +181,7 @@ export default function RorosiClient() {
 
             <ResultActions>
               <KakaoFlex
-                title="한로로 로로시 게임"
+                title="로로시 게임"
                 description={shareText}
                 imageUrl={`/game/rorosi/result/${finalResult.resultId}/opengraph-image`}
                 path={`/game/rorosi/result/${finalResult.resultId}`}
