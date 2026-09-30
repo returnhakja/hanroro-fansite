@@ -91,6 +91,7 @@ export default function RorosiClient() {
   const handleStop = async () => {
     const elapsedMs = performance.now() - startTimeRef.current;
     stopLoop();
+    setDisplayMs(elapsedMs);
 
     try {
       const submitted = await submitRorosi.mutateAsync(elapsedMs);
