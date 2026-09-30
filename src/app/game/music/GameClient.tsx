@@ -109,6 +109,7 @@ export default function GameClient() {
   const [startedAt, setStartedAt] = useState(0);
   const [nickname, setNickname] = useState('');
   const [registered, setRegistered] = useState(false);
+  const [sharedNickname, setSharedNickname] = useState('익명');
   const [finalScore, setFinalScore] = useState<{ resultId: string; score: number; elapsedMs: number } | null>(null);
   const [errorText, setErrorText] = useState('');
 
@@ -179,6 +180,7 @@ export default function GameClient() {
     try {
       const submitted = await submitGame.mutateAsync({ roundToken, nickname: '익명', guesses, elapsedMs });
       setFinalScore({ resultId: submitted.resultId, score: submitted.score, elapsedMs });
+      setSharedNickname('익명');
       setPhase('result');
     } catch (err) {
       setErrorText(err instanceof Error ? err.message : '채점에 실패했습니다');
@@ -190,6 +192,7 @@ export default function GameClient() {
     try {
       await updateNickname.mutateAsync({ id: finalScore.resultId, nickname: nickname.trim() });
       setRegistered(true);
+      setSharedNickname(nickname.trim());
     } catch (err) {
       setErrorText(err instanceof Error ? err.message : '등록에 실패했습니다');
     }
@@ -333,7 +336,7 @@ export default function GameClient() {
               <KakaoFlex
                 title="한로로 음악 맞추기"
                 description={shareText}
-                imageUrl={`/game/music/result/${finalScore.resultId}/opengraph-image`}
+                imageUrl={`/game/music/result/${finalScore.resultId}/opengraph-image?n=${encodeURIComponent(sharedNickname)}`}
                 path={`/game/music/result/${finalScore.resultId}`}
                 buttonTitle="나도 도전하기"
                 label="카카오톡 공유"

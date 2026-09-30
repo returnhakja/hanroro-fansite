@@ -56,7 +56,7 @@ export default function ResultClient({
           <KakaoFlex
             title="한로로 음악 맞추기"
             description={shareText}
-            imageUrl={`/game/music/result/${result._id}/opengraph-image`}
+            imageUrl={`/game/music/result/${result._id}/opengraph-image?n=${encodeURIComponent(result.nickname)}`}
             path={`/game/music/result/${result._id}`}
             buttonTitle="나도 도전하기"
             label="카카오톡 공유"

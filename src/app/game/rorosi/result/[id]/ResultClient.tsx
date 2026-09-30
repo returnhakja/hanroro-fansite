@@ -59,7 +59,7 @@ export default function ResultClient({
           <KakaoFlex
             title="로로시 게임"
             description={shareText}
-            imageUrl={`/game/rorosi/result/${result._id}/opengraph-image`}
+            imageUrl={`/game/rorosi/result/${result._id}/opengraph-image?n=${encodeURIComponent(result.nickname)}`}
             path={`/game/rorosi/result/${result._id}`}
             buttonTitle="나도 도전하기"
             label="카카오톡 공유"

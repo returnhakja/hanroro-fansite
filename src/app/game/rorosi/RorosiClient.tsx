@@ -50,6 +50,7 @@ export default function RorosiClient() {
   const [finalResult, setFinalResult] = useState<{ resultId: string; elapsedMs: number; diffMs: number } | null>(null);
   const [nickname, setNickname] = useState('');
   const [registered, setRegistered] = useState(false);
+  const [sharedNickname, setSharedNickname] = useState('익명');
   const [errorText, setErrorText] = useState('');
 
   const startTimeRef = useRef(0);
@@ -96,6 +97,7 @@ export default function RorosiClient() {
       setFinalResult(submitted);
       setNickname('');
       setRegistered(false);
+      setSharedNickname('익명');
       setPhase('result');
     } catch (err) {
       setErrorText(err instanceof Error ? err.message : '기록에 실패했습니다');
@@ -108,6 +110,7 @@ export default function RorosiClient() {
     try {
       await updateNickname.mutateAsync({ id: finalResult.resultId, nickname: nickname.trim() });
       setRegistered(true);
+      setSharedNickname(nickname.trim());
     } catch (err) {
       setErrorText(err instanceof Error ? err.message : '등록에 실패했습니다');
     }
@@ -183,7 +186,7 @@ export default function RorosiClient() {
               <KakaoFlex
                 title="로로시 게임"
                 description={shareText}
-                imageUrl={`/game/rorosi/result/${finalResult.resultId}/opengraph-image`}
+                imageUrl={`/game/rorosi/result/${finalResult.resultId}/opengraph-image?n=${encodeURIComponent(sharedNickname)}`}
                 path={`/game/rorosi/result/${finalResult.resultId}`}
                 buttonTitle="나도 도전하기"
                 label="카카오톡 공유"
