@@ -232,7 +232,7 @@ export default function GameClient() {
             <PrimaryButton type="button" onClick={handleStart} disabled={startRound.isPending}>
               {startRound.isPending ? '준비 중...' : `${DIFFICULTY_LABEL[difficulty]} 난이도로 시작`}
             </PrimaryButton>
-            <SecondaryLink href="/game/ranking">랭킹만 보기 →</SecondaryLink>
+            <SecondaryLink href="/game/music/ranking">랭킹만 보기 →</SecondaryLink>
           </>
         )}
 
@@ -333,12 +333,12 @@ export default function GameClient() {
               <KakaoFlex
                 title="한로로 음악 맞추기"
                 description={shareText}
-                imageUrl={`/game/result/${finalScore.resultId}/opengraph-image`}
-                path={`/game/result/${finalScore.resultId}`}
+                imageUrl={`/game/music/result/${finalScore.resultId}/opengraph-image`}
+                path={`/game/music/result/${finalScore.resultId}`}
                 buttonTitle="나도 도전하기"
                 label="카카오톡 공유"
               />
-              <RankLink href="/game/ranking">전체 랭킹</RankLink>
+              <RankLink href="/game/music/ranking">전체 랭킹</RankLink>
             </ResultActions>
             {errorText && <ErrorText>{errorText}</ErrorText>}
           </>
