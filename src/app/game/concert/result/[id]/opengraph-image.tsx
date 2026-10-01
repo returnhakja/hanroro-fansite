@@ -7,7 +7,7 @@ export const alt = '한로로 공연 맞추기 게임 결과';
 export const size = { width: 1080, height: 1350 };
 export const contentType = 'image/png';
 
-const STATIC_TEXT = 'HANRORO공연맞추기게임날짜장소정답님의기록HANRORO.CO.KR0123456789./';
+const STATIC_TEXT = 'HANRORO공연명맞추기게임날짜장소정답님의기록HANRORO.CO.KR0123456789./';
 
 async function loadKoreanFont(text: string): Promise<ArrayBuffer> {
   const cssUrl = `https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@700&text=${encodeURIComponent(text)}`;
@@ -24,6 +24,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
   let score = 0;
   let dateCorrectCount = 0;
   let venueCorrectCount = 0;
+  let concertNameCorrectCount = 0;
 
   try {
     if (mongoose.Types.ObjectId.isValid(id)) {
@@ -34,6 +35,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
         score = result.score;
         dateCorrectCount = result.dateCorrectCount;
         venueCorrectCount = result.venueCorrectCount;
+        concertNameCorrectCount = result.concertNameCorrectCount;
       }
     }
   } catch {
@@ -127,7 +129,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
               <div style={{ display: 'flex', fontSize: 48, color: 'rgba(243,236,224,0.55)' }}>/ 10 정답</div>
             </div>
             <div style={{ display: 'flex', fontSize: 32, marginTop: 16, color: '#DEC596' }}>
-              날짜 {dateCorrectCount}/10 · 장소 {venueCorrectCount}/10
+              날짜 {dateCorrectCount}/10 · 장소 {venueCorrectCount}/10 · 공연명 {concertNameCorrectCount}/10
             </div>
             <div style={{ display: 'flex', fontSize: 30, marginTop: 24 }}>{nickname}님의 기록</div>
           </div>

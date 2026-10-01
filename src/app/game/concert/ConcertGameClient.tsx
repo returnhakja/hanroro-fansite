@@ -70,12 +70,14 @@ export default function ConcertGameClient() {
   const [index, setIndex] = useState(0);
   const [pickedDate, setPickedDate] = useState('');
   const [pickedVenue, setPickedVenue] = useState('');
-  const [answers, setAnswers] = useState<{ questionId: string; pickedDate: string; pickedVenue: string }[]>([]);
+  const [pickedConcertName, setPickedConcertName] = useState('');
+  const [answers, setAnswers] = useState<{ questionId: string; pickedDate: string; pickedVenue: string; pickedConcertName: string }[]>([]);
 
   const [resultId, setResultId] = useState('');
   const [score, setScore] = useState(0);
   const [dateCorrectCount, setDateCorrectCount] = useState(0);
   const [venueCorrectCount, setVenueCorrectCount] = useState(0);
+  const [concertNameCorrectCount, setConcertNameCorrectCount] = useState(0);
   const [reviewResults, setReviewResults] = useState<ConcertGameAnswerResult[]>([]);
 
   const [nickname, setNickname] = useState('');
@@ -88,7 +90,7 @@ export default function ConcertGameClient() {
   const updateNickname = useUpdateConcertGameNickname();
 
   const wrongReview = useMemo(
-    () => reviewResults.filter((r) => !(r.dateCorrect && r.venueCorrect)),
+    () => reviewResults.filter((r) => !(r.dateCorrect && r.venueCorrect && r.concertNameCorrect)),
     [reviewResults]
   );
 
@@ -102,6 +104,7 @@ export default function ConcertGameClient() {
       setAnswers([]);
       setPickedDate('');
       setPickedVenue('');
+      setPickedConcertName('');
       setPhase('playing');
     } catch (err) {
       setErrorText(err instanceof Error ? err.message : '문제를 불러올 수 없습니다');
@@ -110,13 +113,14 @@ export default function ConcertGameClient() {
 
   const handleNext = async () => {
     const current = questions[index];
-    const nextAnswers = [...answers, { questionId: current.questionId, pickedDate, pickedVenue }];
+    const nextAnswers = [...answers, { questionId: current.questionId, pickedDate, pickedVenue, pickedConcertName }];
 
     if (index + 1 < questions.length) {
       setAnswers(nextAnswers);
       setIndex(index + 1);
       setPickedDate('');
       setPickedVenue('');
+      setPickedConcertName('');
       return;
     }
 
@@ -126,6 +130,7 @@ export default function ConcertGameClient() {
       setScore(submitted.score);
       setDateCorrectCount(submitted.dateCorrectCount);
       setVenueCorrectCount(submitted.venueCorrectCount);
+      setConcertNameCorrectCount(submitted.concertNameCorrectCount);
       setReviewResults(submitted.results);
       setNickname('');
       setRegistered(false);
@@ -217,10 +222,26 @@ export default function ConcertGameClient() {
               </ChoiceGrid>
             </QuestionCard>
 
+            <QuestionCard>
+              <QuestionLabel>Q3. 이 공연의 이름은 무엇일까요?</QuestionLabel>
+              <ChoiceGrid>
+                {current.concertNameOptions.map((c) => (
+                  <ChoiceButton
+                    key={c}
+                    type="button"
+                    $selected={pickedConcertName === c}
+                    onClick={() => setPickedConcertName(c)}
+                  >
+                    {c}
+                  </ChoiceButton>
+                ))}
+              </ChoiceGrid>
+            </QuestionCard>
+
             <NextButton
               type="button"
               onClick={handleNext}
-              disabled={!pickedDate || !pickedVenue || submitGame.isPending}
+              disabled={!pickedDate || !pickedVenue || !pickedConcertName || submitGame.isPending}
             >
               {index + 1 < questions.length ? '다음 문제' : submitGame.isPending ? '채점 중...' : '결과 보기'}
             </NextButton>
@@ -238,7 +259,7 @@ export default function ConcertGameClient() {
               </ScoreCircle>
               <GradeBadge>찐팬 등급 : {gradeLabel(score)}</GradeBadge>
               <BreakdownText>
-                날짜 정답 {dateCorrectCount}/{questions.length} · 장소 정답 {venueCorrectCount}/{questions.length}
+                날짜 정답 {dateCorrectCount}/{questions.length} · 장소 정답 {venueCorrectCount}/{questions.length} · 공연명 정답 {concertNameCorrectCount}/{questions.length}
               </BreakdownText>
             </ResultWrap>
 
@@ -247,7 +268,8 @@ export default function ConcertGameClient() {
                 {wrongReview.map((r) => (
                   <ReviewItem key={r.questionId}>
                     {!r.dateCorrect && <>날짜 정답은 <b>{formatDateLabel(r.correctDate)}</b>였어요. </>}
-                    {!r.venueCorrect && <>장소 정답은 <b>{r.correctVenue}</b>였어요.</>}
+                    {!r.venueCorrect && <>장소 정답은 <b>{r.correctVenue}</b>였어요. </>}
+                    {!r.concertNameCorrect && <>공연명 정답은 <b>{r.correctConcertName}</b>였어요.</>}
                   </ReviewItem>
                 ))}
               </ReviewList>

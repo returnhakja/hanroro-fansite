@@ -41,6 +41,7 @@ export async function GET() {
       credit: q.credit ?? '',
       dateOptions: shuffle([formatDate(q.correctDate), ...q.wrongDates.map(formatDate)]),
       venueOptions: shuffle([q.correctVenue, ...q.wrongVenues]),
+      concertNameOptions: shuffle([q.correctConcertName, ...q.wrongConcertNames]),
     }));
 
     return NextResponse.json({ roundToken, questions });

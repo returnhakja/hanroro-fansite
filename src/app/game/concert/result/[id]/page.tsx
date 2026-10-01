@@ -61,6 +61,7 @@ export default async function ConcertGameResultPage({
       score: result.score,
       dateCorrectCount: result.dateCorrectCount,
       venueCorrectCount: result.venueCorrectCount,
+      concertNameCorrectCount: result.concertNameCorrectCount,
       createdAt: result.createdAt.toISOString(),
     };
   }

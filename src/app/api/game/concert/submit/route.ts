@@ -15,6 +15,7 @@ interface AnswerInput {
   questionId?: string;
   pickedDate?: string;
   pickedVenue?: string;
+  pickedConcertName?: string;
 }
 
 // POST /api/game/concert/submit - 라운드 토큰을 검증하고 서버가 보관한 정답과 비교해 채점한다.
@@ -50,6 +51,7 @@ export async function POST(request: NextRequest) {
 
     let dateCorrectCount = 0;
     let venueCorrectCount = 0;
+    let concertNameCorrectCount = 0;
     let score = 0;
 
     const results = payload.questionIds.map((questionId, i) => {
@@ -57,25 +59,42 @@ export async function POST(request: NextRequest) {
       const question = questionMap.get(questionId);
 
       if (!question || !answer || answer.questionId !== questionId) {
-        return { questionId, imageUrl: question?.imageUrl ?? '', pickedDate: '', pickedVenue: '', correctDate: question ? formatDate(question.correctDate) : '', correctVenue: question?.correctVenue ?? '', dateCorrect: false, venueCorrect: false };
+        return {
+          questionId,
+          imageUrl: question?.imageUrl ?? '',
+          pickedDate: '',
+          pickedVenue: '',
+          pickedConcertName: '',
+          correctDate: question ? formatDate(question.correctDate) : '',
+          correctVenue: question?.correctVenue ?? '',
+          correctConcertName: question?.correctConcertName ?? '',
+          dateCorrect: false,
+          venueCorrect: false,
+          concertNameCorrect: false,
+        };
       }
 
       const correctDate = formatDate(question.correctDate);
       const dateCorrect = answer.pickedDate === correctDate;
       const venueCorrect = answer.pickedVenue === question.correctVenue;
+      const concertNameCorrect = answer.pickedConcertName === question.correctConcertName;
       if (dateCorrect) dateCorrectCount++;
       if (venueCorrect) venueCorrectCount++;
-      if (dateCorrect && venueCorrect) score++;
+      if (concertNameCorrect) concertNameCorrectCount++;
+      if (dateCorrect && venueCorrect && concertNameCorrect) score++;
 
       return {
         questionId,
         imageUrl: question.imageUrl,
         pickedDate: answer.pickedDate ?? '',
         pickedVenue: answer.pickedVenue ?? '',
+        pickedConcertName: answer.pickedConcertName ?? '',
         correctDate,
         correctVenue: question.correctVenue,
+        correctConcertName: question.correctConcertName,
         dateCorrect,
         venueCorrect,
+        concertNameCorrect,
       };
     });
 
@@ -89,6 +108,7 @@ export async function POST(request: NextRequest) {
       score,
       dateCorrectCount,
       venueCorrectCount,
+      concertNameCorrectCount,
     });
 
     const res = NextResponse.json({
@@ -96,6 +116,7 @@ export async function POST(request: NextRequest) {
       score,
       dateCorrectCount,
       venueCorrectCount,
+      concertNameCorrectCount,
       results,
     });
     if (isNewVoter) {

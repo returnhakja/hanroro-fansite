@@ -52,7 +52,7 @@ export default function ResultClient({
             <span>정답</span>
           </ScoreCircle>
           <BreakdownText>
-            날짜 정답 {result.dateCorrectCount}/10 · 장소 정답 {result.venueCorrectCount}/10
+            날짜 정답 {result.dateCorrectCount}/10 · 장소 정답 {result.venueCorrectCount}/10 · 공연명 정답 {result.concertNameCorrectCount}/10
           </BreakdownText>
         </ResultWrap>
 

@@ -7,8 +7,10 @@ interface QuestionInput {
   imageUrl?: string;
   correctDate?: string;
   correctVenue?: string;
+  correctConcertName?: string;
   wrongDates?: string[];
   wrongVenues?: string[];
+  wrongConcertNames?: string[];
   credit?: string;
 }
 
@@ -16,11 +18,15 @@ function validatePayload(body: QuestionInput): string | null {
   if (!body.imageUrl?.trim()) return '이미지를 등록해주세요';
   if (!body.correctDate || Number.isNaN(Date.parse(body.correctDate))) return '정답 날짜를 입력해주세요';
   if (!body.correctVenue?.trim()) return '정답 장소를 입력해주세요';
+  if (!body.correctConcertName?.trim()) return '정답 공연명을 입력해주세요';
   if (!Array.isArray(body.wrongDates) || body.wrongDates.length !== 3 || body.wrongDates.some((d) => Number.isNaN(Date.parse(d)))) {
     return '오답 날짜 3개를 모두 입력해주세요';
   }
   if (!Array.isArray(body.wrongVenues) || body.wrongVenues.length !== 3 || body.wrongVenues.some((v) => !v?.trim())) {
     return '오답 장소 3개를 모두 입력해주세요';
+  }
+  if (!Array.isArray(body.wrongConcertNames) || body.wrongConcertNames.length !== 3 || body.wrongConcertNames.some((v) => !v?.trim())) {
+    return '오답 공연명 3개를 모두 입력해주세요';
   }
   return null;
 }
@@ -37,8 +43,10 @@ async function handleGet() {
         imageUrl: q.imageUrl,
         correctDate: q.correctDate,
         correctVenue: q.correctVenue,
+        correctConcertName: q.correctConcertName,
         wrongDates: q.wrongDates,
         wrongVenues: q.wrongVenues,
+        wrongConcertNames: q.wrongConcertNames,
         credit: q.credit ?? '',
         isActive: q.isActive,
         createdAt: q.createdAt,
@@ -67,8 +75,10 @@ async function handlePost(req: AuthenticatedRequest) {
       imageUrl: body.imageUrl!.trim(),
       correctDate: new Date(body.correctDate!),
       correctVenue: body.correctVenue!.trim(),
+      correctConcertName: body.correctConcertName!.trim(),
       wrongDates: body.wrongDates!.map((d) => new Date(d)),
       wrongVenues: body.wrongVenues!.map((v) => v.trim()),
+      wrongConcertNames: body.wrongConcertNames!.map((v) => v.trim()),
       credit: body.credit?.trim() || undefined,
     });
 

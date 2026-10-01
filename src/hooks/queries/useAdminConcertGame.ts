@@ -7,8 +7,10 @@ export interface AdminConcertQuestion {
   imageUrl: string;
   correctDate: string;
   correctVenue: string;
+  correctConcertName: string;
   wrongDates: string[];
   wrongVenues: string[];
+  wrongConcertNames: string[];
   credit: string;
   isActive: boolean;
   createdAt: string;
@@ -18,8 +20,10 @@ export interface ConcertQuestionFormValues {
   imageUrl: string;
   correctDate: string;
   correctVenue: string;
+  correctConcertName: string;
   wrongDates: string[];
   wrongVenues: string[];
+  wrongConcertNames: string[];
   credit: string;
   isActive?: boolean;
 }
@@ -30,6 +34,7 @@ export interface AdminConcertResultRow {
   score: number;
   dateCorrectCount: number;
   venueCorrectCount: number;
+  concertNameCorrectCount: number;
   createdAt: string;
 }
 

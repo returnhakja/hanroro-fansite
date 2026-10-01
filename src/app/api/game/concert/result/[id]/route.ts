@@ -29,6 +29,7 @@ export async function GET(
         score: result.score,
         dateCorrectCount: result.dateCorrectCount,
         venueCorrectCount: result.venueCorrectCount,
+        concertNameCorrectCount: result.concertNameCorrectCount,
         createdAt: result.createdAt,
       },
     });
@@ -81,6 +82,7 @@ export async function PATCH(
         score: result.score,
         dateCorrectCount: result.dateCorrectCount,
         venueCorrectCount: result.venueCorrectCount,
+        concertNameCorrectCount: result.concertNameCorrectCount,
         createdAt: result.createdAt,
       },
     });

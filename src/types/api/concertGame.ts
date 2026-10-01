@@ -4,6 +4,7 @@ export interface ConcertGameQuestionView {
   credit: string;
   dateOptions: string[];
   venueOptions: string[];
+  concertNameOptions: string[];
 }
 
 export interface ConcertGameRoundResponse {
@@ -16,10 +17,13 @@ export interface ConcertGameAnswerResult {
   imageUrl: string;
   pickedDate: string;
   pickedVenue: string;
+  pickedConcertName: string;
   correctDate: string;
   correctVenue: string;
+  correctConcertName: string;
   dateCorrect: boolean;
   venueCorrect: boolean;
+  concertNameCorrect: boolean;
 }
 
 export interface ConcertGameSubmitResponse {
@@ -27,6 +31,7 @@ export interface ConcertGameSubmitResponse {
   score: number;
   dateCorrectCount: number;
   venueCorrectCount: number;
+  concertNameCorrectCount: number;
   results: ConcertGameAnswerResult[];
 }
 
@@ -46,5 +51,6 @@ export interface ConcertGameResultDetail {
   score: number;
   dateCorrectCount: number;
   venueCorrectCount: number;
+  concertNameCorrectCount: number;
   createdAt: string;
 }

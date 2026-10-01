@@ -1,13 +1,15 @@
 import mongoose, { Document, Schema, Model } from 'mongoose';
 
-// 공연 날짜·장소 맞추기 게임의 문제 풀. 무대 사진 한 장에 정답 날짜/장소와
+// 공연 날짜·장소·공연명 맞추기 게임의 문제 풀. 무대 사진 한 장에 정답 날짜/장소/공연명과
 // 4지선다 구성을 위한 오답 3개씩을 함께 등록한다.
 export interface IConcertGameQuestion extends Document {
   imageUrl: string;
   correctDate: Date;
   correctVenue: string;
+  correctConcertName: string;
   wrongDates: Date[];
   wrongVenues: string[];
+  wrongConcertNames: string[];
   credit?: string;
   isActive: boolean;
   createdAt: Date;
@@ -23,6 +25,7 @@ const concertGameQuestionSchema = new Schema<IConcertGameQuestion>(
     imageUrl: { type: String, required: true, trim: true },
     correctDate: { type: Date, required: true },
     correctVenue: { type: String, required: true, trim: true },
+    correctConcertName: { type: String, required: true, trim: true },
     wrongDates: {
       type: [Date],
       required: true,
@@ -32,6 +35,11 @@ const concertGameQuestionSchema = new Schema<IConcertGameQuestion>(
       type: [String],
       required: true,
       validate: { validator: exactlyThree, message: '오답 장소는 정확히 3개여야 해요' },
+    },
+    wrongConcertNames: {
+      type: [String],
+      required: true,
+      validate: { validator: exactlyThree, message: '오답 공연명은 정확히 3개여야 해요' },
     },
     credit: { type: String, trim: true },
     isActive: { type: Boolean, default: true },

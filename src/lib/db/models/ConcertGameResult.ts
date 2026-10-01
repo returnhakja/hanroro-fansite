@@ -7,6 +7,7 @@ export interface IConcertGameResult extends Document {
   score: number;
   dateCorrectCount: number;
   venueCorrectCount: number;
+  concertNameCorrectCount: number;
   createdAt: Date;
 }
 
@@ -17,6 +18,7 @@ const concertGameResultSchema = new Schema<IConcertGameResult>(
     score: { type: Number, required: true, min: 0, max: 10 },
     dateCorrectCount: { type: Number, required: true, min: 0, max: 10 },
     venueCorrectCount: { type: Number, required: true, min: 0, max: 10 },
+    concertNameCorrectCount: { type: Number, required: true, min: 0, max: 10 },
   },
   { timestamps: { createdAt: true, updatedAt: false } }
 );

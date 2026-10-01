@@ -18,8 +18,10 @@ const EMPTY_FORM: ConcertQuestionFormValues = {
   imageUrl: '',
   correctDate: '',
   correctVenue: '',
+  correctConcertName: '',
   wrongDates: ['', '', ''],
   wrongVenues: ['', '', ''],
+  wrongConcertNames: ['', '', ''],
   credit: '',
   isActive: true,
 };
@@ -56,8 +58,10 @@ export default function AdminConcertGamePage() {
       imageUrl: q.imageUrl,
       correctDate: toDateInputValue(q.correctDate),
       correctVenue: q.correctVenue,
+      correctConcertName: q.correctConcertName,
       wrongDates: q.wrongDates.map(toDateInputValue),
       wrongVenues: [...q.wrongVenues],
+      wrongConcertNames: [...q.wrongConcertNames],
       credit: q.credit,
       isActive: q.isActive,
     });
@@ -95,12 +99,22 @@ export default function AdminConcertGamePage() {
     });
   };
 
+  const updateWrongConcertName = (i: number, value: string) => {
+    setForm((prev) => {
+      const next = [...prev.wrongConcertNames];
+      next[i] = value;
+      return { ...prev, wrongConcertNames: next };
+    });
+  };
+
   const validate = (): string | null => {
     if (!form.imageUrl.trim()) return '이미지를 등록해주세요';
     if (!form.correctDate) return '정답 날짜를 입력해주세요';
     if (!form.correctVenue.trim()) return '정답 장소를 입력해주세요';
+    if (!form.correctConcertName.trim()) return '정답 공연명을 입력해주세요';
     if (form.wrongDates.some((d) => !d)) return '오답 날짜 3개를 모두 입력해주세요';
     if (form.wrongVenues.some((v) => !v.trim())) return '오답 장소 3개를 모두 입력해주세요';
+    if (form.wrongConcertNames.some((v) => !v.trim())) return '오답 공연명 3개를 모두 입력해주세요';
     return null;
   };
 
@@ -130,8 +144,10 @@ export default function AdminConcertGamePage() {
           imageUrl: q.imageUrl,
           correctDate: toDateInputValue(q.correctDate),
           correctVenue: q.correctVenue,
+          correctConcertName: q.correctConcertName,
           wrongDates: q.wrongDates.map(toDateInputValue),
           wrongVenues: q.wrongVenues,
+          wrongConcertNames: q.wrongConcertNames,
           credit: q.credit,
           isActive: !q.isActive,
         },
@@ -233,6 +249,16 @@ export default function AdminConcertGamePage() {
           </FieldRow>
 
           <FieldBlock>
+            <FieldLabel>정답 공연명</FieldLabel>
+            <TextInput
+              type="text"
+              placeholder="예: 2024 한로로 단독 콘서트"
+              value={form.correctConcertName}
+              onChange={(e) => setForm((p) => ({ ...p, correctConcertName: e.target.value }))}
+            />
+          </FieldBlock>
+
+          <FieldBlock>
             <FieldLabel>오답 날짜 3개</FieldLabel>
             <FieldRow3>
               {form.wrongDates.map((d, i) => (
@@ -246,6 +272,15 @@ export default function AdminConcertGamePage() {
             <FieldRow3>
               {form.wrongVenues.map((v, i) => (
                 <TextInput key={i} type="text" placeholder={`오답 장소 ${i + 1}`} value={v} onChange={(e) => updateWrongVenue(i, e.target.value)} />
+              ))}
+            </FieldRow3>
+          </FieldBlock>
+
+          <FieldBlock>
+            <FieldLabel>오답 공연명 3개</FieldLabel>
+            <FieldRow3>
+              {form.wrongConcertNames.map((v, i) => (
+                <TextInput key={i} type="text" placeholder={`오답 공연명 ${i + 1}`} value={v} onChange={(e) => updateWrongConcertName(i, e.target.value)} />
               ))}
             </FieldRow3>
           </FieldBlock>
@@ -291,6 +326,7 @@ export default function AdminConcertGamePage() {
                   <th>사진</th>
                   <th>정답 날짜</th>
                   <th>정답 장소</th>
+                  <th>정답 공연명</th>
                   <th>상태</th>
                   <th></th>
                 </tr>
@@ -301,6 +337,7 @@ export default function AdminConcertGamePage() {
                     <td><RowThumb src={q.imageUrl} alt="" /></td>
                     <td>{toDateInputValue(q.correctDate)}</td>
                     <td>{q.correctVenue}</td>
+                    <td>{q.correctConcertName}</td>
                     <td>
                       <StatusTag $set={q.isActive} onClick={() => handleToggleActive(q)}>
                         {q.isActive ? '활성' : '비활성'}
@@ -339,6 +376,7 @@ export default function AdminConcertGamePage() {
                   <th>점수</th>
                   <th>날짜 정답</th>
                   <th>장소 정답</th>
+                  <th>공연명 정답</th>
                   <th>등록일</th>
                   <th></th>
                 </tr>
@@ -350,6 +388,7 @@ export default function AdminConcertGamePage() {
                     <td>{r.score}/10</td>
                     <td>{r.dateCorrectCount}/10</td>
                     <td>{r.venueCorrectCount}/10</td>
+                    <td>{r.concertNameCorrectCount}/10</td>
                     <td>{new Date(r.createdAt).toLocaleDateString('ko-KR')}</td>
                     <td>
                       <DelButton type="button" onClick={() => handleDeleteResult(r._id)}>삭제</DelButton>

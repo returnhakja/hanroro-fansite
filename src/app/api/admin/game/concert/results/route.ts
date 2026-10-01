@@ -16,6 +16,7 @@ async function handleGet() {
         score: r.score,
         dateCorrectCount: r.dateCorrectCount,
         venueCorrectCount: r.venueCorrectCount,
+        concertNameCorrectCount: r.concertNameCorrectCount,
         createdAt: r.createdAt,
       })),
     });
