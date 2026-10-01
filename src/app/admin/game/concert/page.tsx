@@ -12,6 +12,7 @@ import {
   type AdminConcertQuestion,
   type ConcertQuestionFormValues,
 } from '@/hooks/queries/useAdminConcertGame';
+import { useAdminConcerts, type Concert } from '@/hooks/queries/useConcerts';
 import { uploadAdminImage } from '@/lib/storage/uploadClient';
 
 const EMPTY_FORM: ConcertQuestionFormValues = {
@@ -30,6 +31,17 @@ function toDateInputValue(iso: string): string {
   return iso ? iso.slice(0, 10) : '';
 }
 
+function concertLabel(c: Concert): string {
+  return `${c.title} · ${c.venue} · ${toDateInputValue(c.startDate)}`;
+}
+
+function findMatchingConcertId(concerts: Concert[], date: string, venue: string, name: string): string {
+  const match = concerts.find(
+    (c) => toDateInputValue(c.startDate) === date && c.venue === venue && c.title === name
+  );
+  return match?._id ?? '';
+}
+
 export default function AdminConcertGamePage() {
   const { data: questions = [], isLoading: questionsLoading } = useAdminConcertQuestions();
   const createQuestion = useCreateConcertQuestion();
@@ -37,9 +49,12 @@ export default function AdminConcertGamePage() {
   const deleteQuestion = useDeleteConcertQuestion();
   const { data: results = [], isLoading: resultsLoading } = useAdminConcertResults();
   const deleteResult = useDeleteAdminConcertResult();
+  const { data: concerts = [] } = useAdminConcerts();
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<ConcertQuestionFormValues>(EMPTY_FORM);
+  const [correctConcertId, setCorrectConcertId] = useState('');
+  const [wrongConcertIds, setWrongConcertIds] = useState(['', '', '']);
   const [imageMode, setImageMode] = useState<'url' | 'upload'>('url');
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [formError, setFormError] = useState('');
@@ -47,6 +62,8 @@ export default function AdminConcertGamePage() {
   const resetForm = () => {
     setEditingId(null);
     setForm(EMPTY_FORM);
+    setCorrectConcertId('');
+    setWrongConcertIds(['', '', '']);
     setImageMode('url');
     setUploadProgress(null);
     setFormError('');
@@ -54,20 +71,56 @@ export default function AdminConcertGamePage() {
 
   const startEdit = (q: AdminConcertQuestion) => {
     setEditingId(q._id);
+    const correctDate = toDateInputValue(q.correctDate);
+    const wrongDates = q.wrongDates.map(toDateInputValue);
     setForm({
       imageUrl: q.imageUrl,
-      correctDate: toDateInputValue(q.correctDate),
+      correctDate,
       correctVenue: q.correctVenue,
       correctConcertName: q.correctConcertName,
-      wrongDates: q.wrongDates.map(toDateInputValue),
+      wrongDates,
       wrongVenues: [...q.wrongVenues],
       wrongConcertNames: [...q.wrongConcertNames],
       credit: q.credit,
       isActive: q.isActive,
     });
+    // 기존 문제가 지금 등록된 공연 일정과 완전히 일치하면 선택지에 자동으로 표시(최선 노력, 못 찾아도 값은 그대로 유지됨)
+    setCorrectConcertId(findMatchingConcertId(concerts, correctDate, q.correctVenue, q.correctConcertName));
+    setWrongConcertIds(
+      wrongDates.map((d, i) => findMatchingConcertId(concerts, d, q.wrongVenues[i], q.wrongConcertNames[i]))
+    );
     setImageMode('url');
     setFormError('');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const applyCorrectConcert = (id: string) => {
+    setCorrectConcertId(id);
+    const c = concerts.find((item) => item._id === id);
+    setForm((p) => ({
+      ...p,
+      correctDate: c ? toDateInputValue(c.startDate) : '',
+      correctVenue: c ? c.venue : '',
+      correctConcertName: c ? c.title : '',
+    }));
+  };
+
+  const applyWrongConcert = (i: number, id: string) => {
+    setWrongConcertIds((prev) => {
+      const next = [...prev];
+      next[i] = id;
+      return next;
+    });
+    const c = concerts.find((item) => item._id === id);
+    setForm((prev) => {
+      const wrongDates = [...prev.wrongDates];
+      const wrongVenues = [...prev.wrongVenues];
+      const wrongConcertNames = [...prev.wrongConcertNames];
+      wrongDates[i] = c ? toDateInputValue(c.startDate) : '';
+      wrongVenues[i] = c ? c.venue : '';
+      wrongConcertNames[i] = c ? c.title : '';
+      return { ...prev, wrongDates, wrongVenues, wrongConcertNames };
+    });
   };
 
   const handleFileUpload = async (file: File) => {
@@ -83,38 +136,18 @@ export default function AdminConcertGamePage() {
     }
   };
 
-  const updateWrongDate = (i: number, value: string) => {
-    setForm((prev) => {
-      const next = [...prev.wrongDates];
-      next[i] = value;
-      return { ...prev, wrongDates: next };
-    });
-  };
-
-  const updateWrongVenue = (i: number, value: string) => {
-    setForm((prev) => {
-      const next = [...prev.wrongVenues];
-      next[i] = value;
-      return { ...prev, wrongVenues: next };
-    });
-  };
-
-  const updateWrongConcertName = (i: number, value: string) => {
-    setForm((prev) => {
-      const next = [...prev.wrongConcertNames];
-      next[i] = value;
-      return { ...prev, wrongConcertNames: next };
-    });
-  };
-
   const validate = (): string | null => {
     if (!form.imageUrl.trim()) return '이미지를 등록해주세요';
-    if (!form.correctDate) return '정답 날짜를 입력해주세요';
-    if (!form.correctVenue.trim()) return '정답 장소를 입력해주세요';
-    if (!form.correctConcertName.trim()) return '정답 공연명을 입력해주세요';
-    if (form.wrongDates.some((d) => !d)) return '오답 날짜 3개를 모두 입력해주세요';
-    if (form.wrongVenues.some((v) => !v.trim())) return '오답 장소 3개를 모두 입력해주세요';
-    if (form.wrongConcertNames.some((v) => !v.trim())) return '오답 공연명 3개를 모두 입력해주세요';
+    if (!form.correctDate || !form.correctVenue.trim() || !form.correctConcertName.trim()) {
+      return '정답 공연을 선택해주세요';
+    }
+    if (form.wrongDates.some((d) => !d) || form.wrongVenues.some((v) => !v.trim()) || form.wrongConcertNames.some((v) => !v.trim())) {
+      return '오답 공연 3개를 모두 선택해주세요';
+    }
+    const chosenIds = [correctConcertId, ...wrongConcertIds].filter(Boolean);
+    if (new Set(chosenIds).size !== chosenIds.length) {
+      return '같은 공연을 중복으로 선택했어요. 서로 다른 공연 4개를 선택해주세요';
+    }
     return null;
   };
 
@@ -184,7 +217,7 @@ export default function AdminConcertGamePage() {
       <PageHead>
         <Eyebrow>Admin · 공연 맞추기</Eyebrow>
         <h1>공연 맞추기 게임 관리</h1>
-        <Lede>무대 사진과 정답 날짜·장소, 오답 3개씩을 등록해요. 플레이 때마다 활성 문제 중 10개를 무작위로 출제해요.</Lede>
+        <Lede>무대 사진을 등록하고, 정답/오답 공연을 기존 공연 일정 중에서 골라요. 플레이 때마다 활성 문제 중 10개를 무작위로 출제해요.</Lede>
       </PageHead>
 
       <Panel>
@@ -228,59 +261,26 @@ export default function AdminConcertGamePage() {
             )}
           </FieldBlock>
 
-          <FieldRow>
-            <FieldBlock>
-              <FieldLabel>정답 날짜</FieldLabel>
-              <DateInput
-                type="date"
-                value={form.correctDate}
-                onChange={(e) => setForm((p) => ({ ...p, correctDate: e.target.value }))}
-              />
-            </FieldBlock>
-            <FieldBlock>
-              <FieldLabel>정답 장소</FieldLabel>
-              <TextInput
-                type="text"
-                placeholder="예: 서울"
-                value={form.correctVenue}
-                onChange={(e) => setForm((p) => ({ ...p, correctVenue: e.target.value }))}
-              />
-            </FieldBlock>
-          </FieldRow>
-
           <FieldBlock>
-            <FieldLabel>정답 공연명</FieldLabel>
-            <TextInput
-              type="text"
-              placeholder="예: 2024 한로로 단독 콘서트"
-              value={form.correctConcertName}
-              onChange={(e) => setForm((p) => ({ ...p, correctConcertName: e.target.value }))}
-            />
-          </FieldBlock>
-
-          <FieldBlock>
-            <FieldLabel>오답 날짜 3개</FieldLabel>
-            <FieldRow3>
-              {form.wrongDates.map((d, i) => (
-                <DateInput key={i} type="date" value={d} onChange={(e) => updateWrongDate(i, e.target.value)} />
+            <FieldLabel>정답 공연 (날짜·장소·공연명이 한 번에 채워져요)</FieldLabel>
+            <SelectInput value={correctConcertId} onChange={(e) => applyCorrectConcert(e.target.value)}>
+              <option value="">공연 선택...</option>
+              {concerts.map((c) => (
+                <option key={c._id} value={c._id}>{concertLabel(c)}</option>
               ))}
-            </FieldRow3>
+            </SelectInput>
           </FieldBlock>
 
           <FieldBlock>
-            <FieldLabel>오답 장소 3개</FieldLabel>
+            <FieldLabel>오답 공연 3개 (4지선다용 헷갈릴 만한 공연을 골라주세요)</FieldLabel>
             <FieldRow3>
-              {form.wrongVenues.map((v, i) => (
-                <TextInput key={i} type="text" placeholder={`오답 장소 ${i + 1}`} value={v} onChange={(e) => updateWrongVenue(i, e.target.value)} />
-              ))}
-            </FieldRow3>
-          </FieldBlock>
-
-          <FieldBlock>
-            <FieldLabel>오답 공연명 3개</FieldLabel>
-            <FieldRow3>
-              {form.wrongConcertNames.map((v, i) => (
-                <TextInput key={i} type="text" placeholder={`오답 공연명 ${i + 1}`} value={v} onChange={(e) => updateWrongConcertName(i, e.target.value)} />
+              {wrongConcertIds.map((id, i) => (
+                <SelectInput key={i} value={id} onChange={(e) => applyWrongConcert(i, e.target.value)}>
+                  <option value="">공연 선택...</option>
+                  {concerts.map((c) => (
+                    <option key={c._id} value={c._id}>{concertLabel(c)}</option>
+                  ))}
+                </SelectInput>
               ))}
             </FieldRow3>
           </FieldBlock>
@@ -485,12 +485,6 @@ const FieldBlock = styled.div`
   gap: 0.4rem;
 `;
 
-const FieldRow = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
-`;
-
 const FieldRow3 = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -530,13 +524,14 @@ const TextInput = styled.input`
   &:focus { outline: none; border-color: #8b7355; }
 `;
 
-const DateInput = styled.input`
+const SelectInput = styled.select`
   padding: 8px 10px;
   border: 1px solid #ddd;
   border-radius: 6px;
   font-size: 0.82rem;
   width: 100%;
   box-sizing: border-box;
+  background: #fff;
 
   &:focus { outline: none; border-color: #8b7355; }
 `;
