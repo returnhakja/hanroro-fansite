@@ -69,5 +69,9 @@ export const queryKeys = {
     adminResults: ['admin', 'game', 'results'] as const,
     rorosiRanking: ['game', 'rorosi', 'ranking'] as const,
     rorosiResult: (id: string) => ['game', 'rorosi', 'result', id] as const,
+    concertRanking: ['game', 'concert', 'ranking'] as const,
+    concertResult: (id: string) => ['game', 'concert', 'result', id] as const,
+    adminConcertQuestions: ['admin', 'game', 'concert', 'questions'] as const,
+    adminConcertResults: ['admin', 'game', 'concert', 'results'] as const,
   },
 } as const;

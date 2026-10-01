@@ -6,6 +6,8 @@
  * 3) 공개 URL(publicUrl) 반환
  */
 
+import { getAuthHeader } from '@/lib/auth/authHeader';
+
 export interface UploadToR2Options {
   /** 'gallery' | 'board' | 'review' */
   type?: 'gallery' | 'board' | 'review';
@@ -65,5 +67,32 @@ export async function uploadToR2(
   await putWithProgress(uploadUrl, file, onProgress);
 
   // 3) 공개 URL 반환
+  return publicUrl;
+}
+
+/**
+ * 관리자 전용 이미지 업로드(/api/admin/upload, JWT 인증) → R2 공개 URL 반환
+ * @returns 업로드된 파일의 공개 URL
+ */
+export async function uploadAdminImage(
+  file: File,
+  onProgress?: (percentage: number) => void
+): Promise<string> {
+  const res = await fetch('/api/admin/upload?type=concertgame', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+    body: JSON.stringify({ filename: file.name, contentType: file.type }),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || '업로드 URL 발급에 실패했습니다');
+  }
+  const { uploadUrl, publicUrl } = (await res.json()) as {
+    uploadUrl: string;
+    publicUrl: string;
+  };
+
+  await putWithProgress(uploadUrl, file, onProgress);
+
   return publicUrl;
 }
