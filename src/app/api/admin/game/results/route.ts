@@ -3,14 +3,14 @@ import { requireAuth } from '@/lib/auth/middleware';
 import connectDB from '@/lib/db/mongoose';
 import GameResult from '@/lib/db/models/GameResult';
 
-// GET /api/admin/game/results - 최근 게임 결과 목록 (모더레이션용)
+// GET /api/admin/game/results - 최근 게임 결과 목록 (모더레이션용, 최신 200건까지만)
 async function handleGet() {
   try {
     await connectDB();
-    const results = await GameResult.find()
-      .sort({ createdAt: -1 })
-      .limit(200)
-      .lean();
+    const [results, totalCount] = await Promise.all([
+      GameResult.find().sort({ createdAt: -1 }).limit(200).lean(),
+      GameResult.countDocuments(),
+    ]);
 
     return NextResponse.json({
       results: results.map((r) => ({
@@ -21,6 +21,7 @@ async function handleGet() {
         elapsedMs: r.elapsedMs,
         createdAt: r.createdAt,
       })),
+      totalCount,
     });
   } catch (error) {
     console.error('게임 결과 목록 조회 오류:', error);

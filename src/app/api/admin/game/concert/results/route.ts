@@ -3,11 +3,14 @@ import { requireAuth } from '@/lib/auth/middleware';
 import connectDB from '@/lib/db/mongoose';
 import ConcertGameResult from '@/lib/db/models/ConcertGameResult';
 
-// GET /api/admin/game/concert/results - 전체 랭킹 기록 조회(어뷰징 관리용)
+// GET /api/admin/game/concert/results - 최근 랭킹 기록 조회(어뷰징 관리용, 최신 200건까지만)
 async function handleGet() {
   try {
     await connectDB();
-    const results = await ConcertGameResult.find().sort({ createdAt: -1 }).limit(200).lean();
+    const [results, totalCount] = await Promise.all([
+      ConcertGameResult.find().sort({ createdAt: -1 }).limit(200).lean(),
+      ConcertGameResult.countDocuments(),
+    ]);
 
     return NextResponse.json({
       results: results.map((r) => ({
@@ -19,6 +22,7 @@ async function handleGet() {
         concertNameCorrectCount: r.concertNameCorrectCount,
         createdAt: r.createdAt,
       })),
+      totalCount,
     });
   } catch (error) {
     console.error('공연 맞추기 결과 목록 조회 오류:', error);

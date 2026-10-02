@@ -59,7 +59,7 @@ export function useAdminGameResults() {
       const res = await fetch('/api/admin/game/results', { headers: getAuthHeader() });
       if (!res.ok) throw new Error('결과 목록을 불러올 수 없습니다');
       const data = await res.json();
-      return data.results as AdminGameResultRow[];
+      return { results: data.results as AdminGameResultRow[], totalCount: data.totalCount as number };
     },
   });
 }

@@ -47,7 +47,9 @@ export default function AdminConcertGamePage() {
   const createQuestion = useCreateConcertQuestion();
   const updateQuestion = useUpdateConcertQuestion();
   const deleteQuestion = useDeleteConcertQuestion();
-  const { data: results = [], isLoading: resultsLoading } = useAdminConcertResults();
+  const { data: resultsData, isLoading: resultsLoading } = useAdminConcertResults();
+  const results = resultsData?.results ?? [];
+  const totalResultsCount = resultsData?.totalCount ?? results.length;
   const deleteResult = useDeleteAdminConcertResult();
   const { data: concerts = [] } = useAdminConcerts();
 
@@ -371,7 +373,7 @@ export default function AdminConcertGamePage() {
             <PanelTitle>랭킹 관리</PanelTitle>
             <PanelSub>부적절한 닉네임이나 어뷰징으로 의심되는 기록을 삭제할 수 있어요.</PanelSub>
           </div>
-          <StatPill>전체 {results.length}건</StatPill>
+          <StatPill>전체 {totalResultsCount.toLocaleString('ko-KR')}건{totalResultsCount > results.length ? ` (최근 ${results.length}건 표시)` : ''}</StatPill>
         </PanelHead>
         <TableWrap>
           {resultsLoading ? (

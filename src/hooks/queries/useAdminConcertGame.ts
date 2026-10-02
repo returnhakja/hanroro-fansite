@@ -123,7 +123,7 @@ export function useAdminConcertResults() {
       const res = await fetch('/api/admin/game/concert/results', { headers: getAuthHeader() });
       if (!res.ok) throw new Error('결과 목록을 불러올 수 없습니다');
       const data = await res.json();
-      return data.results as AdminConcertResultRow[];
+      return { results: data.results as AdminConcertResultRow[], totalCount: data.totalCount as number };
     },
   });
 }
