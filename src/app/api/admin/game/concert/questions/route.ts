@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import { requireAuth, type AuthenticatedRequest } from '@/lib/auth/middleware';
 import connectDB from '@/lib/db/mongoose';
 import ConcertGameQuestion from '@/lib/db/models/ConcertGameQuestion';
@@ -8,9 +9,11 @@ interface QuestionInput {
   correctDate?: string;
   correctVenue?: string;
   correctConcertName?: string;
+  correctConcertId?: string;
   wrongDates?: string[];
   wrongVenues?: string[];
   wrongConcertNames?: string[];
+  wrongConcertIds?: string[];
   credit?: string;
 }
 
@@ -31,6 +34,11 @@ function validatePayload(body: QuestionInput): string | null {
   return null;
 }
 
+/** 관리자 수정 화면에서 드롭다운을 다시 정확히 선택해 보여주기 위한 참조용 id. 비어있거나 유효하지 않으면 그냥 저장하지 않는다. */
+function toObjectIdOrUndefined(id?: string): mongoose.Types.ObjectId | undefined {
+  return id && mongoose.Types.ObjectId.isValid(id) ? new mongoose.Types.ObjectId(id) : undefined;
+}
+
 // GET /api/admin/game/concert/questions - 전체 문제 목록(비활성 포함)
 async function handleGet() {
   try {
@@ -44,9 +52,11 @@ async function handleGet() {
         correctDate: q.correctDate,
         correctVenue: q.correctVenue,
         correctConcertName: q.correctConcertName,
+        correctConcertId: q.correctConcertId ? q.correctConcertId.toString() : '',
         wrongDates: q.wrongDates,
         wrongVenues: q.wrongVenues,
         wrongConcertNames: q.wrongConcertNames,
+        wrongConcertIds: (q.wrongConcertIds ?? []).map((id) => id.toString()),
         credit: q.credit ?? '',
         isActive: q.isActive,
         createdAt: q.createdAt,
@@ -76,9 +86,11 @@ async function handlePost(req: AuthenticatedRequest) {
       correctDate: new Date(body.correctDate!),
       correctVenue: body.correctVenue!.trim(),
       correctConcertName: body.correctConcertName!.trim(),
+      correctConcertId: toObjectIdOrUndefined(body.correctConcertId),
       wrongDates: body.wrongDates!.map((d) => new Date(d)),
       wrongVenues: body.wrongVenues!.map((v) => v.trim()),
       wrongConcertNames: body.wrongConcertNames!.map((v) => v.trim()),
+      wrongConcertIds: (body.wrongConcertIds ?? []).map(toObjectIdOrUndefined).filter(Boolean),
       credit: body.credit?.trim() || undefined,
     });
 

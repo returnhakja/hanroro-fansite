@@ -8,9 +8,11 @@ export interface AdminConcertQuestion {
   correctDate: string;
   correctVenue: string;
   correctConcertName: string;
+  correctConcertId: string;
   wrongDates: string[];
   wrongVenues: string[];
   wrongConcertNames: string[];
+  wrongConcertIds: string[];
   credit: string;
   isActive: boolean;
   createdAt: string;
@@ -21,9 +23,11 @@ export interface ConcertQuestionFormValues {
   correctDate: string;
   correctVenue: string;
   correctConcertName: string;
+  correctConcertId?: string;
   wrongDates: string[];
   wrongVenues: string[];
   wrongConcertNames: string[];
+  wrongConcertIds?: string[];
   credit: string;
   isActive?: boolean;
 }

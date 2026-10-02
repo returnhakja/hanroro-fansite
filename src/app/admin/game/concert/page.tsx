@@ -84,10 +84,15 @@ export default function AdminConcertGamePage() {
       credit: q.credit,
       isActive: q.isActive,
     });
-    // 기존 문제가 지금 등록된 공연 일정과 완전히 일치하면 선택지에 자동으로 표시(최선 노력, 못 찾아도 값은 그대로 유지됨)
-    setCorrectConcertId(findMatchingConcertId(concerts, correctDate, q.correctVenue, q.correctConcertName));
+    // 저장된 참조 id가 있으면 그걸 그대로 쓰고(가장 정확함), 없는 옛 문제는 현재 공연 일정과
+    // 값이 완전히 일치하는 걸 찾아 최선 노력으로 매칭한다(그래도 못 찾으면 값 자체는 그대로 유지됨).
+    setCorrectConcertId(
+      q.correctConcertId || findMatchingConcertId(concerts, correctDate, q.correctVenue, q.correctConcertName)
+    );
     setWrongConcertIds(
-      wrongDates.map((d, i) => findMatchingConcertId(concerts, d, q.wrongVenues[i], q.wrongConcertNames[i]))
+      wrongDates.map((d, i) =>
+        q.wrongConcertIds[i] || findMatchingConcertId(concerts, d, q.wrongVenues[i], q.wrongConcertNames[i])
+      )
     );
     setImageMode('url');
     setFormError('');
@@ -157,11 +162,12 @@ export default function AdminConcertGamePage() {
       setFormError(error);
       return;
     }
+    const payload: ConcertQuestionFormValues = { ...form, correctConcertId, wrongConcertIds };
     try {
       if (editingId) {
-        await updateQuestion.mutateAsync({ id: editingId, values: form });
+        await updateQuestion.mutateAsync({ id: editingId, values: payload });
       } else {
-        await createQuestion.mutateAsync(form);
+        await createQuestion.mutateAsync(payload);
       }
       resetForm();
     } catch (err) {
@@ -178,9 +184,11 @@ export default function AdminConcertGamePage() {
           correctDate: toDateInputValue(q.correctDate),
           correctVenue: q.correctVenue,
           correctConcertName: q.correctConcertName,
+          correctConcertId: q.correctConcertId,
           wrongDates: q.wrongDates.map(toDateInputValue),
           wrongVenues: q.wrongVenues,
           wrongConcertNames: q.wrongConcertNames,
+          wrongConcertIds: q.wrongConcertIds,
           credit: q.credit,
           isActive: !q.isActive,
         },
