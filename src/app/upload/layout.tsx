@@ -8,6 +8,9 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  alternates: {
+    canonical: 'https://www.hanroro.co.kr/upload',
+  },
 };
 
 export default function UploadLayout({

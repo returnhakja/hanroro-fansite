@@ -15,6 +15,9 @@ export const metadata: Metadata = {
     title: '연대기 | HANRORO',
     description: '한로로의 활동 발자취를 연도별로 돌아보세요',
   },
+  alternates: {
+    canonical: 'https://www.hanroro.co.kr/chronicle',
+  },
 };
 
 export default function ChroniclePage() {

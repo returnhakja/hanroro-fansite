@@ -4,6 +4,9 @@ import { theme } from "@/styles/theme";
 export const metadata = {
   title: "개인정보처리방침 | 한로로 팬사이트",
   description: "한로로 팬사이트의 개인정보처리방침",
+  alternates: {
+    canonical: "https://www.hanroro.co.kr/privacy-policy",
+  },
 };
 
 export default function PrivacyPolicyPage() {

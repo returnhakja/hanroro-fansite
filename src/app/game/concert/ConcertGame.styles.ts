@@ -124,11 +124,13 @@ export const ProgressFill = styled.div<{ $percent: number }>`
   transition: width 0.25s ease;
 `;
 
-export const QuestionImage = styled.div<{ $src: string }>`
+export const QuestionImage = styled.img`
   width: 100%;
   height: 200px;
   border-radius: ${theme.borderRadius.lg};
-  background: ${theme.colors.textPrimary} url(${(p) => p.$src}) center / cover no-repeat;
+  background: ${theme.colors.textPrimary};
+  object-fit: cover;
+  display: block;
 `;
 
 export const Credit = styled.p`

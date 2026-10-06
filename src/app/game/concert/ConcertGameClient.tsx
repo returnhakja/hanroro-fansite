@@ -186,7 +186,7 @@ export default function ConcertGameClient() {
             </ProgressTrack>
 
             <div>
-              <QuestionImage $src={current.imageUrl} />
+              <QuestionImage src={current.imageUrl} alt="공연 맞추기 문제 사진" />
               {current.credit && <Credit>ⓒ 제공: {current.credit}</Credit>}
             </div>
 
