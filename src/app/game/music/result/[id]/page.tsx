@@ -44,6 +44,9 @@ export async function generateMetadata({
       type: "website",
     },
     alternates: { canonical },
+    // 플레이할 때마다 계속 생기는 1인용 결과 페이지라 검색 색인은 막는다
+    // (카카오톡 공유는 og 메타만 보고 가져가므로 색인 여부와 무관하게 그대로 동작함)
+    robots: { index: false, follow: true },
   };
 }
 
