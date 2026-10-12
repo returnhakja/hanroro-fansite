@@ -10,6 +10,7 @@ import NaverAnalytics from "@/components/analytics/NaverAnalytics";
 import GoogleTagManager from "@/components/analytics/GoogleTagManager";
 import ScrollToTop from "@/components/ui/ScrollToTop";
 import RegisterSW from "@/components/pwa/RegisterSW";
+import BirthdayCafeNotice from "@/components/notices/BirthdayCafeNotice";
 import "./globals.css";
 
 const SITE_URL = "https://www.hanroro.co.kr";
@@ -252,6 +253,7 @@ export default function RootLayout({
             <AuthProvider>
               <LoadingProvider>
                 <Header />
+                <BirthdayCafeNotice />
                 <main
                   style={{
                     minHeight: "calc(100vh - 200px)",
