@@ -107,7 +107,11 @@ export default function BirthdayCafeNotice() {
           <NoteText>
             🎁 11,111원 모금과 50,000원 이상 모금 시 특전을 드려요(50,000원 모금 시 두 특전 모두 수령, 11,111원 특전은 현장수령만 가능 · 111명 한정).
             모금 중간 현황은 주기적으로 공유하고, 생일카페 종료 후 사용 내역과 영수증도 투명하게 공개할게요.
-            모금·생일카페 관련 문의는 갠톡으로 부탁드려요.
+            모금·생일카페 관련 문의는{' '}
+            <NoteLink href="https://open.kakao.com/o/srMAlNri" target="_blank" rel="noopener noreferrer">
+              오픈카톡
+            </NoteLink>
+            으로 부탁드려요.
           </NoteText>
 
           <Actions>
@@ -304,6 +308,12 @@ const NoteText = styled.p`
   background: ${theme.colors.background};
   border-radius: ${theme.borderRadius.md};
   padding: 10px 12px;
+`;
+
+const NoteLink = styled.a`
+  color: ${theme.colors.primary};
+  font-weight: 700;
+  text-decoration: underline;
 `;
 
 const Actions = styled.div`
