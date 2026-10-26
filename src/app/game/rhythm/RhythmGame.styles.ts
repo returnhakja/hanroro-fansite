@@ -168,19 +168,6 @@ export const ScoreText = styled.span`
   font-size: 0.8rem;
 `;
 
-export const UnmuteButton = styled.button`
-  position: relative;
-  z-index: 2;
-  margin: 10px 18px 0 18px;
-  padding: 0.6rem 1rem;
-  border: none;
-  border-radius: 999px;
-  background: #ffd54a;
-  color: #241a2e;
-  font-size: 0.78rem;
-  font-weight: 800;
-  cursor: pointer;
-`;
 
 export const ProgressTrack = styled.div`
   position: relative;

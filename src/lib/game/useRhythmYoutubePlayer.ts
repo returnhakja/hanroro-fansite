@@ -6,6 +6,11 @@ import { useCallback, useEffect, useRef } from 'react';
 // 추정한다. getCurrentTime()은 프레임 단위로 정밀하지 않아 그대로 쓰면 노트가
 // 뚝뚝 끊겨 보이므로, performance.now() 기반 로컬 시계로 매끄럽게 보간하고
 // 주기적으로 getCurrentTime()과 대조해 드리프트를 보정한다.
+//
+// 재생을 트리거하는 부분(loadVideoById + playVideo)은 이미 소리가 정상적으로
+// 나오는 것으로 확인된 useYoutubeSnippetPlayer(노래 맞추기 게임)와 동일한
+// 순서를 그대로 따른다. unMute/setVolume 같은 추가 호출은 오히려 도움이
+// 안 됐어서 넣지 않는다.
 
 declare global {
   interface Window {
@@ -47,19 +52,10 @@ export const RHYTHM_YT_ERROR_MESSAGES: Record<number, string> = {
   150: '영상 소유자가 외부 재생(임베드)을 막아놨어요',
 };
 
-export function useRhythmYoutubePlayer(
-  onEnded?: () => void,
-  onError?: (message: string) => void,
-  onStillMuted?: () => void
-) {
+export function useRhythmYoutubePlayer(onEnded?: () => void, onError?: (message: string) => void) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const playerRef = useRef<any>(null);
   const readyRef = useRef<Promise<void> | null>(null);
-  // player가 이미 준비된 뒤라면(거의 모든 실제 케이스) start()가 await을 전혀 거치지 않고
-  // 클릭 이벤트 핸들러 안에서 완전히 동기적으로 playVideo()까지 끝내야 한다.
-  // await을 한 번이라도 거치면(마이크로태스크라도) 브라우저가 "사용자 제스처와
-  // 무관한 재생"으로 취급해 소리를 막는 경우가 있어서, 이 경로를 아예 없앤다.
-  const isReadyRef = useRef(false);
   const startSecondsRef = useRef(0);
   const baseVideoSecRef = useRef(0);
   const localStartPerfRef = useRef(0);
@@ -68,8 +64,6 @@ export function useRhythmYoutubePlayer(
   onEndedRef.current = onEnded;
   const onErrorRef = useRef(onError);
   onErrorRef.current = onError;
-  const onStillMutedRef = useRef(onStillMuted);
-  onStillMutedRef.current = onStillMuted;
 
   useEffect(() => {
     let cancelled = false;
@@ -81,10 +75,7 @@ export function useRhythmYoutubePlayer(
           width: '1',
           playerVars: { autoplay: 0, controls: 0, disablekb: 1 },
           events: {
-            onReady: () => {
-              isReadyRef.current = true;
-              resolve();
-            },
+            onReady: () => resolve(),
             onStateChange: (e: any) => {
               if (e.data === 0) onEndedRef.current?.();
             },
@@ -113,38 +104,18 @@ export function useRhythmYoutubePlayer(
     playerRef.current?.pauseVideo?.();
   }, []);
 
-  const beginPlayback = useCallback((player: any, youtubeId: string, startSeconds: number) => {
+  // 노래 맞추기 게임의 play()와 동일한 순서: await readyRef.current → loadVideoById → playVideo.
+  const start = useCallback(async (youtubeId: string, startSeconds: number) => {
+    await readyRef.current;
+    const player = playerRef.current;
+    if (!player) return;
+
     startSecondsRef.current = startSeconds;
     baseVideoSecRef.current = startSeconds;
     localStartPerfRef.current = performance.now();
 
     player.loadVideoById({ videoId: youtubeId, startSeconds });
     player.playVideo();
-    player.unMute?.();
-    player.setVolume?.(100);
-
-    // 유튜브 플레이어는 "소리 있는 자동재생이 막혔다"고 판단하면 onError 없이
-    // 조용히 muted 상태로 전환해 재생을 이어가는 내부 폴백이 있다. 위에서
-    // unMute를 호출해도 그 폴백이 그 이후에 비동기로 뒤늦게 발동하면
-    // 다시 muted로 덮일 수 있어서, 재생 시작 초반 몇 초간 반복 확인해서
-    // muted면 강제로 다시 풀어준다.
-    // 다만 setInterval 콜백 안에서의 unMute 호출은 "사용자 제스처" 로
-    // 인정받지 못할 수 있다(특히 모바일 브라우저). 그래서 3초가 지나도
-    // 계속 muted면, 진짜 탭 이벤트로 다시 풀 수 있는 버튼을 보여주도록
-    // onStillMuted로 알려준다.
-    let watchdogTicks = 0;
-    const watchdog = setInterval(() => {
-      watchdogTicks += 1;
-      const stillMuted = !!player.isMuted?.();
-      if (stillMuted) {
-        player.unMute?.();
-        player.setVolume?.(100);
-      }
-      if (watchdogTicks >= 10) {
-        clearInterval(watchdog);
-        if (stillMuted) onStillMutedRef.current?.();
-      }
-    }, 300);
 
     if (syncTimerRef.current) clearInterval(syncTimerRef.current);
     syncTimerRef.current = setInterval(() => {
@@ -156,25 +127,6 @@ export function useRhythmYoutubePlayer(
     }, SYNC_INTERVAL_MS);
   }, []);
 
-  // 버튼 탭 같은 진짜 사용자 제스처 안에서 직접 호출해야 효과가 있다.
-  const forceUnmute = useCallback(() => {
-    const player = playerRef.current;
-    player?.unMute?.();
-    player?.setVolume?.(100);
-    player?.playVideo?.();
-  }, []);
-
-  const start = useCallback((youtubeId: string, startSeconds: number) => {
-    if (isReadyRef.current && playerRef.current) {
-      beginPlayback(playerRef.current, youtubeId, startSeconds);
-      return;
-    }
-    // 아직 준비 안 된 아주 초기 진입 케이스에만 대기한다(사용자 제스처 보존 불가 경로).
-    readyRef.current?.then(() => {
-      if (playerRef.current) beginPlayback(playerRef.current, youtubeId, startSeconds);
-    });
-  }, [beginPlayback]);
-
   // 노트 타이밍의 기준이 되는, startSeconds 시점부터 경과한 ms (매 프레임 호출해도 안전)
   const getElapsedMs = useCallback(() => {
     const estimatedSec =
@@ -182,5 +134,5 @@ export function useRhythmYoutubePlayer(
     return (estimatedSec - startSecondsRef.current) * 1000;
   }, []);
 
-  return { containerRef, start, stop, getElapsedMs, forceUnmute };
+  return { containerRef, start, stop, getElapsedMs };
 }
