@@ -170,6 +170,8 @@ export const viewport: Viewport = {
   themeColor: "#8B7355",
   width: "device-width",
   initialScale: 1,
+  // 디자인이 항상 라이트 톤이라 다크모드 강제 보정을 막아야 함(globals.css의 color-scheme과 동일한 목적)
+  colorScheme: "light",
 };
 
 export default function RootLayout({
