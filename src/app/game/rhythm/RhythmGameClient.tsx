@@ -92,6 +92,12 @@ function gradeLabel(accuracy: number): string {
 }
 
 const JUDGEMENT_LINE_Y = 300;
+// Note 바(RhythmGame.styles.ts)의 height와 동일. top은 바의 "윗변" 기준이라
+// top === JUDGEMENT_LINE_Y일 때 바의 윗변이 막 판정선에 도달한 상태일 뿐,
+// 실제로 눈에 보이는 "바가 판정선에 겹친" 순간(바의 중심이 판정선에 있는 순간)과는
+// 바 높이의 절반만큼(약 200ms) 차이가 나서 체감 타이밍이 어긋났다.
+// 아래에서 바의 중심이 판정선에 오도록 절반만큼 보정한다.
+const NOTE_HALF_HEIGHT = 17;
 
 export default function RhythmGameClient() {
   const [phase, setPhase] = useState<Phase>('select');
@@ -260,7 +266,7 @@ export default function RhythmGameClient() {
         const remainingMs = note.timeMs - elapsedMs;
         if (remainingMs <= RHYTHM_NOTE_TRAVEL_MS && remainingMs >= -300) {
           const progress = 1 - remainingMs / RHYTHM_NOTE_TRAVEL_MS;
-          next.push({ index, lane: note.lane, top: progress * JUDGEMENT_LINE_Y });
+          next.push({ index, lane: note.lane, top: progress * JUDGEMENT_LINE_Y - NOTE_HALF_HEIGHT });
         }
       });
 
