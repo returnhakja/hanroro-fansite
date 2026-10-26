@@ -47,7 +47,11 @@ export const RHYTHM_YT_ERROR_MESSAGES: Record<number, string> = {
   150: '영상 소유자가 외부 재생(임베드)을 막아놨어요',
 };
 
-export function useRhythmYoutubePlayer(onEnded?: () => void, onError?: (message: string) => void) {
+export function useRhythmYoutubePlayer(
+  onEnded?: () => void,
+  onError?: (message: string) => void,
+  onStillMuted?: () => void
+) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const playerRef = useRef<any>(null);
   const readyRef = useRef<Promise<void> | null>(null);
@@ -64,6 +68,8 @@ export function useRhythmYoutubePlayer(onEnded?: () => void, onError?: (message:
   onEndedRef.current = onEnded;
   const onErrorRef = useRef(onError);
   onErrorRef.current = onError;
+  const onStillMutedRef = useRef(onStillMuted);
+  onStillMutedRef.current = onStillMuted;
 
   useEffect(() => {
     let cancelled = false;
@@ -122,14 +128,22 @@ export function useRhythmYoutubePlayer(onEnded?: () => void, onError?: (message:
     // unMute를 호출해도 그 폴백이 그 이후에 비동기로 뒤늦게 발동하면
     // 다시 muted로 덮일 수 있어서, 재생 시작 초반 몇 초간 반복 확인해서
     // muted면 강제로 다시 풀어준다.
+    // 다만 setInterval 콜백 안에서의 unMute 호출은 "사용자 제스처" 로
+    // 인정받지 못할 수 있다(특히 모바일 브라우저). 그래서 3초가 지나도
+    // 계속 muted면, 진짜 탭 이벤트로 다시 풀 수 있는 버튼을 보여주도록
+    // onStillMuted로 알려준다.
     let watchdogTicks = 0;
     const watchdog = setInterval(() => {
       watchdogTicks += 1;
-      if (player.isMuted?.()) {
+      const stillMuted = !!player.isMuted?.();
+      if (stillMuted) {
         player.unMute?.();
         player.setVolume?.(100);
       }
-      if (watchdogTicks >= 10) clearInterval(watchdog);
+      if (watchdogTicks >= 10) {
+        clearInterval(watchdog);
+        if (stillMuted) onStillMutedRef.current?.();
+      }
     }, 300);
 
     if (syncTimerRef.current) clearInterval(syncTimerRef.current);
@@ -140,6 +154,14 @@ export function useRhythmYoutubePlayer(onEnded?: () => void, onError?: (message:
         localStartPerfRef.current = performance.now();
       }
     }, SYNC_INTERVAL_MS);
+  }, []);
+
+  // 버튼 탭 같은 진짜 사용자 제스처 안에서 직접 호출해야 효과가 있다.
+  const forceUnmute = useCallback(() => {
+    const player = playerRef.current;
+    player?.unMute?.();
+    player?.setVolume?.(100);
+    player?.playVideo?.();
   }, []);
 
   const start = useCallback((youtubeId: string, startSeconds: number) => {
@@ -160,5 +182,5 @@ export function useRhythmYoutubePlayer(onEnded?: () => void, onError?: (message:
     return (estimatedSec - startSecondsRef.current) * 1000;
   }, []);
 
-  return { containerRef, start, stop, getElapsedMs };
+  return { containerRef, start, stop, getElapsedMs, forceUnmute };
 }

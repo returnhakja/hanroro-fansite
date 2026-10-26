@@ -42,6 +42,7 @@ import {
   GlowBlob,
   PlayTopBar,
   ScoreText,
+  UnmuteButton,
   ProgressTrack,
   ProgressFill,
   ComboWrap,
@@ -124,6 +125,7 @@ export default function RhythmGameClient() {
   const [resultId, setResultId] = useState('');
   const [nickname, setNickname] = useState('');
   const [registered, setRegistered] = useState(false);
+  const [needsUnmuteTap, setNeedsUnmuteTap] = useState(false);
 
   const judgedRef = useRef<Set<number>>(new Set());
   const laneAreaRef = useRef<HTMLDivElement | null>(null);
@@ -148,7 +150,13 @@ export default function RhythmGameClient() {
     setErrorText(`영상 재생 오류: ${message}`);
   }, []);
 
-  const player = useRhythmYoutubePlayer(handleEnded, handlePlayerError);
+  // 재생 시작 후에도 몇 초간 계속 muted면, setInterval 안에서의 강제 unMute는
+  // 사용자 제스처로 인정 안 받는 브라우저가 있어서 직접 탭할 버튼을 띄운다.
+  const handleStillMuted = useCallback(() => {
+    setNeedsUnmuteTap(true);
+  }, []);
+
+  const player = useRhythmYoutubePlayer(handleEnded, handlePlayerError, handleStillMuted);
 
   const { data: ranking = [] } = useRhythmRanking(phase === 'result' ? chart?._id ?? '' : '');
 
@@ -308,6 +316,7 @@ export default function RhythmGameClient() {
 
   const handleSelectStart = async (chartId: string) => {
     setErrorText('');
+    setNeedsUnmuteTap(false);
     const summary = charts.find((c) => c._id === chartId);
     if (!summary) {
       setErrorText('곡을 찾을 수 없습니다');
@@ -456,6 +465,17 @@ export default function RhythmGameClient() {
             <div style={{ position: 'relative', zIndex: 2, padding: '4px 18px 0' }}>
               <ErrorText>{errorText}</ErrorText>
             </div>
+          )}
+          {needsUnmuteTap && (
+            <UnmuteButton
+              type="button"
+              onClick={() => {
+                player.forceUnmute();
+                setNeedsUnmuteTap(false);
+              }}
+            >
+              🔈 소리가 안 나오면 탭하세요
+            </UnmuteButton>
           )}
           <ProgressTrack><ProgressFill $percent={progressPercent} /></ProgressTrack>
 
