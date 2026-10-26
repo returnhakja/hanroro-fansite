@@ -142,7 +142,13 @@ export default function RhythmGameClient() {
     endedRef.current = true;
   }, []);
 
-  const player = useRhythmYoutubePlayer(handleEnded);
+  // 테스트 단계라 콘솔 대신 화면에 바로 보여줘서, 디버깅 없이도 어떤 유튜브 오류인지
+  // (임베드 차단/삭제된 영상 등) 바로 알 수 있게 한다.
+  const handlePlayerError = useCallback((message: string) => {
+    setErrorText(`영상 재생 오류: ${message}`);
+  }, []);
+
+  const player = useRhythmYoutubePlayer(handleEnded, handlePlayerError);
 
   const { data: ranking = [] } = useRhythmRanking(phase === 'result' ? chart?._id ?? '' : '');
 
@@ -446,6 +452,11 @@ export default function RhythmGameClient() {
             <span>{chart.title} · {RHYTHM_DIFFICULTY_LABEL[chart.difficulty]}</span>
             <ScoreText>{score.toLocaleString('ko-KR')}</ScoreText>
           </PlayTopBar>
+          {errorText && (
+            <div style={{ position: 'relative', zIndex: 2, padding: '4px 18px 0' }}>
+              <ErrorText>{errorText}</ErrorText>
+            </div>
+          )}
           <ProgressTrack><ProgressFill $percent={progressPercent} /></ProgressTrack>
 
           <ComboWrap>

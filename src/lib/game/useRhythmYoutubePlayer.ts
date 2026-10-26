@@ -37,7 +37,17 @@ function loadYoutubeApi(): Promise<void> {
 
 const SYNC_INTERVAL_MS = 500;
 
-export function useRhythmYoutubePlayer(onEnded?: () => void) {
+// 유튜브 IFrame API의 onError 코드 → 사람이 읽을 수 있는 설명.
+// https://developers.google.com/youtube/iframe_api_reference#onError
+export const RHYTHM_YT_ERROR_MESSAGES: Record<number, string> = {
+  2: '잘못된 영상 ID예요',
+  5: 'HTML5 플레이어에서 재생할 수 없는 영상이에요',
+  100: '영상을 찾을 수 없어요(비공개거나 삭제됨)',
+  101: '영상 소유자가 외부 재생(임베드)을 막아놨어요',
+  150: '영상 소유자가 외부 재생(임베드)을 막아놨어요',
+};
+
+export function useRhythmYoutubePlayer(onEnded?: () => void, onError?: (message: string) => void) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const playerRef = useRef<any>(null);
   const readyRef = useRef<Promise<void> | null>(null);
@@ -52,6 +62,8 @@ export function useRhythmYoutubePlayer(onEnded?: () => void) {
   const syncTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const onEndedRef = useRef(onEnded);
   onEndedRef.current = onEnded;
+  const onErrorRef = useRef(onError);
+  onErrorRef.current = onError;
 
   useEffect(() => {
     let cancelled = false;
@@ -69,6 +81,11 @@ export function useRhythmYoutubePlayer(onEnded?: () => void) {
             },
             onStateChange: (e: any) => {
               if (e.data === 0) onEndedRef.current?.();
+            },
+            onError: (e: any) => {
+              const message = RHYTHM_YT_ERROR_MESSAGES[e.data] ?? `유튜브 오류 (코드 ${e.data})`;
+              console.error('[rhythm] youtube player error', e.data, message);
+              onErrorRef.current?.(message);
             },
           },
         });
@@ -97,9 +114,23 @@ export function useRhythmYoutubePlayer(onEnded?: () => void) {
 
     player.loadVideoById({ videoId: youtubeId, startSeconds });
     player.playVideo();
-    // 로드 직후 음소거 상태가 남아있는 경우를 대비해 명시적으로 풀어준다.
     player.unMute?.();
     player.setVolume?.(100);
+
+    // 유튜브 플레이어는 "소리 있는 자동재생이 막혔다"고 판단하면 onError 없이
+    // 조용히 muted 상태로 전환해 재생을 이어가는 내부 폴백이 있다. 위에서
+    // unMute를 호출해도 그 폴백이 그 이후에 비동기로 뒤늦게 발동하면
+    // 다시 muted로 덮일 수 있어서, 재생 시작 초반 몇 초간 반복 확인해서
+    // muted면 강제로 다시 풀어준다.
+    let watchdogTicks = 0;
+    const watchdog = setInterval(() => {
+      watchdogTicks += 1;
+      if (player.isMuted?.()) {
+        player.unMute?.();
+        player.setVolume?.(100);
+      }
+      if (watchdogTicks >= 10) clearInterval(watchdog);
+    }, 300);
 
     if (syncTimerRef.current) clearInterval(syncTimerRef.current);
     syncTimerRef.current = setInterval(() => {
