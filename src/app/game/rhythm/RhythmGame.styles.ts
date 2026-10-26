@@ -129,7 +129,7 @@ export const ErrorText = styled.p`
 export const PlayWrap = styled.div`
   position: relative;
   width: 100%;
-  min-height: 640px;
+  height: 640px;
   border-radius: ${theme.borderRadius.xl};
   overflow: hidden;
   background: linear-gradient(165deg, #241a2e 0%, #140f1c 60%, #0d0a12 100%);
