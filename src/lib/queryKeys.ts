@@ -73,5 +73,10 @@ export const queryKeys = {
     concertResult: (id: string) => ['game', 'concert', 'result', id] as const,
     adminConcertQuestions: ['admin', 'game', 'concert', 'questions'] as const,
     adminConcertResults: ['admin', 'game', 'concert', 'results'] as const,
+    rhythmCharts: ['game', 'rhythm', 'charts'] as const,
+    rhythmRanking: (chartId: string) => ['game', 'rhythm', 'ranking', chartId] as const,
+    adminRhythmCharts: ['admin', 'game', 'rhythm', 'charts'] as const,
+    adminRhythmChart: (id: string) => ['admin', 'game', 'rhythm', 'chart', id] as const,
+    adminRhythmResults: ['admin', 'game', 'rhythm', 'results'] as const,
   },
 } as const;
