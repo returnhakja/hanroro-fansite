@@ -49,6 +49,12 @@ const IconCalendar = () => (
   </svg>
 );
 
+const IconRhythm = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <path d="M4 20V10M9 20V4M14 20V13M19 20V7" />
+  </svg>
+);
+
 export default function GameHubPage() {
   return (
     <HubWrapper>
@@ -71,6 +77,11 @@ export default function GameHubPage() {
           <GameIcon><IconCalendar /></GameIcon>
           <GameName>공연 맞추기</GameName>
           <GameDesc>무대 사진으로 공연 날짜와 장소를 맞혀보세요.</GameDesc>
+        </GameCard>
+        <GameCard href="/game/rhythm">
+          <GameIcon><IconRhythm /></GameIcon>
+          <GameName>로로비트</GameName>
+          <GameDesc>노래에 맞춰 떨어지는 노트를 정확한 타이밍에 눌러보세요.</GameDesc>
         </GameCard>
       </GameGrid>
     </HubWrapper>

@@ -22,6 +22,7 @@ import {
   type RhythmJudgement,
 } from '@/lib/game/rhythm';
 import type { RhythmChartDetail } from '@/types/api/rhythm';
+import { getAllSongs } from '@/lib/utils/songs';
 import {
   PageWrapper,
   IntroCard,
@@ -102,6 +103,15 @@ const NOTE_HEIGHT = 34;
 export default function RhythmGameClient() {
   const [phase, setPhase] = useState<Phase>('select');
   const { data: charts = [], isLoading: chartsLoading } = useRhythmCharts();
+
+  // 곡 선택 목록의 썸네일을 디스코그래피 앨범 커버와 제목으로 매칭해서 보여준다.
+  const coverByTitle = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const song of getAllSongs()) {
+      map.set(song.title.trim().toLowerCase(), song.coverUrl);
+    }
+    return map;
+  }, []);
   const fetchChart = useFetchRhythmChart();
   const submitResult = useSubmitRhythmResult();
   const updateNickname = useUpdateRhythmNickname();
@@ -453,7 +463,7 @@ export default function RhythmGameClient() {
                   $selected={selectedId === c._id}
                   onClick={() => setSelectedId(c._id)}
                 >
-                  <SongArt />
+                  <SongArt $coverUrl={coverByTitle.get(c.title.trim().toLowerCase())} />
                   <SongInfo>
                     <SongTitle>{c.title}</SongTitle>
                     <SongMeta>4레인 · BPM {c.bpm}</SongMeta>

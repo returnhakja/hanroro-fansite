@@ -94,10 +94,10 @@ export default function AdminRhythmGamePage() {
   return (
     <Page>
       <PageHead>
-        <Eyebrow>Admin · 리듬게임 (비공개 테스트)</Eyebrow>
+        <Eyebrow>Admin · 리듬게임</Eyebrow>
         <h1>리듬게임 관리</h1>
         <Lede>
-          아직 공개 전 테스트 단계라 게임 허브에는 안 올라가 있어요. 아래 링크로만 들어갈 수 있어요.
+          게임 허브(/game)에 공개된 게임이에요. 아래 링크로 바로 들어가서 확인할 수 있어요.
         </Lede>
         <PreviewLinkRow>
           <PreviewLink href="/game/rhythm" target="_blank" rel="noopener noreferrer">

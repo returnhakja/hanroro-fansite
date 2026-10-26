@@ -89,12 +89,15 @@ export const SongCard = styled.button<{ $selected: boolean }>`
   text-align: left;
 `;
 
-export const SongArt = styled.div`
+export const SongArt = styled.div<{ $coverUrl?: string }>`
   width: 44px;
   height: 44px;
   flex: none;
   border-radius: 10px;
-  background: linear-gradient(135deg, ${theme.colors.accent} 0%, ${theme.colors.primary} 100%);
+  background: ${(p) =>
+    p.$coverUrl
+      ? `url('${p.$coverUrl}') center / cover no-repeat`
+      : `linear-gradient(135deg, ${theme.colors.accent} 0%, ${theme.colors.primary} 100%)`};
 `;
 
 export const SongInfo = styled.div`
