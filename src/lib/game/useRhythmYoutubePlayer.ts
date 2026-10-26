@@ -41,6 +41,11 @@ export function useRhythmYoutubePlayer(onEnded?: () => void) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const playerRef = useRef<any>(null);
   const readyRef = useRef<Promise<void> | null>(null);
+  // player가 이미 준비된 뒤라면(거의 모든 실제 케이스) start()가 await을 전혀 거치지 않고
+  // 클릭 이벤트 핸들러 안에서 완전히 동기적으로 playVideo()까지 끝내야 한다.
+  // await을 한 번이라도 거치면(마이크로태스크라도) 브라우저가 "사용자 제스처와
+  // 무관한 재생"으로 취급해 소리를 막는 경우가 있어서, 이 경로를 아예 없앤다.
+  const isReadyRef = useRef(false);
   const startSecondsRef = useRef(0);
   const baseVideoSecRef = useRef(0);
   const localStartPerfRef = useRef(0);
@@ -58,7 +63,10 @@ export function useRhythmYoutubePlayer(onEnded?: () => void) {
           width: '1',
           playerVars: { autoplay: 0, controls: 0, disablekb: 1 },
           events: {
-            onReady: () => resolve(),
+            onReady: () => {
+              isReadyRef.current = true;
+              resolve();
+            },
             onStateChange: (e: any) => {
               if (e.data === 0) onEndedRef.current?.();
             },
@@ -82,17 +90,16 @@ export function useRhythmYoutubePlayer(onEnded?: () => void) {
     playerRef.current?.pauseVideo?.();
   }, []);
 
-  const start = useCallback(async (youtubeId: string, startSeconds: number) => {
-    await readyRef.current;
-    const player = playerRef.current;
-    if (!player) return;
-
+  const beginPlayback = useCallback((player: any, youtubeId: string, startSeconds: number) => {
     startSecondsRef.current = startSeconds;
     baseVideoSecRef.current = startSeconds;
     localStartPerfRef.current = performance.now();
 
     player.loadVideoById({ videoId: youtubeId, startSeconds });
     player.playVideo();
+    // 로드 직후 음소거 상태가 남아있는 경우를 대비해 명시적으로 풀어준다.
+    player.unMute?.();
+    player.setVolume?.(100);
 
     if (syncTimerRef.current) clearInterval(syncTimerRef.current);
     syncTimerRef.current = setInterval(() => {
@@ -103,6 +110,17 @@ export function useRhythmYoutubePlayer(onEnded?: () => void) {
       }
     }, SYNC_INTERVAL_MS);
   }, []);
+
+  const start = useCallback((youtubeId: string, startSeconds: number) => {
+    if (isReadyRef.current && playerRef.current) {
+      beginPlayback(playerRef.current, youtubeId, startSeconds);
+      return;
+    }
+    // 아직 준비 안 된 아주 초기 진입 케이스에만 대기한다(사용자 제스처 보존 불가 경로).
+    readyRef.current?.then(() => {
+      if (playerRef.current) beginPlayback(playerRef.current, youtubeId, startSeconds);
+    });
+  }, [beginPlayback]);
 
   // 노트 타이밍의 기준이 되는, startSeconds 시점부터 경과한 ms (매 프레임 호출해도 안전)
   const getElapsedMs = useCallback(() => {

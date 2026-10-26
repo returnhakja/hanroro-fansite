@@ -236,7 +236,7 @@ export const LaneArea = styled.div`
   justify-content: center;
   gap: 10px;
   margin-top: 18px;
-  padding: 0 10px;
+  padding: 0 10px 20px;
 `;
 
 export const Lane = styled.div`
@@ -246,17 +246,6 @@ export const Lane = styled.div`
   border-left: 1px solid rgba(255, 255, 255, 0.08);
   border-right: 1px solid rgba(255, 255, 255, 0.08);
   overflow: hidden;
-`;
-
-export const JudgementLine = styled.div`
-  position: absolute;
-  left: 0;
-  right: 10px;
-  top: 300px;
-  height: 3px;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, #fff 50%, rgba(255, 255, 255, 0) 100%);
-  box-shadow: 0 0 16px rgba(255, 255, 255, 0.95);
-  z-index: 2;
 `;
 
 export const Note = styled.div<{ $top: number; $from: string; $to: string; $glow: string }>`
@@ -278,7 +267,7 @@ const burstPop = keyframes`
 export const HitBurst = styled.div`
   position: absolute;
   left: 50%;
-  top: 300px;
+  bottom: 28px;
   width: 110px;
   height: 110px;
   border-radius: 9999px;
@@ -294,17 +283,12 @@ export const HitBurst = styled.div`
   z-index: 3;
 `;
 
-export const TapRow = styled.div`
-  position: relative;
-  z-index: 2;
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  padding: 0 18px 22px 18px;
-`;
-
 export const TapButton = styled.button<{ $from: string; $to: string; $glow: string; $pressed: boolean }>`
-  width: 72px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
   height: 56px;
   border: none;
   border-radius: 12px;

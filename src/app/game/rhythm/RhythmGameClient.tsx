@@ -50,10 +50,8 @@ import {
   JudgementFlash,
   LaneArea,
   Lane,
-  JudgementLine,
   Note,
   HitBurst,
-  TapRow,
   TapButton,
   CountdownOverlay,
   ResultWrap,
@@ -91,13 +89,13 @@ function gradeLabel(accuracy: number): string {
   return 'B';
 }
 
-const JUDGEMENT_LINE_Y = 300;
-// Note 바(RhythmGame.styles.ts)의 height와 동일. top은 바의 "윗변" 기준이라
-// top === JUDGEMENT_LINE_Y일 때 바의 윗변이 막 판정선에 도달한 상태일 뿐,
-// 실제로 눈에 보이는 "바가 판정선에 겹친" 순간(바의 중심이 판정선에 있는 순간)과는
-// 바 높이의 절반만큼(약 200ms) 차이가 나서 체감 타이밍이 어긋났다.
-// 아래에서 바의 중심이 판정선에 오도록 절반만큼 보정한다.
-const NOTE_HALF_HEIGHT = 17;
+// RhythmGame.styles.ts의 TapButton height / Note height와 반드시 일치해야 한다.
+// 판정 기준점을 화면 중간의 가상 판정선이 아니라, 실제로 사용자가 누르는
+// D/F/J/K 네모(TapButton)로 바꿨다. 노트가 떨어지다 이 버튼 칸 안에
+// (정확히는 버튼의 세로 중앙에) 겹치는 순간이 diff=0이 되도록, 버튼이
+// Lane 바닥에 붙어있는 실제 높이를 기준으로 도착 지점을 계산한다.
+const TAP_BUTTON_HEIGHT = 56;
+const NOTE_HEIGHT = 34;
 
 export default function RhythmGameClient() {
   const [phase, setPhase] = useState<Phase>('select');
@@ -128,6 +126,8 @@ export default function RhythmGameClient() {
   const [registered, setRegistered] = useState(false);
 
   const judgedRef = useRef<Set<number>>(new Set());
+  const laneAreaRef = useRef<HTMLDivElement | null>(null);
+  const laneHeightRef = useRef(440);
   const rafRef = useRef<number | null>(null);
   const flashKeyRef = useRef(0);
   const comboRef = useRef(0);
@@ -154,6 +154,18 @@ export default function RhythmGameClient() {
   }, []);
 
   useEffect(() => stopLoop, [stopLoop]);
+
+  // 레인 영역의 실제 렌더링 높이를 측정해 "노트가 TapButton 칸에 도착하는 지점"을
+  // 하드코딩된 픽셀이 아니라 실제 레이아웃 기준으로 계산한다.
+  useEffect(() => {
+    const el = laneAreaRef.current;
+    if (!el) return;
+    const update = () => { laneHeightRef.current = el.clientHeight; };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [phase]);
 
   const finishGame = useCallback(async () => {
     stopLoop();
@@ -266,7 +278,9 @@ export default function RhythmGameClient() {
         const remainingMs = note.timeMs - elapsedMs;
         if (remainingMs <= RHYTHM_NOTE_TRAVEL_MS && remainingMs >= -300) {
           const progress = 1 - remainingMs / RHYTHM_NOTE_TRAVEL_MS;
-          next.push({ index, lane: note.lane, top: progress * JUDGEMENT_LINE_Y - NOTE_HALF_HEIGHT });
+          // progress===1(diff=0)일 때 노트의 중심이 TapButton의 중심과 겹치도록.
+          const targetTop = laneHeightRef.current - TAP_BUTTON_HEIGHT / 2 - NOTE_HEIGHT / 2;
+          next.push({ index, lane: note.lane, top: progress * targetTop });
         }
       });
 
@@ -445,7 +459,7 @@ export default function RhythmGameClient() {
             </JudgementFlash>
           )}
 
-          <LaneArea>
+          <LaneArea ref={laneAreaRef}>
             {Array.from({ length: RHYTHM_LANE_COUNT }).map((_, lane) => {
               const color = RHYTHM_LANE_COLORS[lane];
               return (
@@ -456,32 +470,22 @@ export default function RhythmGameClient() {
                       <Note key={n.index} $top={n.top} $from={color.from} $to={color.to} $glow={color.glow} />
                     ))}
                   {burst?.lane === lane && <HitBurst key={burst.key} />}
+                  <TapButton
+                    type="button"
+                    aria-label={`레인 ${lane + 1}`}
+                    $from={color.from}
+                    $to={color.to}
+                    $glow={color.glow}
+                    $pressed={pressedLane === lane}
+                    onPointerDown={(e) => {
+                      e.preventDefault();
+                      handleLaneInput(lane);
+                    }}
+                  />
                 </Lane>
               );
             })}
-            <JudgementLine />
           </LaneArea>
-
-          <TapRow>
-            {Array.from({ length: RHYTHM_LANE_COUNT }).map((_, lane) => {
-              const color = RHYTHM_LANE_COLORS[lane];
-              return (
-                <TapButton
-                  key={lane}
-                  type="button"
-                  aria-label={`레인 ${lane + 1}`}
-                  $from={color.from}
-                  $to={color.to}
-                  $glow={color.glow}
-                  $pressed={pressedLane === lane}
-                  onPointerDown={(e) => {
-                    e.preventDefault();
-                    handleLaneInput(lane);
-                  }}
-                />
-              );
-            })}
-          </TapRow>
         </PlayWrap>
       )}
 
