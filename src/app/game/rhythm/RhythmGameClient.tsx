@@ -29,6 +29,8 @@ import {
   Eyebrow,
   IntroTitle,
   IntroDesc,
+  HowToPlayBox,
+  HowToPlayRow,
   SongList,
   SongCard,
   SongArt,
@@ -429,6 +431,12 @@ export default function RhythmGameClient() {
             <IntroTitle>로로비트</IntroTitle>
             <IntroDesc>노래에 맞춰 떨어지는 노트를 정확한 타이밍에 눌러보세요</IntroDesc>
           </IntroWrap>
+
+          <HowToPlayBox>
+            <HowToPlayRow><strong>PC</strong><span>키보드 D · F · J · K 키로 플레이해요</span></HowToPlayRow>
+            <HowToPlayRow><strong>모바일</strong><span>화면 하단 네모 버튼을 탭해서 플레이해요</span></HowToPlayRow>
+            <HowToPlayRow><strong>참고</strong><span>키보드가 안 눌리면 화면의 버튼을 마우스로 클릭해도 플레이할 수 있어요</span></HowToPlayRow>
+          </HowToPlayBox>
 
           {errorText && <ErrorText>{errorText}</ErrorText>}
 

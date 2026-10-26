@@ -49,6 +49,28 @@ export const IntroDesc = styled.p`
   color: ${theme.colors.textSecondary};
 `;
 
+export const HowToPlayBox = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: ${theme.borderRadius.lg};
+  background: ${theme.colors.surface};
+  font-size: 0.76rem;
+  color: ${theme.colors.textSecondary};
+`;
+
+export const HowToPlayRow = styled.div`
+  display: flex;
+  gap: 0.5rem;
+
+  strong {
+    flex: none;
+    width: 44px;
+    color: ${theme.colors.textPrimary};
+  }
+`;
+
 export const SongList = styled.div`
   display: flex;
   flex-direction: column;
