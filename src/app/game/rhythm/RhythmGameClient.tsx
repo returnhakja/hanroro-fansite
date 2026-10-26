@@ -23,6 +23,7 @@ import {
 } from '@/lib/game/rhythm';
 import type { RhythmChartDetail } from '@/types/api/rhythm';
 import { getAllSongs } from '@/lib/utils/songs';
+import KakaoShareButton from '@/components/ui/KakaoShareButton';
 import {
   PageWrapper,
   IntroCard,
@@ -424,6 +425,11 @@ export default function RhythmGameClient() {
     ].map((row) => ({ ...row, percent: (row.value / max) * 100 }));
   }, [perfectCount, greatCount, missCount]);
 
+  const shareText = useMemo(() => {
+    if (!chart) return '';
+    return `한로로 로로비트에서 "${chart.title}" ${score.toLocaleString('ko-KR')}점 (최고 콤보 ${maxCombo}) 받았어요!`;
+  }, [chart, score, maxCombo]);
+
   return (
     <PageWrapper>
       {/* 화면에 보이지 않는 유튜브 플레이어. phase와 무관하게 항상 마운트돼 있어야 한다.
@@ -602,6 +608,16 @@ export default function RhythmGameClient() {
               </RankList>
             </BreakdownBox>
           )}
+
+          <KakaoShareButton
+            title="한로로 로로비트"
+            description={shareText}
+            imageUrl={coverByTitle.get(chart.title.trim().toLowerCase())}
+            path="/game/rhythm"
+            buttonTitle="나도 도전하기"
+            label="카카오톡 공유"
+            block
+          />
 
           <ResultActions>
             <SecondaryButton type="button" onClick={() => handleSelectStart(chart._id)}>다시 하기</SecondaryButton>
