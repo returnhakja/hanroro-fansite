@@ -405,6 +405,14 @@ export default function RhythmGameClient() {
 
   return (
     <PageWrapper>
+      {/* 화면에 보이지 않는 유튜브 플레이어. phase와 무관하게 항상 마운트돼 있어야 한다.
+          전에는 phase==='playing'일 때만 렌더링됐는데, 플레이어를 실제로 만드는 건
+          마운트 시 한 번만 도는 effect([] deps)라서 그 시점에 이 div가 DOM에
+          없으면(즉 아직 곡 선택 화면이면) containerRef.current가 null이라
+          YT.Player가 영영 생성되지 않았다 — 그래서 게임은 로컬 시계로 그냥
+          돌아가는데 실제 영상/소리는 아예 재생된 적이 없었다. */}
+      <div ref={player.containerRef} style={{ position: 'absolute', width: 1, height: 1, opacity: 0 }} />
+
       {phase === 'select' && (
         <IntroCard>
           <IntroWrap>
@@ -451,8 +459,6 @@ export default function RhythmGameClient() {
 
       {phase === 'playing' && chart && (
         <PlayWrap>
-          <div ref={player.containerRef} style={{ position: 'absolute', width: 1, height: 1, opacity: 0 }} />
-
           {countdown >= 0 && <CountdownOverlay>{countdown > 0 ? countdown : 'GO'}</CountdownOverlay>}
 
           <GlowBlob $color="rgba(94,234,212,0.28)" $top={-140} $left={-100} />
