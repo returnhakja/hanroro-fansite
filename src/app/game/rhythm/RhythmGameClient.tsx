@@ -75,7 +75,7 @@ import {
   SecondaryButton,
 } from './RhythmGame.styles';
 
-type Phase = 'select' | 'countdown' | 'playing' | 'result';
+type Phase = 'select' | 'playing' | 'result';
 
 interface VisibleNote {
   index: number;
@@ -282,9 +282,20 @@ export default function RhythmGameClient() {
 
   const handleSelectStart = async (chartId: string) => {
     setErrorText('');
+    const summary = charts.find((c) => c._id === chartId);
+    if (!summary) {
+      setErrorText('곡을 찾을 수 없습니다');
+      return;
+    }
+
+    // 브라우저 자동재생(소리) 정책 때문에, 유저 클릭 시점에 바로(지연 없이) 재생을 시작해야 해.
+    // 카운트다운 뒤로 재생 시작을 미루면 "제스처와 무관한 재생"으로 취급돼 소리가 막힌다.
+    player.start(summary.youtubeId, summary.startSeconds);
+
     try {
       const detail = await fetchChart.mutateAsync(chartId);
       if (detail.notes.length === 0) {
+        player.stop();
         setErrorText('아직 박자맵이 준비되지 않은 곡이에요');
         return;
       }
@@ -308,25 +319,23 @@ export default function RhythmGameClient() {
       setVisibleNotes([]);
       setProgressPercent(0);
 
-      setPhase('countdown');
+      setPhase('playing');
       setCountdown(3);
     } catch (err) {
+      player.stop();
       setErrorText(err instanceof Error ? err.message : '곡을 불러올 수 없습니다');
     }
   };
 
-  // 카운트다운 후 실제 재생 시작
+  // 재생은 이미 시작됐고, 이건 그 위에 잠깐 보여주는 화면용 카운트다운일 뿐이다
+  // (노트 판정 루프는 재생 시작과 함께 바로 돌아간다). 3,2,1,GO를 보여주고 사라진다.
   useEffect(() => {
-    if (phase !== 'countdown' || !chart) return;
-    if (countdown <= 0) {
-      player.start(chart.youtubeId, chart.startSeconds);
-      setPhase('playing');
-      return;
-    }
-    const t = setTimeout(() => setCountdown((c) => c - 1), 700);
+    if (phase !== 'playing' || countdown < 0) return;
+    const delay = countdown === 0 ? 500 : 700;
+    const t = setTimeout(() => setCountdown((c) => c - 1), delay);
     return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, countdown, chart]);
+  }, [phase, countdown]);
+
 
   const handleRegister = async () => {
     if (!nickname.trim() || !resultId) return;
@@ -403,11 +412,11 @@ export default function RhythmGameClient() {
         </IntroCard>
       )}
 
-      {(phase === 'countdown' || phase === 'playing') && chart && (
+      {phase === 'playing' && chart && (
         <PlayWrap>
           <div ref={player.containerRef} style={{ position: 'absolute', width: 1, height: 1, opacity: 0 }} />
 
-          {phase === 'countdown' && <CountdownOverlay>{countdown > 0 ? countdown : 'GO'}</CountdownOverlay>}
+          {countdown >= 0 && <CountdownOverlay>{countdown > 0 ? countdown : 'GO'}</CountdownOverlay>}
 
           <GlowBlob $color="rgba(94,234,212,0.28)" $top={-140} $left={-100} />
           <GlowBlob $color="rgba(255,111,176,0.26)" $top={-80} $right={-120} />

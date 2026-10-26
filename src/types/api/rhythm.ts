@@ -2,6 +2,7 @@ export interface RhythmChartSummary {
   _id: string;
   title: string;
   youtubeId: string;
+  startSeconds: number;
   bpm: number;
   difficulty: 'easy' | 'normal' | 'hard';
 }

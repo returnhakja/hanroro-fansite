@@ -7,7 +7,7 @@ export async function GET() {
   try {
     await connectDB();
     const charts = await RhythmChart.find({ isActive: true })
-      .select('title youtubeId bpm difficulty')
+      .select('title youtubeId startSeconds bpm difficulty')
       .sort({ createdAt: -1 })
       .lean();
 
@@ -16,6 +16,7 @@ export async function GET() {
         _id: (c._id as { toString(): string }).toString(),
         title: c.title,
         youtubeId: c.youtubeId,
+        startSeconds: c.startSeconds,
         bpm: c.bpm,
         difficulty: c.difficulty,
       })),
