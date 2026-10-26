@@ -49,6 +49,10 @@ export default function RhythmChartEditorClient({ id }: { id: string }) {
   const [saveError, setSaveError] = useState('');
   const [saved, setSaved] = useState(false);
 
+  const [showImport, setShowImport] = useState(false);
+  const [importText, setImportText] = useState('');
+  const [importError, setImportError] = useState('');
+
   const timelineScrollRef = useRef<HTMLDivElement | null>(null);
 
   const handleStateChange = useCallback((state: number) => {
@@ -160,6 +164,46 @@ export default function RhythmChartEditorClient({ id }: { id: string }) {
     container.scrollLeft = Math.max(0, target);
   }, [currentSec, isPlaying, startSeconds]);
 
+  // 외부에서 자동으로 뽑아낸 비트맵 JSON({ bpm?, offsetMs?, startSeconds?, notes: [{lane,timeMs}] })을
+  // 붙여넣어서 한 번에 반영한다. 직접 클릭/실시간 탭으로 일일이 찍는 대신 쓸 수 있는 가져오기 기능.
+  const handleApplyImport = () => {
+    setImportError('');
+    let parsed: any;
+    try {
+      parsed = JSON.parse(importText);
+    } catch {
+      setImportError('올바른 JSON이 아니에요');
+      return;
+    }
+    if (!Array.isArray(parsed?.notes)) {
+      setImportError('notes 배열이 없어요');
+      return;
+    }
+    const parsedNotes: RhythmNote[] = [];
+    for (const n of parsed.notes) {
+      const lane = Number(n?.lane);
+      const timeMs = Number(n?.timeMs);
+      if (!Number.isInteger(lane) || lane < 0 || lane >= RHYTHM_LANE_COUNT) {
+        setImportError(`레인 값이 잘못됐어요: ${JSON.stringify(n)}`);
+        return;
+      }
+      if (!Number.isFinite(timeMs) || timeMs < 0) {
+        setImportError(`timeMs 값이 잘못됐어요: ${JSON.stringify(n)}`);
+        return;
+      }
+      parsedNotes.push({ lane, timeMs: Math.round(timeMs) });
+    }
+    parsedNotes.sort((a, b) => a.timeMs - b.timeMs);
+
+    if (Number.isFinite(Number(parsed.bpm))) setBpm(Number(parsed.bpm));
+    if (Number.isFinite(Number(parsed.offsetMs))) setOffsetMs(Math.round(Number(parsed.offsetMs)));
+    if (Number.isFinite(Number(parsed.startSeconds))) setStartSeconds(Number(parsed.startSeconds));
+    setNotes(parsedNotes);
+    setSaved(false);
+    setShowImport(false);
+    setImportText('');
+  };
+
   const handleSave = async () => {
     setSaveError('');
     if (isActive && notes.length === 0) {
@@ -192,11 +236,34 @@ export default function RhythmChartEditorClient({ id }: { id: string }) {
         <TopRight>
           {saveError && <ErrorText>{saveError}</ErrorText>}
           {saved && !saveError && <SavedText>저장됨</SavedText>}
+          <ImportButton type="button" onClick={() => setShowImport((v) => !v)}>
+            JSON 가져오기
+          </ImportButton>
           <SaveButton type="button" onClick={handleSave} disabled={updateChart.isPending}>
             {updateChart.isPending ? '저장 중...' : '저장'}
           </SaveButton>
         </TopRight>
       </TopBar>
+
+      {showImport && (
+        <ImportPanel>
+          <ImportHint>
+            자동 채보 결과(JSON)를 붙여넣으면 bpm/오프셋/시작 초/노트가 한 번에 반영돼요. 적용 후에도 "저장"을 눌러야 실제로 저장됩니다.
+          </ImportHint>
+          <ImportTextarea
+            value={importText}
+            onChange={(e) => setImportText(e.target.value)}
+            placeholder='{"bpm": 117.5, "offsetMs": 1347, "startSeconds": 0.28, "notes": [{"lane": 0, "timeMs": 1277}, ...]}'
+          />
+          {importError && <ErrorText>{importError}</ErrorText>}
+          <ImportActions>
+            <SecondaryButton type="button" onClick={() => { setShowImport(false); setImportText(''); setImportError(''); }}>
+              취소
+            </SecondaryButton>
+            <SaveButton type="button" onClick={handleApplyImport}>적용</SaveButton>
+          </ImportActions>
+        </ImportPanel>
+      )}
 
       <MetaPanel>
         <FieldBlock>
@@ -395,6 +462,69 @@ const SaveButton = styled.button`
 
   &:hover { background: #6b5740; }
   &:disabled { opacity: 0.6; cursor: not-allowed; }
+`;
+
+const ImportButton = styled.button`
+  padding: 0.5rem 1.1rem;
+  border: 1px solid #8b7355;
+  border-radius: 8px;
+  background: #fff;
+  color: #8b7355;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+
+  &:hover { background: #f5f0e8; }
+`;
+
+const ImportPanel = styled.div`
+  background: #fff;
+  border: 1px solid #e5ddd0;
+  border-radius: 10px;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 1px 4px rgba(44,36,24,0.06);
+`;
+
+const ImportHint = styled.p`
+  margin: 0;
+  font-size: 0.74rem;
+  color: #a99e8f;
+`;
+
+const ImportTextarea = styled.textarea`
+  width: 100%;
+  min-height: 100px;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.76rem;
+  font-family: 'JetBrains Mono', Consolas, monospace;
+  box-sizing: border-box;
+  resize: vertical;
+
+  &:focus { outline: none; border-color: #8b7355; }
+`;
+
+const ImportActions = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+`;
+
+const SecondaryButton = styled.button`
+  padding: 0.5rem 1.1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  color: #7a6e5d;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+
+  &:hover { background: #f5f0e8; }
 `;
 
 const MetaPanel = styled.div`
