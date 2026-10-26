@@ -12,11 +12,11 @@ export const RHYTHM_LANE_COLORS = [
 // 노트가 화면 상단에서 판정선까지 떨어지는 데 걸리는 시간
 export const RHYTHM_NOTE_TRAVEL_MS = 1800;
 
-// 판정 윈도우 (판정 시각과 눌린 시각의 차이, ms)
-export const RHYTHM_PERFECT_WINDOW_MS = 60;
-export const RHYTHM_GREAT_WINDOW_MS = 140;
+// 판정 윈도우 (판정 시각과 눌린 시각의 차이, ms). 후하게(널널하게) 잡는다.
+export const RHYTHM_PERFECT_WINDOW_MS = 110;
+export const RHYTHM_GREAT_WINDOW_MS = 220;
 // 이 범위를 넘기면 MISS. 노트가 판정선을 지나고도 안 눌리면 자동 MISS.
-export const RHYTHM_MISS_WINDOW_MS = 220;
+export const RHYTHM_MISS_WINDOW_MS = 320;
 
 export const RHYTHM_SCORE_PER_HIT = { perfect: 100, great: 60, miss: 0 } as const;
 
