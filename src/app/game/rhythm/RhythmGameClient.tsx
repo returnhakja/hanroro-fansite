@@ -130,6 +130,11 @@ export default function RhythmGameClient() {
   const judgedRef = useRef<Set<number>>(new Set());
   const laneAreaRef = useRef<HTMLDivElement | null>(null);
   const laneHeightRef = useRef(440);
+  // 카운트다운(3,2,1,GO)이 끝나는 바로 그 순간의 player.getElapsedMs() 값.
+  // 소리는 클릭 즉시(제스처 보존을 위해) 재생을 시작하지만, 실제 노트 판정의
+  // 기준 시각(0ms)은 "GO"가 사라지는 시점이어야 하므로 그 차이를 여기 저장해뒀다가
+  // 매번 빼서 쓴다.
+  const gameStartOffsetRef = useRef<number | null>(null);
   const rafRef = useRef<number | null>(null);
   const flashKeyRef = useRef(0);
   const comboRef = useRef(0);
@@ -234,11 +239,12 @@ export default function RhythmGameClient() {
   }, [triggerJudgement]);
 
   const handleLaneInput = useCallback((lane: number) => {
-    if (!chart) return;
+    // 카운트다운이 끝나기 전(GO 전)에는 아직 게임이 시작된 게 아니므로 입력을 무시한다.
+    if (!chart || gameStartOffsetRef.current === null) return;
     setPressedLane(lane);
     setTimeout(() => setPressedLane((cur) => (cur === lane ? null : cur)), 120);
 
-    const elapsedMs = player.getElapsedMs();
+    const elapsedMs = player.getElapsedMs() - gameStartOffsetRef.current;
     let bestIndex = -1;
     let bestDiff = Infinity;
     chart.notes.forEach((note, index) => {
@@ -269,11 +275,16 @@ export default function RhythmGameClient() {
   }, [phase, handleLaneInput]);
 
   // 메인 루프: 노트 위치 갱신 + 자동 미스 판정 + 종료 체크
+  // 카운트다운이 끝나기(GO) 전까지는 돌지 않는다 — 노트는 "GO"와 동시에 떨어지기 시작해야 한다.
   useEffect(() => {
-    if (phase !== 'playing' || !chart) return;
+    if (phase !== 'playing' || !chart || countdown >= 0) return;
+
+    if (gameStartOffsetRef.current === null) {
+      gameStartOffsetRef.current = player.getElapsedMs();
+    }
 
     const tick = () => {
-      const elapsedMs = player.getElapsedMs();
+      const elapsedMs = player.getElapsedMs() - (gameStartOffsetRef.current ?? 0);
       const next: VisibleNote[] = [];
       let allJudged = true;
       let lastNoteMs = 0;
@@ -312,7 +323,7 @@ export default function RhythmGameClient() {
     rafRef.current = requestAnimationFrame(tick);
     return stopLoop;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, chart]);
+  }, [phase, chart, countdown]);
 
   const handleSelectStart = async (chartId: string) => {
     setErrorText('');
@@ -338,6 +349,7 @@ export default function RhythmGameClient() {
       setSelectedId(chartId);
 
       judgedRef.current = new Set();
+      gameStartOffsetRef.current = null;
       comboRef.current = 0;
       maxComboRef.current = 0;
       scoreRef.current = 0;
@@ -362,8 +374,8 @@ export default function RhythmGameClient() {
     }
   };
 
-  // 재생은 이미 시작됐고, 이건 그 위에 잠깐 보여주는 화면용 카운트다운일 뿐이다
-  // (노트 판정 루프는 재생 시작과 함께 바로 돌아간다). 3,2,1,GO를 보여주고 사라진다.
+  // 소리는 클릭 즉시 재생되지만(제스처 보존), 노트 판정 루프는 이 카운트다운이
+  // 0 밑으로 내려가(= "GO"가 사라지는 순간) 비로소 시작된다. 3,2,1,GO를 보여주고 사라진다.
   useEffect(() => {
     if (phase !== 'playing' || countdown < 0) return;
     const delay = countdown === 0 ? 500 : 700;
