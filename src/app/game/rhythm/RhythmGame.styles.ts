@@ -204,8 +204,11 @@ export const ProgressTrack = styled.div`
   overflow: hidden;
 `;
 
-export const ProgressFill = styled.div<{ $percent: number }>`
-  width: ${(p) => Math.min(100, Math.max(0, p.$percent))}%;
+// width는 매 프레임 바뀌는 값이라 styled-components prop으로 넘기지 않는다.
+// 넘기면 바뀌는 값마다 전역 스타일시트에 새 클래스가 계속 쌓여서(한 번 추가된
+// 클래스는 지워지지 않음) 몇 분만 플레이해도 스타일시트가 비대해져 페이지가
+// 느려지다 멈춘다. 호출부에서 style={{width}}로 직접 DOM에 꽂아야 한다.
+export const ProgressFill = styled.div`
   height: 100%;
   background: linear-gradient(90deg, #5eead4 0%, #ff6fb0 50%, #ffd54a 100%);
 `;
@@ -274,9 +277,10 @@ export const Lane = styled.div`
   overflow: hidden;
 `;
 
-export const Note = styled.div<{ $top: number; $from: string; $to: string; $glow: string }>`
+// top도 ProgressFill의 width와 같은 이유로 styled-components prop이 아니라
+// style={{top}}으로 직접 넘겨야 한다(매 프레임 바뀌는 값 → 전역 스타일시트 누적 방지).
+export const Note = styled.div<{ $from: string; $to: string; $glow: string }>`
   position: absolute;
-  top: ${(p) => p.$top}px;
   left: 8px;
   right: 8px;
   height: 34px;

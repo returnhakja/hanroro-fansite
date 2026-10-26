@@ -139,6 +139,10 @@ export default function RhythmGameClient() {
   const [registered, setRegistered] = useState(false);
 
   const judgedRef = useRef<Set<number>>(new Set());
+  // sortedNotes에서 "이미 전부 판정된 앞쪽 구간"을 기억해, 매 프레임마다
+  // 노트 전체(수백 개)를 처음부터 다시 훑지 않도록 한다. 노트 수가 많은
+  // 채보에서 프레임마다 O(전체 노트 수)로 스캔하면 체감 성능이 급격히 떨어진다.
+  const noteCursorRef = useRef(0);
   const laneAreaRef = useRef<HTMLDivElement | null>(null);
   const laneHeightRef = useRef(440);
   // 카운트다운(3,2,1,GO)이 끝나는 바로 그 순간의 player.getElapsedMs() 값.
@@ -167,6 +171,15 @@ export default function RhythmGameClient() {
   }, []);
 
   const player = useRhythmYoutubePlayer(handleEnded, handlePlayerError);
+
+  // 판정/낙하 루프가 "시간순으로 정렬돼 있다"는 걸 전제로 앞쪽에서 끊고 나가는
+  // 최적화(아래 tick() 참고)를 하기 때문에, 서버에 저장된 순서를 믿지 않고
+  // 여기서 한 번 확실히 정렬해둔다.
+  const sortedNotes = useMemo(
+    () => (chart ? [...chart.notes].sort((a, b) => a.timeMs - b.timeMs) : []),
+    [chart]
+  );
+  const lastNoteMs = sortedNotes.length > 0 ? sortedNotes[sortedNotes.length - 1].timeMs : 0;
 
   const { data: ranking = [] } = useRhythmRanking(phase === 'result' ? chart?._id ?? '' : '');
 
@@ -252,7 +265,7 @@ export default function RhythmGameClient() {
     const elapsedMs = player.getElapsedMs() - gameStartOffsetRef.current;
     let bestIndex = -1;
     let bestDiff = Infinity;
-    chart.notes.forEach((note, index) => {
+    sortedNotes.forEach((note, index) => {
       if (note.lane !== lane || judgedRef.current.has(index)) return;
       const diff = Math.abs(note.timeMs - elapsedMs);
       if (diff <= RHYTHM_MISS_WINDOW_MS && diff < bestDiff) {
@@ -265,7 +278,7 @@ export default function RhythmGameClient() {
     const judgement: RhythmJudgement =
       bestDiff <= RHYTHM_PERFECT_WINDOW_MS ? 'perfect' : bestDiff <= RHYTHM_GREAT_WINDOW_MS ? 'great' : 'miss';
     applyJudgement(judgement, lane);
-  }, [applyJudgement, chart, player]);
+  }, [applyJudgement, chart, sortedNotes, player]);
 
   // 키보드 입력 (D F J K)
   useEffect(() => {
@@ -287,6 +300,7 @@ export default function RhythmGameClient() {
     if (gameStartOffsetRef.current === null) {
       gameStartOffsetRef.current = player.getElapsedMs();
     }
+    noteCursorRef.current = 0;
 
     const tick = () => {
       // 일부 브라우저(특히 사파리)는 숨겨놓은 유튜브 iframe이 재생을 시작하면
@@ -301,27 +315,34 @@ export default function RhythmGameClient() {
       const elapsedMs = player.getElapsedMs() - (gameStartOffsetRef.current ?? 0);
       const next: VisibleNote[] = [];
       let allJudged = true;
-      let lastNoteMs = 0;
 
-      chart.notes.forEach((note, index) => {
-        lastNoteMs = Math.max(lastNoteMs, note.timeMs);
-        if (judgedRef.current.has(index)) return;
+      // 이미 다 판정된 앞쪽 구간은 매번 다시 훑지 않도록 커서를 당겨놓는다.
+      while (noteCursorRef.current < sortedNotes.length && judgedRef.current.has(noteCursorRef.current)) {
+        noteCursorRef.current += 1;
+      }
+
+      for (let index = noteCursorRef.current; index < sortedNotes.length; index++) {
+        const note = sortedNotes[index];
+        if (judgedRef.current.has(index)) continue;
         allJudged = false;
 
         if (elapsedMs - note.timeMs > RHYTHM_MISS_WINDOW_MS) {
           judgedRef.current.add(index);
           applyJudgement('miss');
-          return;
+          continue;
         }
 
         const remainingMs = note.timeMs - elapsedMs;
-        if (remainingMs <= RHYTHM_NOTE_TRAVEL_MS && remainingMs >= -300) {
+        // sortedNotes는 시간순이라, 아직 한참 먼 노트를 만나면 그 뒤는 더 멀다 —
+        // 여기서 끊어서 매 프레임 전체 노트를 다 훑지 않는다.
+        if (remainingMs > RHYTHM_NOTE_TRAVEL_MS) break;
+        if (remainingMs >= -300) {
           const progress = 1 - remainingMs / RHYTHM_NOTE_TRAVEL_MS;
           // progress===1(diff=0)일 때 노트의 중심이 TapButton의 중심과 겹치도록.
           const targetTop = laneHeightRef.current - TAP_BUTTON_HEIGHT / 2 - NOTE_HEIGHT / 2;
           next.push({ index, lane: note.lane, top: progress * targetTop });
         }
-      });
+      }
 
       setVisibleNotes(next);
       setProgressPercent((elapsedMs / (lastNoteMs + RHYTHM_MISS_WINDOW_MS)) * 100);
@@ -507,7 +528,7 @@ export default function RhythmGameClient() {
               <ErrorText>{errorText}</ErrorText>
             </div>
           )}
-          <ProgressTrack><ProgressFill $percent={progressPercent} /></ProgressTrack>
+          <ProgressTrack><ProgressFill style={{ width: `${Math.min(100, Math.max(0, progressPercent))}%` }} /></ProgressTrack>
 
           <ComboWrap>
             <ComboNumber>{combo}</ComboNumber>
@@ -528,7 +549,7 @@ export default function RhythmGameClient() {
                   {visibleNotes
                     .filter((n) => n.lane === lane)
                     .map((n) => (
-                      <Note key={n.index} $top={n.top} $from={color.from} $to={color.to} $glow={color.glow} />
+                      <Note key={n.index} style={{ top: n.top }} $from={color.from} $to={color.to} $glow={color.glow} />
                     ))}
                   {burst?.lane === lane && <HitBurst key={burst.key} />}
                   <TapButton
