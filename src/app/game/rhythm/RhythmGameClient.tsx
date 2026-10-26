@@ -276,6 +276,15 @@ export default function RhythmGameClient() {
     }
 
     const tick = () => {
+      // 일부 브라우저(특히 사파리)는 숨겨놓은 유튜브 iframe이 재생을 시작하면
+      // 포커스를 그 iframe 쪽으로 가져가버린다. 포커스가 iframe 안에 있는 동안은
+      // keydown 이벤트가 그 iframe 문서 안에서만 발생하고 부모 window까지
+      // 올라오지 않아서, D/F/J/K가 안 눌리는 것처럼 보인다. 매 프레임 확인해서
+      // 포커스가 iframe에 가 있으면 즉시 풀어준다.
+      if (document.activeElement?.tagName === 'IFRAME') {
+        (document.activeElement as HTMLElement).blur();
+      }
+
       const elapsedMs = player.getElapsedMs() - (gameStartOffsetRef.current ?? 0);
       const next: VisibleNote[] = [];
       let allJudged = true;
