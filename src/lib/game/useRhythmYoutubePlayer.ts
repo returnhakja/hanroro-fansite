@@ -73,7 +73,7 @@ export function useRhythmYoutubePlayer(onEnded?: () => void, onError?: (message:
         playerRef.current = new window.YT.Player(containerRef.current, {
           height: '1',
           width: '1',
-          playerVars: { autoplay: 0, controls: 0, disablekb: 1 },
+          playerVars: { autoplay: 0, controls: 0, disablekb: 1, playsinline: 1 },
           events: {
             onReady: () => resolve(),
             onStateChange: (e: any) => {

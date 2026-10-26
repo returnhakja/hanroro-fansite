@@ -411,7 +411,7 @@ export default function RhythmGameClient() {
           없으면(즉 아직 곡 선택 화면이면) containerRef.current가 null이라
           YT.Player가 영영 생성되지 않았다 — 그래서 게임은 로컬 시계로 그냥
           돌아가는데 실제 영상/소리는 아예 재생된 적이 없었다. */}
-      <div ref={player.containerRef} style={{ position: 'absolute', width: 1, height: 1, opacity: 0 }} />
+      <div ref={player.containerRef} style={{ position: 'fixed', left: -9999, top: -9999, width: 1, height: 1 }} />
 
       {phase === 'select' && (
         <IntroCard>
