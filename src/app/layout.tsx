@@ -10,7 +10,7 @@ import NaverAnalytics from "@/components/analytics/NaverAnalytics";
 import GoogleTagManager from "@/components/analytics/GoogleTagManager";
 import ScrollToTop from "@/components/ui/ScrollToTop";
 import RegisterSW from "@/components/pwa/RegisterSW";
-import BirthdayCafeNotice from "@/components/notices/BirthdayCafeNotice";
+// import BirthdayCafeNotice from "@/components/notices/BirthdayCafeNotice"; // 생일카페 모금 공지 종료 - 다음 공지 때 참고용으로 남겨둠
 import "./globals.css";
 
 const SITE_URL = "https://www.hanroro.co.kr";
@@ -255,7 +255,7 @@ export default function RootLayout({
             <AuthProvider>
               <LoadingProvider>
                 <Header />
-                <BirthdayCafeNotice />
+                {/* <BirthdayCafeNotice /> */}
                 <main
                   style={{
                     minHeight: "calc(100vh - 200px)",
