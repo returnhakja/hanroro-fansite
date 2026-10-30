@@ -36,6 +36,14 @@ export const artistData = {
   imageUrl: "/assets/애증프로필.jpg",
   albums: [
     {
+      id: "18",
+      title: "물음표",
+      releaseDate: "2026-11-05",
+      coverUrl: "/assets/물음표.jpg",
+      tracks: [],
+      // TODO: 소개글(description)과 뮤직비디오 링크(videos) 추가 필요
+    },
+    {
       id: "17",
       title: "잔혹한 천사의 테제",
       releaseDate: "2026-07-30",
