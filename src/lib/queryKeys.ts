@@ -10,6 +10,7 @@ export const queryKeys = {
   },
   concerts: {
     all: ['concerts'] as const,
+    list: (page: number, q: string) => ['concerts', 'list', page, q] as const,
     admin: ['admin', 'concerts'] as const,
   },
   setlists: {

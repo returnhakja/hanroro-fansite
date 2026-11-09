@@ -61,7 +61,7 @@ import {
   RelatedDeepDesc,
 } from "./Schedule.styles";
 import { useUpcomingEvents } from "@/hooks/queries/useEvents";
-import { useConcerts } from "@/hooks/queries/useConcerts";
+import { useAllConcerts } from "@/hooks/queries/useConcerts";
 import {
   useAttendedConcerts,
   useToggleAttendedConcert,
@@ -151,7 +151,7 @@ const SchedulePageClient = () => {
   const router = useRouter();
   const { data: session } = useSession();
   const { data, isLoading: loading } = useUpcomingEvents();
-  const { data: concerts = [] } = useConcerts();
+  const { data: concerts = [] } = useAllConcerts();
   const { data: attended = [] } = useAttendedConcerts();
   const { check, uncheck } = useToggleAttendedConcert();
 

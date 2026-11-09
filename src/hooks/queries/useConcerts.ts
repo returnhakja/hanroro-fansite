@@ -1,8 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/queryKeys';
 import { getAuthHeader } from '@/lib/auth/authHeader';
-import type { Song, SetList, Concert, ActiveSetlistData } from '@/types/api/concert';
-export type { Song, SetList, Concert, ActiveSetlistData };
+import type { Song, SetList, Concert, ActiveSetlistData, ConcertListResponse } from '@/types/api/concert';
+export type { Song, SetList, Concert, ActiveSetlistData, ConcertListResponse };
 
 /**
  * 셋리스트 생성/수정 요청 본문.
@@ -17,17 +17,39 @@ export interface SetlistFormBody {
 }
 
 // ─── 쿼리 훅 ────────────────────────────────────────────────────
-// 공개: 공연 + 셋리스트 목록
-export function useConcerts() {
+// 공개: 공연 + 셋리스트 목록 (페이지네이션/검색)
+export function useConcerts({ page = 1, q = '' }: { page?: number; q?: string } = {}) {
+  return useQuery({
+    queryKey: queryKeys.concerts.list(page, q),
+    queryFn: async () => {
+      const params = new URLSearchParams({ page: String(page) });
+      if (q) params.set('q', q);
+      const res = await fetch(`/api/concerts?${params.toString()}`);
+      if (!res.ok) throw new Error('공연 목록을 불러올 수 없습니다');
+      return (await res.json()) as ConcertListResponse;
+    },
+  });
+}
+
+// 공개: 공연 전체 목록 (페이지네이션 없이 전부 필요한 화면용, 예: 일정 페이지)
+export function useAllConcerts() {
   return useQuery({
     queryKey: queryKeys.concerts.all,
     queryFn: async () => {
-      const res = await fetch('/api/concerts');
+      const res = await fetch('/api/concerts?all=true');
       if (!res.ok) throw new Error('공연 목록을 불러올 수 없습니다');
-      const data = await res.json();
-      return (data.concerts || []) as Concert[];
+      const data = (await res.json()) as ConcertListResponse;
+      return data.concerts;
     },
   });
+}
+
+// 공개: concertId가 몇 페이지에 있는지 조회 (딥링크용, 1회성 fetch)
+export async function locateConcertPage(concertId: string): Promise<number> {
+  const res = await fetch(`/api/concerts?locateId=${concertId}`);
+  if (!res.ok) throw new Error('공연 위치를 찾을 수 없습니다');
+  const data = await res.json();
+  return data.page as number;
 }
 
 // 공개: 활성 셋리스트 (홈 화면용)

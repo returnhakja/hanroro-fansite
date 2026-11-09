@@ -33,3 +33,10 @@ export interface ActiveSetlistData {
   concert: Concert | null;
   setlists: SetList[];
 }
+
+export interface ConcertListResponse {
+  concerts: Concert[];
+  page: number;
+  totalPages: number;
+  totalCount: number;
+}

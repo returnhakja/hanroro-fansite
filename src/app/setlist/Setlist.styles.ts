@@ -87,6 +87,89 @@ export const PageSubtitle = styled.p`
   }
 `;
 
+export const SearchForm = styled.form`
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 3rem;
+`;
+
+export const SearchInput = styled.input`
+  width: 100%;
+  max-width: 320px;
+  padding: 0.7rem 1rem;
+  border: 1px solid ${theme.colors.border};
+  border-radius: ${theme.borderRadius.sm};
+  font-size: 0.95rem;
+  color: ${theme.colors.textPrimary};
+  background: ${theme.colors.surface};
+
+  &:focus {
+    outline: none;
+    border-color: ${theme.colors.primary};
+  }
+`;
+
+export const SearchButton = styled.button`
+  padding: 0.7rem 1.4rem;
+  border: 1px solid ${theme.colors.primary};
+  border-radius: ${theme.borderRadius.sm};
+  background: ${theme.colors.primary};
+  color: ${theme.colors.textLight};
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background ${theme.transitions.fast};
+
+  &:hover {
+    background: ${theme.colors.primaryDark};
+  }
+`;
+
+export const Pagination = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 3rem;
+`;
+
+export const PageNavButton = styled.button`
+  padding: 0.5rem 0.9rem;
+  border: 1px solid ${theme.colors.border};
+  border-radius: ${theme.borderRadius.sm};
+  background: ${theme.colors.surface};
+  color: ${theme.colors.textSecondary};
+  font-size: 0.85rem;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    border-color: ${theme.colors.primary};
+    color: ${theme.colors.primary};
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+`;
+
+export const PageButton = styled.button<{ $active?: boolean }>`
+  width: 36px;
+  height: 36px;
+  border: 1px solid ${({ $active }) => ($active ? theme.colors.primary : theme.colors.border)};
+  border-radius: ${theme.borderRadius.sm};
+  background: ${({ $active }) => ($active ? theme.colors.primary : theme.colors.surface)};
+  color: ${({ $active }) => ($active ? theme.colors.textLight : theme.colors.textSecondary)};
+  font-size: 0.85rem;
+  font-weight: ${({ $active }) => ($active ? 700 : 400)};
+  cursor: pointer;
+
+  &:hover {
+    border-color: ${theme.colors.primary};
+  }
+`;
+
 export const ConcertGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);

@@ -9,6 +9,12 @@ import {
   Container,
   PageTitle,
   PageSubtitle,
+  SearchForm,
+  SearchInput,
+  SearchButton,
+  Pagination,
+  PageNavButton,
+  PageButton,
   ConcertGrid,
   ConcertCard,
   ConcertHeader,
@@ -32,7 +38,7 @@ import {
   BuilderCtaCopy,
   BuilderCtaArrow,
 } from "./Setlist.styles";
-import { useConcerts } from "@/hooks/queries/useConcerts";
+import { useConcerts, locateConcertPage } from "@/hooks/queries/useConcerts";
 import {
   useAttendedConcerts,
   useToggleAttendedConcert,
@@ -63,7 +69,12 @@ function SetlistContent() {
   const [shouldReduceMotion, setShouldReduceMotion] = useState(false);
   const searchParams = useSearchParams();
   const targetConcertId = searchParams.get("concertId");
-  const { data: concerts = [], isLoading: loading } = useConcerts();
+  const [page, setPage] = useState(1);
+  const [searchInput, setSearchInput] = useState("");
+  const [query, setQuery] = useState("");
+  const { data, isLoading: loading } = useConcerts({ page, q: query });
+  const concerts = data?.concerts ?? [];
+  const totalPages = data?.totalPages ?? 1;
   const [activeTabs, setActiveTabs] = useState<{ [key: string]: number }>({});
   const cardRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const { data: session } = useSession();
@@ -101,6 +112,15 @@ function SetlistContent() {
     setShouldReduceMotion(prefersReducedMotion ?? false);
   }, [prefersReducedMotion]);
 
+  // 딥링크(?concertId=)로 들어왔을 때, 그 공연이 검색/페이지네이션 때문에
+  // 지금 페이지에 없을 수 있으니 먼저 몇 페이지에 있는지 물어보고 그 페이지로 이동한다.
+  useEffect(() => {
+    if (!targetConcertId) return;
+    locateConcertPage(targetConcertId)
+      .then((resolvedPage) => setPage(resolvedPage))
+      .catch(() => {});
+  }, [targetConcertId]);
+
   useEffect(() => {
     if (!targetConcertId || loading) return;
     const el = cardRefs.current[targetConcertId];
@@ -110,6 +130,16 @@ function SetlistContent() {
       }, 300);
     }
   }, [targetConcertId, loading]);
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setQuery(searchInput.trim());
+    setPage(1);
+  };
+
+  const goToPage = (p: number) => {
+    setPage(Math.min(Math.max(1, p), totalPages));
+  };
 
   const handleTabChange = (concertId: string, tabIndex: number) => {
     setActiveTabs((prev) => ({
@@ -123,6 +153,16 @@ function SetlistContent() {
       <PageTitle>셋리스트</PageTitle>
       <PageSubtitle>한로로의 공연 셋리스트를 확인하세요</PageSubtitle>
 
+      <SearchForm onSubmit={handleSearchSubmit}>
+        <SearchInput
+          type="text"
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          placeholder="공연 제목, 장소 검색"
+        />
+        <SearchButton type="submit">검색</SearchButton>
+      </SearchForm>
+
       <BuilderCta href="/setlist/builder">
         <BuilderCtaCopy>
           <strong>내 최애 세트리스트 만들어보기</strong>
@@ -134,6 +174,7 @@ function SetlistContent() {
       {loading ? (
         <Spinner />
       ) : concerts.length > 0 ? (
+        <>
         <ConcertGrid>
           {concerts.map((concert, index) => (
             <ConcertCard
@@ -249,8 +290,40 @@ function SetlistContent() {
             </ConcertCard>
           ))}
         </ConcertGrid>
+
+        {totalPages > 1 && (
+          <Pagination>
+            <PageNavButton
+              type="button"
+              onClick={() => goToPage(page - 1)}
+              disabled={page <= 1}
+            >
+              ‹ 이전
+            </PageNavButton>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+              <PageButton
+                key={p}
+                type="button"
+                $active={p === page}
+                onClick={() => goToPage(p)}
+              >
+                {p}
+              </PageButton>
+            ))}
+            <PageNavButton
+              type="button"
+              onClick={() => goToPage(page + 1)}
+              disabled={page >= totalPages}
+            >
+              다음 ›
+            </PageNavButton>
+          </Pagination>
+        )}
+        </>
       ) : (
-        <EmptyMessage>등록된 공연이 없습니다</EmptyMessage>
+        <EmptyMessage>
+          {query ? "검색 결과가 없습니다" : "등록된 공연이 없습니다"}
+        </EmptyMessage>
       )}
     </Container>
   );
