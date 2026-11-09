@@ -22,7 +22,7 @@ const SITE_URL = "https://www.hanroro.co.kr";
  * "수상 이력 + 최신 릴리즈"를 앞에 두고, 사이트 기능 나열은 뒤에 붙인다.
  */
 const SITE_DESCRIPTION =
-  "2026 한국대중음악상 올해의 음악인 · 신곡 '너와 나' — 싱어송라이터 한로로(HANRORO)의 비공식 팬사이트. 공연 일정, 셋리스트, 갤러리, 연대기, 응원법과 최신 활동을 한곳에서 확인하세요.";
+  "2026 한국대중음악상 올해의 음악인 · 신곡 '물음표' — 싱어송라이터 한로로(HANRORO)의 비공식 팬사이트. 공연 일정, 셋리스트, 갤러리, 연대기, 응원법과 최신 활동을 한곳에서 확인하세요.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -57,6 +57,8 @@ export const metadata: Metadata = {
     "한로로 최애곡",
 
     // 음악
+    "한로로 물음표",
+    "물음표",
     "한로로 너와 나",
     "너와 나",
     "한로로 애증",
@@ -100,10 +102,10 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
     images: [
       {
-        url: "/assets/한로로프로필사진.jpg",
+        url: "/assets/물음표.jpg",
         width: 1200,
         height: 630,
-        alt: "한로로 HANRORO",
+        alt: "한로로 HANRORO - 물음표",
       },
     ],
   },
@@ -111,7 +113,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "한로로 팬사이트 - HANRORO Fansite",
     description: SITE_DESCRIPTION,
-    images: ["/assets/한로로프로필사진.jpg"],
+    images: ["/assets/물음표.jpg"],
   },
   manifest: "/manifest.json",
   appleWebApp: {
