@@ -1,23 +1,22 @@
 "use client";
 
-import { Container } from "./_sections/common.styles";
-import HomeHeroQuick from "./_sections/HomeHeroQuick";
-import AlbumHighlightSection from "./_sections/AlbumHighlightSection";
-import BoardPreviewSection from "./_sections/BoardPreviewSection";
-import GalleryPreviewSection from "./_sections/GalleryPreviewSection";
-import SchedulePreviewSection from "./_sections/SchedulePreviewSection";
-import SetlistPreviewSection from "./_sections/SetlistPreviewSection";
+import { HomeRoot } from "./_sections/home/Home.styles";
+import HomeHero from "./_sections/home/HomeHero";
+import {
+  HomeShortcuts,
+  HomeDiscography,
+  HomeUpcoming,
+  HomeCommunity,
+} from "./_sections/home/HomeSections";
 
 export default function Home() {
   return (
-    <Container>
-      <HomeHeroQuick />
-      <AlbumHighlightSection />
-      {/* <NewReleaseSection /> */}
-      <BoardPreviewSection />
-      <GalleryPreviewSection />
-      <SchedulePreviewSection />
-      <SetlistPreviewSection />
-    </Container>
+    <HomeRoot>
+      <HomeHero />
+      <HomeShortcuts />
+      <HomeDiscography />
+      <HomeUpcoming />
+      <HomeCommunity />
+    </HomeRoot>
   );
 }

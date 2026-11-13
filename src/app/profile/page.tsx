@@ -102,7 +102,7 @@ export default function ProfilePage() {
           </ProfileLayout>
         </ProfileSection>
 
-        <DiscographySection>
+        <DiscographySection id="discography">
           <SectionHeader>
             <SectionLabelGroup>
               <SectionOverline>DISCOGRAPHY</SectionOverline>
