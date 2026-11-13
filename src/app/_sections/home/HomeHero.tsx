@@ -258,8 +258,8 @@ const Cover = styled.img`
 
 const OutNow = styled.div`
   position: absolute;
-  left: -14px;
-  bottom: 28px;
+  left: 16px;
+  bottom: 16px;
   background: ${accent};
   color: #ffffff;
   font-family: ${display};
@@ -268,10 +268,6 @@ const OutNow = styled.div`
   letter-spacing: 0.12em;
   padding: 10px 16px;
   border-radius: 4px;
-
-  @media (max-width: ${theme.breakpoints.mobile}) {
-    left: 12px;
-  }
 `;
 
 const SmallLabel = styled.span`
