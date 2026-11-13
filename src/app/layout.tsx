@@ -102,7 +102,7 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
     images: [
       {
-        url: "/assets/물음표.jpg",
+        url: "/og/default.jpg",
         width: 1200,
         height: 630,
         alt: "한로로 HANRORO - 물음표",
@@ -113,7 +113,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "한로로 팬사이트 - HANRORO Fansite",
     description: SITE_DESCRIPTION,
-    images: ["/assets/물음표.jpg"],
+    images: ["/og/default.jpg"],
   },
   manifest: "/manifest.json",
   appleWebApp: {
