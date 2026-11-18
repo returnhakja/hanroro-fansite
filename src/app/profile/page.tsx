@@ -50,8 +50,18 @@ export default function ProfilePage() {
   return (
     <Wrapper>
       <HeroBanner>
-        <HeroOverlay />
-        <HeroText>ABOUT</HeroText>
+        {/* 글자(ABOUT · HANRORO)가 이미지에 들어 있어서 제목은 화면에서 숨기고 검색·스크린리더용으로만 둔다 */}
+        <HeroTitle>한로로 프로필</HeroTitle>
+        <picture>
+          <source media="(max-width: 767px)" srcSet="/banners/about-mobile.webp" />
+          <HeroImage
+            src="/banners/about-pc.webp"
+            alt="ABOUT HANRORO - 하늘과 나무, 필름 사진을 붙인 콜라주 배너"
+            width={2000}
+            height={667}
+            fetchPriority="high"
+          />
+        </picture>
       </HeroBanner>
 
       <ProfileHubBand>
@@ -167,39 +177,36 @@ const Wrapper = styled.div`
 const HeroBanner = styled.div`
   position: relative;
   width: 100%;
-  height: 40vh;
-  min-height: 280px;
-  background-image: url('/assets/콘서트.jpg');
-  background-size: cover;
-  background-position: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
+  aspect-ratio: 3 / 1;
+  max-height: 320px;
+  overflow: hidden;
+  background: #9fbfe0;
 
-const HeroOverlay = styled.div`
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(44, 36, 24, 0.3) 0%,
-    rgba(44, 36, 24, 0.65) 100%
-  );
-`;
-
-const HeroText = styled.h1`
-  position: relative;
-  z-index: 1;
-  font-family: ${theme.typography.fontHeading};
-  font-size: ${theme.typography.hero.fontSize};
-  font-weight: ${theme.typography.hero.fontWeight};
-  letter-spacing: ${theme.typography.hero.letterSpacing};
-  color: ${theme.colors.textLight};
-  margin: 0;
-
-  @media (max-width: ${theme.breakpoints.mobile}) {
-    font-size: 3rem;
+  @media (max-width: 767px) {
+    aspect-ratio: auto;
+    height: 180px;
+    max-height: none;
   }
+`;
+
+const HeroImage = styled.img`
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+`;
+
+const HeroTitle = styled.h1`
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 `;
 
 const ContentArea = styled.div`
