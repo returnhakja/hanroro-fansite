@@ -116,12 +116,8 @@ export default function HomeBanner() {
         )}
       </Frame>
 
-      <Meta>
-        <Disclaimer>
-          <LongText>팬이 진행하는 이벤트 홍보예요. 내용은 각 주최 측에 문의해 주세요.</LongText>
-          <ShortText>팬 이벤트 홍보 · 문의는 각 주최 측에</ShortText>
-        </Disclaimer>
-        {count > 1 && (
+      {count > 1 && (
+        <Meta>
           <Dots>
             {banners.map((b, i) => (
               <DotButton
@@ -138,8 +134,8 @@ export default function HomeBanner() {
               {current + 1} / {count}
             </Counter>
           </Dots>
-        )}
-      </Meta>
+        </Meta>
+      )}
     </Section>
   );
 }
@@ -305,29 +301,8 @@ const Arrow = styled.button<{ $side: "left" | "right" }>`
 const Meta = styled.div`
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  justify-content: flex-end;
   padding-top: 4px;
-`;
-
-const Disclaimer = styled.span`
-  font-size: 12px;
-  color: ${muted};
-  min-width: 0;
-`;
-
-const LongText = styled.span`
-  @media (max-width: 767px) {
-    display: none;
-  }
-`;
-
-const ShortText = styled.span`
-  display: none;
-
-  @media (max-width: 767px) {
-    display: inline;
-  }
 `;
 
 const Dots = styled.div`
