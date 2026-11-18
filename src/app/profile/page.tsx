@@ -58,7 +58,7 @@ export default function ProfilePage() {
             src="/banners/about-pc.webp"
             alt="ABOUT HANRORO - 하늘과 나무, 필름 사진을 붙인 콜라주 배너"
             width={2000}
-            height={667}
+            height={500}
             fetchPriority="high"
           />
         </picture>
@@ -177,15 +177,13 @@ const Wrapper = styled.div`
 const HeroBanner = styled.div`
   position: relative;
   width: 100%;
-  aspect-ratio: 3 / 1;
-  max-height: 320px;
+  /* 칸 비율을 이미지 비율과 똑같이 맞춰서 어떤 화면 폭에서도 잘리지 않게 한다 */
+  aspect-ratio: 4 / 1; /* about-pc.webp 2000×500 */
   overflow: hidden;
   background: #9fbfe0;
 
   @media (max-width: 767px) {
-    aspect-ratio: auto;
-    height: 180px;
-    max-height: none;
+    aspect-ratio: 1122 / 518; /* about-mobile.webp */
   }
 `;
 
