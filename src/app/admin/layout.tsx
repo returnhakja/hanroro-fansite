@@ -108,6 +108,12 @@ export default function AdminLayout({
             📊 대시보드
           </NavItem>
           <NavItem
+            href="/admin/banners"
+            $active={pathname.startsWith('/admin/banners')}
+          >
+            🪧 홈 배너 관리
+          </NavItem>
+          <NavItem
             href="/admin/concerts"
             $active={pathname.startsWith('/admin/concerts')}
           >

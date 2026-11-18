@@ -1,6 +1,7 @@
 "use client";
 
 import { HomeRoot } from "./_sections/home/Home.styles";
+import HomeBanner from "./_sections/home/HomeBanner";
 import HomeHero from "./_sections/home/HomeHero";
 import {
   HomeShortcuts,
@@ -12,6 +13,7 @@ import {
 export default function Home() {
   return (
     <HomeRoot>
+      <HomeBanner />
       <HomeHero />
       <HomeShortcuts />
       <HomeDiscography />

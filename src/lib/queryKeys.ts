@@ -43,6 +43,10 @@ export const queryKeys = {
     all: ['fanchants'] as const,
     admin: ['admin', 'fanchants'] as const,
   },
+  banners: {
+    all: ['banners'] as const,
+    admin: ['admin', 'banners'] as const,
+  },
   activities: {
     all: ['activities'] as const,
     admin: ['admin', 'activities'] as const,
